@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = "postgresql://postgres:bcZswiJmLJVmXMkFOiaWEbwkdRupUhkg@gondola.proxy.rlwy.net:21628/railway"
 }
 
