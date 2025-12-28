@@ -28,11 +28,19 @@ model User {
   phone         String?
   visits        Visit[]
   
-  // Store Manager-specific fields
+    // Store Manager-specific fields
   storeName     String?
   storeAddress  String?
   storePhone    String?
   discounts     Discount[]
+  
+  // Email verification
+  verificationToken String? @unique
+  verificationTokenExpires DateTime?
+  
+  // Password reset
+  resetPasswordToken String? @unique
+  resetPasswordTokenExpires DateTime?
   
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt

@@ -13,15 +13,30 @@ export default function ForgotPasswordPage() {
   const [userType, setUserType] = useState<"customer" | "store-manager">("customer");
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
+  e.preventDefault();
+  setIsLoading(true);
 
-    // Simulate API call
-    setTimeout(() => {
+  try {
+    const res = await fetch('/api/auth/reset-password/request', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
+
+    if (res.ok) {
       setIsSubmitted(true);
-      setIsLoading(false);
-    }, 1000);
-  };
+    } else {
+      // Still show success message for security
+      setIsSubmitted(true);
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    // Still show success message for security
+    setIsSubmitted(true);
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
