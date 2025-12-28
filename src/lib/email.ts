@@ -29,7 +29,7 @@ export async function sendPasswordResetEmail(email: string, token: string) {
 }
 
 export async function sendVerificationEmail(email: string, token: string) {
-  const verifyUrl = `${process.env.NEXTAUTH_URL}/auth/verify-email?token=${token}`;
+  const verifyUrl = `${process.env.NEXTAUTH_URL}/api/auth/verify-email?token=${token}`;
   
   await transporter.sendMail({
     from: '"BondOutfit SVD" <noreply@bondoutfit.com>',
