@@ -1,11 +1,25 @@
-import NextAuth, { type AuthOptions } from "next-auth";
+// Direct NextAuth handler for /api/auth/*
+import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-import { compare, hash } from "bcryptjs";
-import { prisma } from "./prisma";
+import { compare } from "bcryptjs";
+import { prisma } from "@/lib/prisma";
 
-// Client-side auth configuration (without cookie config since it's in API route)
-const authOptions: AuthOptions = {
+const handler = NextAuth({
   secret: process.env.NEXTAUTH_SECRET,
+  
+  // Cookie configuration for production
+  cookies: {
+    sessionToken: {
+      name: `next-auth.session-token`,
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: true,
+        domain: process.env.NODE_ENV === 'production' ? '.bondoutfit.com' : undefined,
+      },
+    },
+  },
   
   providers: [
     Credentials({
@@ -20,9 +34,7 @@ const authOptions: AuthOptions = {
         }
 
         const user = await prisma.user.findUnique({
-          where: {
-            email: credentials.email as string,
-          },
+          where: { email: credentials.email as string },
         });
 
         if (!user || !user.password) {
@@ -33,14 +45,8 @@ const authOptions: AuthOptions = {
           throw new Error("Please verify your email before logging in.");
         }
 
-        const isPasswordValid = await compare(
-          credentials.password as string,
-          user.password
-        );
-
-        if (!isPasswordValid) {
-          return null;
-        }
+        const isValid = await compare(credentials.password as string, user.password);
+        if (!isValid) return null;
 
         return {
           id: user.id,
@@ -51,6 +57,11 @@ const authOptions: AuthOptions = {
       },
     }),
   ],
+  
+  pages: { 
+    signIn: "/auth/signin", 
+    error: "/auth/signin" 
+  },
   
   callbacks: {
     async jwt({ token, user }: any) {
@@ -70,28 +81,12 @@ const authOptions: AuthOptions = {
     },
   },
   
-  pages: {
-    signIn: "/auth/signin",
-    error: "/auth/signin",
+  session: { 
+    strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   
-  session: {
-    strategy: "jwt",
-  },
-};
+  debug: process.env.NODE_ENV === "development",
+});
 
-// Export for client-side use
-export default NextAuth(authOptions);
-const nextAuthInstance = NextAuth(authOptions);
-export const auth = nextAuthInstance.auth;
-export const signIn = nextAuthInstance.signIn;
-export const signOut = nextAuthInstance.signOut;
-
-// Helper functions
-export async function hashPassword(password: string): Promise<string> {
-  return await hash(password, 12);
-}
-
-export async function comparePassword(password: string, hashedPassword: string): Promise<boolean> {
-  return await compare(password, hashedPassword);
-}
+export { handler as GET, handler as POST };
