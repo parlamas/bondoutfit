@@ -5,10 +5,15 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET(request: NextRequest) {
   try {
+    console.log("🔍 Verify-email endpoint called");
     const { searchParams } = new URL(request.url);
     const token = searchParams.get("token");
+    
+    console.log("🔍 Received token:", token);
+    console.log("🔍 Token length:", token?.length);
 
     if (!token) {
+      console.log("❌ No token provided");
       return NextResponse.json(
         { error: "Invalid verification token" },
         { status: 400 }
@@ -20,12 +25,16 @@ export async function GET(request: NextRequest) {
       where: {
         verificationToken: token,
         verificationTokenExpires: {
-          gt: new Date(), // Token hasn't expired
+          gt: new Date(),
         },
       },
     });
 
+    console.log("🔍 User found:", user?.email);
+    console.log("🔍 Token matches:", !!user);
+
     if (!user) {
+      console.log("❌ No user found or token expired");
       return NextResponse.redirect(
         new URL("/auth/signin?error=InvalidToken", request.url)
       );
@@ -41,12 +50,14 @@ export async function GET(request: NextRequest) {
       },
     });
 
+    console.log("✅ User verified successfully:", user.email);
+    
     return NextResponse.redirect(
       new URL("/auth/signin?verified=true", request.url)
     );
     
   } catch (error) {
-    console.error("Verification error:", error);
+    console.error("❌ Verification error:", error);
     return NextResponse.redirect(
       new URL("/auth/signin?error=VerificationFailed", request.url)
     );
