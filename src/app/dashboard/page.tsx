@@ -1,7 +1,7 @@
 //src/app/dashboard/page.tsx
 
 import { auth } from "../../lib/auth";
-import { signOut } from "@/lib/auth"; // Add this import
+import SignOutButton from "../components/SignOutButton"; // Add this import
 
 export default async function CustomerDashboard() {
   const session = await auth();
@@ -20,19 +20,7 @@ export default async function CustomerDashboard() {
             <p className="text-gray-900">Role: {session.user.role}</p>
             
             {/* Add Sign Out Button */}
-            <form
-              action={async () => {
-                "use server";
-                await signOut({ redirectTo: "/" });
-              }}
-            >
-              <button
-                type="submit"
-                className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-              >
-                Sign Out
-              </button>
-            </form>
+            <SignOutButton />
           </div>
         ) : (
           <p>Not signed in</p>
@@ -41,3 +29,4 @@ export default async function CustomerDashboard() {
     </div>
   );
 }
+
