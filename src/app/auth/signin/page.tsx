@@ -2,6 +2,8 @@
 
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { useSearchParams } from "next/navigation";
 import AuthSection from "../../components/AuthSection";
 
@@ -22,3 +24,4 @@ export default function SignInPage() {
     </div>
   );
 }
+
