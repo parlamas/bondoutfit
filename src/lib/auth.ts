@@ -1,12 +1,13 @@
-import NextAuth, { type AuthOptions } from "next-auth";
+// src/lib/auth.ts
+
+import type { NextAuthOptions } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { compare, hash } from "bcryptjs";
 import { prisma } from "./prisma";
 
-// Client-side auth configuration (without cookie config since it's in API route)
-const authOptions: AuthOptions = {
+export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
-  
+
   providers: [
     Credentials({
       name: "credentials",
@@ -20,9 +21,7 @@ const authOptions: AuthOptions = {
         }
 
         const user = await prisma.user.findUnique({
-          where: {
-            email: credentials.email as string,
-          },
+          where: { email: credentials.email },
         });
 
         if (!user || !user.password) {
@@ -33,12 +32,8 @@ const authOptions: AuthOptions = {
           throw new Error("Please verify your email before logging in.");
         }
 
-        const isPasswordValid = await compare(
-          credentials.password as string,
-          user.password
-        );
-
-        if (!isPasswordValid) {
+        const valid = await compare(credentials.password, user.password);
+        if (!valid) {
           return null;
         }
 
@@ -51,47 +46,40 @@ const authOptions: AuthOptions = {
       },
     }),
   ],
-  
+
   callbacks: {
-    async jwt({ token, user }: any) {
+    async jwt({ token, user }) {
       if (user) {
-        token.role = user.role;
-        token.id = user.id;
+        token.id = (user as any).id;
+        token.role = (user as any).role;
       }
       return token;
     },
-    
-    async session({ session, token }: any) {
-      if (session?.user) {
-        session.user.role = token.role as string;
-        session.user.id = token.id as string;
+
+    async session({ session, token }) {
+      if (session.user) {
+        (session.user as any).id = token.id;
+        (session.user as any).role = token.role;
       }
       return session;
     },
   },
-  
+
   pages: {
     signIn: "/auth/signin",
     error: "/auth/signin",
   },
-  
+
   session: {
     strategy: "jwt",
   },
 };
 
-// Export for client-side use
-export default NextAuth(authOptions);
-const nextAuthInstance = NextAuth(authOptions);
-export const auth = nextAuthInstance.auth;
-export const signIn = nextAuthInstance.signIn;
-export const signOut = nextAuthInstance.signOut;
-
-// Helper functions
-export async function hashPassword(password: string): Promise<string> {
-  return await hash(password, 12);
+// helpers
+export async function hashPassword(password: string) {
+  return hash(password, 12);
 }
 
-export async function comparePassword(password: string, hashedPassword: string): Promise<boolean> {
-  return await compare(password, hashedPassword);
+export async function comparePassword(password: string, hashed: string) {
+  return compare(password, hashed);
 }
