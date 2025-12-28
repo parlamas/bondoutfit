@@ -1,3 +1,5 @@
+// src/lib/auth.ts
+
 import NextAuth, { type AuthOptions } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { compare, hash } from "bcryptjs";
@@ -6,8 +8,22 @@ import { prisma } from "./prisma";
 const authOptions: AuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
   
-  // Note: trustHost is not available in NextAuth v4
-  // For Vercel deployment, ensure NEXTAUTH_URL is set correctly
+  // For custom domain on Vercel
+  cookies: {
+    sessionToken: {
+      name: `next-auth.session-token`,
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: true, // Always true for production
+        // Important: Set domain for custom domain
+        domain: process.env.NODE_ENV === 'production' 
+          ? '.bondoutfit.com' // Note the leading dot for subdomains
+          : undefined,
+      },
+    },
+  },
   
   providers: [
     Credentials({
@@ -74,11 +90,15 @@ const authOptions: AuthOptions = {
   
   pages: {
     signIn: "/auth/signin",
+    error: "/auth/signin",
   },
   
   session: {
     strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
+  
+  debug: process.env.NODE_ENV === "development",
 };
 
 // ✅ STANDARD NEXTAUTH v4 EXPORT PATTERN
