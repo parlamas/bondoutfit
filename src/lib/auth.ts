@@ -1,14 +1,13 @@
-// src/lib/auth.ts
-
-import NextAuth from "next-auth";
+import NextAuth, { type AuthOptions } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { compare, hash } from "bcryptjs";
 import { prisma } from "./prisma";
-import { UserRole } from "@prisma/client";
 
-export const { handlers, auth, signIn, signOut } = NextAuth({
-  // ✅ ONLY THIS LINE IS NEEDED:
+const authOptions: AuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
+  
+  // Note: trustHost is not available in NextAuth v4
+  // For Vercel deployment, ensure NEXTAUTH_URL is set correctly
   
   providers: [
     Credentials({
@@ -32,7 +31,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           return null;
         }
 
-        // ✅ CHECK: Is email verified?
         if (!user.emailVerified) {
           throw new Error("Please verify your email before logging in.");
         }
@@ -55,6 +53,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
     }),
   ],
+  
   callbacks: {
     async jwt({ token, user }: any) {
       if (user) {
@@ -63,21 +62,34 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
       return token;
     },
+    
     async session({ session, token }: any) {
       if (session?.user) {
-        session.user.role = token.role as UserRole;
+        session.user.role = token.role as string;
         session.user.id = token.id as string;
       }
       return session;
     },
   },
+  
   pages: {
     signIn: "/auth/signin",
   },
+  
   session: {
     strategy: "jwt",
   },
-});
+};
+
+// ✅ STANDARD NEXTAUTH v4 EXPORT PATTERN
+export default NextAuth(authOptions);
+
+// Manually extract and export methods
+const nextAuthInstance = NextAuth(authOptions);
+export const auth = nextAuthInstance.auth;
+export const signIn = nextAuthInstance.signIn;
+export const signOut = nextAuthInstance.signOut;
+export const handlers = nextAuthInstance.handlers;
 
 export async function hashPassword(password: string): Promise<string> {
   return await hash(password, 12);
