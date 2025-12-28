@@ -1,9 +1,8 @@
 // src/lib/auth.ts
 
 import NextAuth from "next-auth";
-import { PrismaAdapter } from "@auth/prisma-adapter";
 import Credentials from "next-auth/providers/credentials";
-import { compare, hash } from "bcryptjs"; // Make sure hash is imported
+import { compare, hash } from "bcryptjs";
 import { prisma } from "./prisma";
 import { UserRole } from "@prisma/client";
 
@@ -28,6 +27,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         if (!user || !user.password) {
           return null;
+        }
+
+        // ✅ CHECK: Is email verified?
+        if (!user.emailVerified) {
+          throw new Error("Please verify your email before logging in.");
         }
 
         const isPasswordValid = await compare(
@@ -72,12 +76,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
 });
 
-// Make sure hashPassword is exported
 export async function hashPassword(password: string): Promise<string> {
   return await hash(password, 12);
 }
 
-// Also export comparePassword if needed
 export async function comparePassword(password: string, hashedPassword: string): Promise<boolean> {
   return await compare(password, hashedPassword);
 }
