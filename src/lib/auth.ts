@@ -7,8 +7,8 @@ import { prisma } from "./prisma";
 import { UserRole } from "@prisma/client";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  // ✅ CORRECT FOR NEXTAUTH v5:
-  secret: process.env.AUTH_SECRET, // Use AUTH_SECRET, not NEXTAUTH_SECRET
+  // ✅ ONLY THIS LINE IS NEEDED:
+  secret: process.env.NEXTAUTH_SECRET,
   
   providers: [
     Credentials({
