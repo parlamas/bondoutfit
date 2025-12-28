@@ -1,18 +1,16 @@
 // src/app/api/debug/route.ts
 
-import { NextResponse } from "next/server"
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
-  return NextResponse.json({
-    // Check all critical env vars
-    NEXTAUTH_SECRET: !!process.env.NEXTAUTH_SECRET,
-    AUTH_SECRET: !!process.env.AUTH_SECRET,
-    NEXTAUTH_URL: process.env.NEXTAUTH_URL,
-    NODE_ENV: process.env.NODE_ENV,
-    
-    // Check NextAuth version
-    nextAuthVersion: "5.0.0-beta.30 (you're using beta!)",
-    
-    timestamp: new Date().toISOString()
-  })
+  return Response.json({
+    NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET ? "Set" : "Missing",
+    NEXTAUTH_URL: process.env.NEXTAUTH_URL || "Missing",
+    RESEND_API_KEY: process.env.RESEND_API_KEY ? "Set" : "Missing",
+    DATABASE_URL: process.env.DATABASE_URL ? "Set" : "Missing",
+    nodeEnv: process.env.NODE_ENV,
+    vercelUrl: process.env.VERCEL_URL,
+    nextAuthUrl: process.env.NEXTAUTH_URL,
+  });
 }
+
