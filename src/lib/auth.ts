@@ -1,4 +1,4 @@
-// src/lib/auth.ts
+//src/lib/auth.ts
 
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
@@ -7,6 +7,10 @@ import { prisma } from "./prisma";
 import { UserRole } from "@prisma/client";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  // ✅ REQUIRED FOR PRODUCTION:
+  secret: process.env.NEXTAUTH_SECRET,
+  trustHost: true, // Required for Vercel
+  
   providers: [
     Credentials({
       name: "credentials",
