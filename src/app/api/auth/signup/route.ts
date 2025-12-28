@@ -3,6 +3,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { hashPassword } from "../../../../lib/auth";
 import { prisma } from "../../../../lib/prisma";
+// REMOVE THIS LINE: import { hash } from "bcryptjs"; ← This is unused
 
 export async function POST(request: NextRequest) {
   try {
@@ -30,7 +31,7 @@ export async function POST(request: NextRequest) {
         email,
         password: hashedPassword,
         name,
-        role,
+        role: role || "CUSTOMER", // Add default value
         ...(role === "STORE_MANAGER" && storeName && { storeName }),
       },
     });
