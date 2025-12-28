@@ -1,6 +1,7 @@
 //src/app/dashboard/store/page.tsx
 
 import { auth } from "../../../lib/auth";
+import { signOut } from "@/lib/auth"; // Add this import
 
 export default async function StoreManagerDashboard() {
   const session = await auth();
@@ -17,6 +18,21 @@ export default async function StoreManagerDashboard() {
             <p className="text-gray-900">Email: {session.user.email}</p>
             <p className="text-gray-900">Name: {session.user.name}</p>
             <p className="text-gray-900">Role: {session.user.role}</p>
+            
+            {/* Add Sign Out Button */}
+            <form
+              action={async () => {
+                "use server";
+                await signOut({ redirectTo: "/" });
+              }}
+            >
+              <button
+                type="submit"
+                className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+              >
+                Sign Out
+              </button>
+            </form>
           </div>
         ) : (
           <p>Not signed in</p>
@@ -25,4 +41,6 @@ export default async function StoreManagerDashboard() {
     </div>
   );
 }
+
+
 
