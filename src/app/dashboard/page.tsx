@@ -3,6 +3,8 @@
 import { auth } from "../../lib/auth";
 import SignOutButton from "../components/SignOutButton"; // Add this import
 
+export const dynamic = 'force-dynamic';
+
 export default async function CustomerDashboard() {
   const session = await auth();
 
