@@ -132,7 +132,7 @@ const toggleCategory = (category: string) => {
         {isSignUp && (
   <div>
     <label className="block text-sm font-medium text-gray-700 mb-1">
-      Full Name (optional)
+      Full Name
     </label>
     <input
       type="text"
@@ -238,7 +238,7 @@ const toggleCategory = (category: string) => {
 
     <div>
       <label className="block text-sm font-medium mb-1">
-        Phone (optional)
+        Phone
       </label>
       <input
         type="tel"
@@ -344,7 +344,7 @@ const toggleCategory = (category: string) => {
 
       <div>
         <label className="block text-sm font-medium mb-1">
-          State / Region (optional)
+          State / Province / Region
         </label>
         <input
           type="text"
