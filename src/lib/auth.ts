@@ -48,22 +48,33 @@ export const authOptions: NextAuthOptions = {
   ],
 
   callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.id = (user as any).id;
-        token.role = (user as any).role;
-      }
-      return token;
-    },
-
-    async session({ session, token }) {
-      if (session.user) {
-        (session.user as any).id = token.id;
-        (session.user as any).role = token.role;
-      }
-      return session;
-    },
+  async jwt({ token, user }) {
+    if (user) {
+      token.id = (user as any).id;
+      token.role = (user as any).role;
+    }
+    return token;
   },
+
+  async session({ session, token }) {
+    if (session.user) {
+      (session.user as any).id = token.id;
+      (session.user as any).role = token.role;
+    }
+    return session;
+  },
+
+  async redirect({ url, baseUrl }) {
+    // allow relative URLs
+    if (url.startsWith("/")) return `${baseUrl}${url}`;
+
+    // allow same-origin URLs
+    if (new URL(url).origin === baseUrl) return url;
+
+    return baseUrl;
+  },
+},
+
 
   pages: {
     signIn: "/auth/signin",
