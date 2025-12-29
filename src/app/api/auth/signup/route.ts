@@ -10,6 +10,19 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
 
+    const normalizeInt = (value: any) => {
+  if (value === "" || value === undefined || value === null) return null;
+  const n = Number(value);
+  return Number.isNaN(n) ? null : n;
+};
+
+const normalizeText = (value: any) => {
+  if (value === "" || value === undefined || value === null) return null;
+  const s = String(value).trim();
+  return s.length ? s : null;
+};
+
+
     console.log("📦 SIGNUP PAYLOAD:", body);
 
     /* =========================
@@ -21,19 +34,20 @@ export async function POST(req: Request) {
     const name = body.name?.trim();
     const role = body.role;
 
-    const phoneCountry = body.phoneCountry ?? null;
-    const phoneArea = body.phoneArea ?? null;
-    const phoneNumber = body.phoneNumber?.trim();
+const phoneCountry = normalizeText(body.phoneCountry);
+const phoneArea = normalizeText(body.phoneArea);
+const phoneNumber = body.phoneNumber?.trim();
+const city = body.city?.trim();
+const state = body.state?.trim();
+const zip = body.zip?.trim();
 
-    const city = body.city?.trim();
-    const state = body.state?.trim();
-    const zip = body.zip?.trim();
 
-    const age = body.age ?? null;
-    const gender = body.gender ?? null;
-    const heightCm = body.heightCm ?? null;
-    const weightKg = body.weightKg ?? null;
-    const occupation = body.occupation ?? null;
+const age = normalizeInt(body.age);
+const gender = normalizeText(body.gender);
+const heightCm = normalizeInt(body.heightCm);
+const weightKg = normalizeInt(body.weightKg);
+const occupation = normalizeText(body.occupation);
+
 
     const storeName = body.storeName?.trim();
     const country = body.country?.trim();
@@ -43,21 +57,22 @@ export async function POST(req: Request) {
     const categories = Array.isArray(body.categories) ? body.categories : [];
 
     console.log("🧪 VALIDATED FIELDS:", {
-      email,
-      name,
-      role,
-      phoneCountry,
-      phoneArea,
-      phoneNumber,
-      city,
-      state,
-      zip,
-      storeName,
-      country,
-      street,
-      streetNumber,
-      categories,
-    });
+  email: email,
+  name: name,
+  role: role,
+  phoneCountry: phoneCountry,
+  phoneArea: phoneArea,
+  phoneNumber: phoneNumber,
+  city: city,
+  state: state,
+  zip: zip,
+  storeName: storeName,
+  country: country,
+  street: street,
+  streetNumber: streetNumber,
+  categories: categories,
+});
+
 
     /* =========================
        REQUIRED (ALL USERS)
