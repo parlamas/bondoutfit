@@ -10,8 +10,16 @@ export const transporter = nodemailer.createTransport({
   },
 });
 
-export async function sendPasswordResetEmail(email: string, token: string) {
-  const resetUrl = `${process.env.NEXTAUTH_URL}/auth/reset-password?token=${token}`;
+export async function sendPasswordResetEmail(
+  email: string,
+  token: string,
+  role: "CUSTOMER" | "STORE_MANAGER"
+) {
+
+  const resetUrl = `${process.env.NEXTAUTH_URL}/auth/reset-password?token=${token}&type=${
+  role === "STORE_MANAGER" ? "store-manager" : "customer"
+}`;
+
   
   await transporter.sendMail({
     from: '"BondOutfit SVD" <noreply@bondoutfit.com>',

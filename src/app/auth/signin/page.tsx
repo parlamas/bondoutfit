@@ -18,8 +18,12 @@ function SignInContent() {
   const typeParam = searchParams.get("type");
   const modeParam = searchParams.get("mode");
 
-  const type =
-    typeParam === "store-manager" ? "store-manager" : "customer";
+  if (typeParam !== "customer" && typeParam !== "store-manager") {
+  throw new Error("Missing or invalid auth type");
+}
+
+const type = typeParam;
+
 
   const isSignUp = modeParam === "signup";
 

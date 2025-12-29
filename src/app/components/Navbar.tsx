@@ -22,7 +22,8 @@ export default function Navbar() {
         {!session && status === "unauthenticated" && (
           <>
             <Link href="/auth/signup?type=customer">Customer Sign Up</Link>
-            <Link href="/auth/signin">Customer Sign In</Link>
+            <Link href="/auth/signin?role=customer">Customer Sign In</Link>
+            <Link href="/auth/signin?role=store-manager">Store Manager Sign In</Link>
             <Link href="/auth/signup?type=store-manager">Store Sign Up</Link>
             <Link href="/auth/signin">Store Sign In</Link>
           </>
