@@ -12,6 +12,13 @@ enum UserRole {
   STORE_MANAGER
 }
 
+enum VisitStatus {
+  SCHEDULED
+  COMPLETED
+  MISSED
+  CANCELLED
+}
+
 model User {
   id            String    @id @default(cuid())
   email         String    @unique
@@ -20,41 +27,37 @@ model User {
   emailVerified DateTime?
   role          UserRole  @default(CUSTOMER)
 
-  // NextAuth
-  accounts      Account[]
-  sessions      Session[]
-
   // Customer profile
-  phone         String?
-  customerCity  String?
-  gender        String?
-  age           Int?
-  heightCm      Int?
-  weightKg      Int?
-  occupation    String?
+  phone        String?
+  customerCity String?
+  age          Int?
+  gender       String?
+  heightCm     Int?
+  weightKg     Int?
+  occupation   String?
 
   // Relations
-  visits        Visit[]
-  stores        Store[]          @relation("ManagerStores")
+  stores   Store[]
+  visits   Visit[]
+  accounts Account[]
+  sessions Session[]
 
-  // Email verification
-  verificationToken        String?   @unique
-  verificationTokenExpires DateTime?
-
-  // Password reset
+  // Verification / reset
+  verificationToken         String?   @unique
+  verificationTokenExpires  DateTime?
   resetPasswordToken        String?   @unique
   resetPasswordTokenExpires DateTime?
 
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Store {
-  id           String   @id @default(cuid())
-  managerId    String
+  id        String @id @default(cuid())
+  managerId String
 
-  name         String
-  storePhone   String?
+  name       String
+  storePhone String?
 
   country      String
   city         String
@@ -64,51 +67,42 @@ model Store {
   state        String?
   zip          String
 
-  categories   String[]
+  categories String[]
 
-  manager      User     @relation("ManagerStores", fields: [managerId], references: [id], onDelete: Cascade)
-  visits       Visit[]
-  discounts    Discount[]
+  manager   User       @relation(fields: [managerId], references: [id], onDelete: Cascade)
+  visits    Visit[]
+  discounts Discount[]
 
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Visit {
-  id               String      @id @default(cuid())
-  userId           String
-  storeId          String
+  id         String  @id @default(cuid())
+  userId     String
+  storeId    String
+  discountId String?
 
-  scheduledDate    DateTime
-  scheduledTime    String
-  actualVisit      DateTime?
+  scheduledDate DateTime
+  scheduledTime String
+  actualVisit   DateTime?
 
-  status           VisitStatus @default(SCHEDULED)
+  status VisitStatus @default(SCHEDULED)
 
-  discountUnlocked Boolean     @default(false)
-  discountUsed     Boolean     @default(false)
+  discountUnlocked Boolean @default(false)
+  discountUsed     Boolean @default(false)
   discountAmount   Float?
 
-  // Optional link to a specific discount (recommended)
-  discountId       String?
-  discount         Discount?   @relation(fields: [discountId], references: [id])
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  store    Store     @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  discount Discount? @relation(fields: [discountId], references: [id])
 
-  user             User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  store            Store       @relation(fields: [storeId], references: [id], onDelete: Cascade)
-
-  createdAt        DateTime    @default(now())
-}
-
-enum VisitStatus {
-  SCHEDULED
-  COMPLETED
-  MISSED
-  CANCELLED
+  createdAt DateTime @default(now())
 }
 
 model Discount {
-  id              String   @id @default(cuid())
-  storeId          String
+  id      String @id @default(cuid())
+  storeId String
 
   title           String
   description     String
@@ -120,11 +114,10 @@ model Discount {
   currentUses     Int      @default(0)
   svdOnly         Boolean  @default(true)
 
-  store           Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  store  Store   @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  visits Visit[]
 
-  visits          Visit[]
-
-  createdAt       DateTime @default(now())
+  createdAt DateTime @default(now())
 }
 
 model Account {
