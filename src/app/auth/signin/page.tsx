@@ -1,4 +1,4 @@
-//src/app/auth/signin/page.tsx
+// src/app/auth/signin/page.tsx
 
 "use client";
 
@@ -14,11 +14,12 @@ function SignInContent() {
   const verifySent = searchParams.get("verify") === "sent";
   const error = searchParams.get("error");
 
-  const roleParam = searchParams.get("role");
+  // ✅ SINGLE SOURCE OF TRUTH
+  const typeParam = searchParams.get("type");
   const modeParam = searchParams.get("mode");
 
   const type =
-    roleParam === "store-manager" ? "store-manager" : "customer";
+    typeParam === "store-manager" ? "store-manager" : "customer";
 
   const isSignUp = modeParam === "signup";
 
