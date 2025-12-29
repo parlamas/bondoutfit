@@ -24,15 +24,34 @@ model User {
   accounts      Account[]
   sessions      Session[]
   
-  // Customer-specific fields
-  phone         String?
-  visits        Visit[]
+  // Customer profile (SVD preparation)
+phone        String?
+customerCity String?
+gender       String?
+age          Int?
+heightCm     Int?
+weightKg     Int?
+occupation   String?
+visits       Visit[]
   
-    // Store Manager-specific fields
-  storeName     String?
-  storeAddress  String?
-  storePhone    String?
-  discounts     Discount[]
+      // Store Manager-specific fields
+  storeName       String?
+  storePhone      String?
+
+  // Store location
+  country         String?
+  city            String?
+  street          String?
+  streetNumber    String?
+  floor           String?
+  state           String?
+  zip             String?
+
+  // Store metadata
+  categories      String[]
+
+  discounts       Discount[]
+
   
   // Email verification
   verificationToken String? @unique
@@ -82,20 +101,24 @@ model VerificationToken {
 }
 
 model Visit {
-  id             String   @id @default(cuid())
-  userId         String
-  storeId        String
-  scheduledDate  DateTime
-  scheduledTime  String
-  actualVisit    DateTime?
-  status         VisitStatus @default(SCHEDULED)
-  discountUsed   Boolean @default(false)
-  discountAmount Float?
-  
-  user           User     @relation(fields: [userId], references: [id])
-  discount       Discount @relation(fields: [storeId], references: [id])
-  
-  createdAt      DateTime @default(now())
+  id              String      @id @default(cuid())
+  userId          String
+  storeId         String
+
+  scheduledDate   DateTime
+  scheduledTime   String
+  actualVisit     DateTime?
+
+  status          VisitStatus @default(SCHEDULED)
+
+  discountUnlocked Boolean    @default(false)
+  discountUsed     Boolean    @default(false)
+  discountAmount   Float?
+
+  user            User        @relation(fields: [userId], references: [id])
+  discount        Discount    @relation(fields: [storeId], references: [id])
+
+  createdAt       DateTime    @default(now())
 }
 
 enum VisitStatus {

@@ -2,8 +2,8 @@
 
 "use client";
 
-import { useState } from "react";
-import { signIn } from "next-auth/react";
+import { useEffect, useState } from "react";
+import { signIn, useSession } from "next-auth/react";
 import Link from "next/link";
 import { User, Store, Mail, Lock, Eye, EyeOff } from "lucide-react";
 
@@ -16,11 +16,56 @@ export default function AuthSection({ type }: AuthSectionProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-    name: "",
-    storeName: type === "store-manager" ? "" : undefined,
-  });
+  email: "",
+  password: "",
+  name: "",
+
+    // customer fields
+  customerCity: "",
+  gender: "",
+  age: 0,
+  heightCm: 0,
+  weightKg: 0,
+  occupation: "",
+  phone: "",
+
+
+  // store manager fields
+  storeName: "",
+  country: "",
+  city: "",
+  street: "",
+  streetNumber: "",
+  floor: "",
+  state: "",
+  zip: "",
+  categories: [] as string[],
+});
+
+  const { data: session, status } = useSession();
+
+  useEffect(() => {
+    if (status !== "authenticated") return;
+
+    const role = (session?.user as any)?.role;
+
+    if (role === "CUSTOMER") {
+      window.location.href = "/dashboard";
+    }
+
+    if (role === "STORE_MANAGER") {
+      window.location.href = "/dashboard/store";
+    }
+  }, [status, session]);
+
+const toggleCategory = (category: string) => {
+  setFormData((prev) => ({
+    ...prev,
+    categories: prev.categories.includes(category)
+      ? prev.categories.filter((c) => c !== category)
+      : [...prev.categories, category],
+  }));
+};
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,15 +84,9 @@ export default function AuthSection({ type }: AuthSectionProps) {
         });
 
         if (res.ok) {
-          // Sign in after successful sign up
-          await signIn("credentials", {
-            email: formData.email,
-            password: formData.password,
-            role: type === "store-manager" ? "STORE_MANAGER" : "CUSTOMER",
-            redirect: true,
-            callbackUrl: type === "store-manager" ? "/dashboard/store" : "/dashboard",
-          });
-        }
+  window.location.href = "/auth/signin?verify=sent";
+}
+
       } else {
         // Handle sign in
         await signIn("credentials", {
@@ -86,42 +125,275 @@ export default function AuthSection({ type }: AuthSectionProps) {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {isSignUp && (
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              {type === "store-manager" ? "Your Name" : "Full Name"}
-            </label>
-            <div className="relative">
-              <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-              <input
-                type="text"
-                required={isSignUp}
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="pl-10 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
-                placeholder={type === "store-manager" ? "John Smith" : "John Doe"}
-              />
-            </div>
-          </div>
-        )}
+  <div>
+    <label className="block text-sm font-medium text-gray-700 mb-1">
+      Full Name (optional)
+    </label>
+    <input
+      type="text"
+      value={formData.name}
+      onChange={(e) =>
+        setFormData({ ...formData, name: e.target.value })
+      }
+      className="w-full px-4 py-2 border rounded-lg"
+    />
+  </div>
+)}
+
+        {isSignUp && type === "customer" && (
+  <>
+    <div>
+      <label className="block text-sm font-medium mb-1">City / Town</label>
+      <input
+        type="text"
+        required
+        value={formData.customerCity}
+        onChange={(e) =>
+          setFormData({ ...formData, customerCity: e.target.value })
+        }
+        className="w-full px-4 py-2 border rounded-lg"
+      />
+    </div>
+
+    <div>
+      <label className="block text-sm font-medium mb-1">Gender</label>
+      <select
+        required
+        value={formData.gender}
+        onChange={(e) =>
+          setFormData({ ...formData, gender: e.target.value })
+        }
+        className="w-full px-4 py-2 border rounded-lg"
+      >
+        <option value="">Select gender</option>
+        <option value="female">Female</option>
+        <option value="male">Male</option>
+        <option value="other">Other</option>
+      </select>
+    </div>
+
+    <div className="grid grid-cols-3 gap-3">
+      <div>
+        <label className="block text-sm font-medium mb-1">Age</label>
+        <input
+          type="number"
+          required
+          min={1}
+          value={formData.age}
+            onChange={(e) =>
+  setFormData({ ...formData, age: Number(e.target.value) })
+}
+          className="w-full px-4 py-2 border rounded-lg"
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium mb-1">Height (cm)</label>
+        <input
+          type="number"
+          required
+          min={50}
+          value={formData.heightCm}
+          onChange={(e) =>
+  setFormData({ ...formData, heightCm: Number(e.target.value) })
+}
+          className="w-full px-4 py-2 border rounded-lg"
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium mb-1">Weight (kg)</label>
+        <input
+          type="number"
+          required
+          min={20}
+          value={formData.weightKg}
+          onChange={(e) =>
+  setFormData({ ...formData, weightKg: Number(e.target.value) })
+}
+
+          className="w-full px-4 py-2 border rounded-lg"
+        />
+      </div>
+    </div>
+
+    <div>
+      <label className="block text-sm font-medium mb-1">
+        Occupation (optional)
+      </label>
+      <input
+        type="text"
+        value={formData.occupation}
+        onChange={(e) =>
+          setFormData({ ...formData, occupation: e.target.value })
+        }
+        className="w-full px-4 py-2 border rounded-lg"
+      />
+    </div>
+
+    <div>
+      <label className="block text-sm font-medium mb-1">
+        Phone (optional)
+      </label>
+      <input
+        type="tel"
+        value={formData.phone}
+        onChange={(e) =>
+          setFormData({ ...formData, phone: e.target.value })
+        }
+        className="w-full px-4 py-2 border rounded-lg"
+      />
+    </div>
+  </>
+)}
+
 
         {isSignUp && type === "store-manager" && (
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Store Name
-            </label>
-            <div className="relative">
-              <Store className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-              <input
-                type="text"
-                required={isSignUp}
-                value={formData.storeName}
-                onChange={(e) => setFormData({ ...formData, storeName: e.target.value })}
-                className="pl-10 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
-                placeholder="Bond Outfit Store"
-              />
-            </div>
-          </div>
+  <>
+    {/* Store Name */}
+    <div>
+      <label className="block text-sm font-medium mb-1">Store Name</label>
+      <input
+        type="text"
+        required
+        value={formData.storeName}
+        onChange={(e) =>
+          setFormData({ ...formData, storeName: e.target.value })
+        }
+        className="w-full px-4 py-2 border rounded-lg"
+      />
+    </div>
+
+    {/* Country */}
+    <div>
+      <label className="block text-sm font-medium mb-1">Country</label>
+      <input
+        type="text"
+        required
+        value={formData.country}
+        onChange={(e) =>
+          setFormData({ ...formData, country: e.target.value })
+        }
+        className="w-full px-4 py-2 border rounded-lg"
+      />
+    </div>
+
+    {/* City */}
+    <div>
+      <label className="block text-sm font-medium mb-1">City / Town</label>
+      <input
+        type="text"
+        required
+        value={formData.city}
+        onChange={(e) =>
+          setFormData({ ...formData, city: e.target.value })
+        }
+        className="w-full px-4 py-2 border rounded-lg"
+      />
+    </div>
+
+    {/* Street + Number */}
+    <div className="grid grid-cols-3 gap-3">
+      <div className="col-span-2">
+        <label className="block text-sm font-medium mb-1">Street</label>
+        <input
+          type="text"
+          required
+          value={formData.street}
+          onChange={(e) =>
+            setFormData({ ...formData, street: e.target.value })
+          }
+          className="w-full px-4 py-2 border rounded-lg"
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium mb-1">No.</label>
+        <input
+          type="text"
+          required
+          value={formData.streetNumber}
+          onChange={(e) =>
+            setFormData({ ...formData, streetNumber: e.target.value })
+          }
+          className="w-full px-4 py-2 border rounded-lg"
+        />
+      </div>
+    </div>
+
+    {/* Floor + State */}
+    <div className="grid grid-cols-2 gap-3">
+      <div>
+        <label className="block text-sm font-medium mb-1">
+          Floor (optional)
+        </label>
+        <input
+          type="text"
+          value={formData.floor}
+          onChange={(e) =>
+            setFormData({ ...formData, floor: e.target.value })
+          }
+          className="w-full px-4 py-2 border rounded-lg"
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium mb-1">
+          State / Region (optional)
+        </label>
+        <input
+          type="text"
+          value={formData.state}
+          onChange={(e) =>
+            setFormData({ ...formData, state: e.target.value })
+          }
+          className="w-full px-4 py-2 border rounded-lg"
+        />
+      </div>
+    </div>
+
+    {/* ZIP */}
+    <div>
+      <label className="block text-sm font-medium mb-1">
+        ZIP / Postal Code
+      </label>
+      <input
+        type="text"
+        required
+        value={formData.zip}
+        onChange={(e) =>
+          setFormData({ ...formData, zip: e.target.value })
+        }
+        className="w-full px-4 py-2 border rounded-lg"
+      />
+    </div>
+
+    {/* Categories */}
+    <div>
+      <label className="block text-sm font-medium mb-2">
+        Store Categories
+      </label>
+      <div className="flex flex-wrap gap-3">
+        {["Men’s wear", "Women’s wear", "Children", "Unisex / Mixed"].map(
+          (cat) => (
+            <button
+              type="button"
+              key={cat}
+              onClick={() => toggleCategory(cat)}
+              className={`px-3 py-1.5 rounded-md border ${
+                formData.categories.includes(cat)
+                  ? "bg-blue-600 text-white border-blue-600"
+                  : "bg-white text-gray-700"
+              }`}
+            >
+              {cat}
+            </button>
+          )
         )}
+      </div>
+    </div>
+  </>
+)}
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">

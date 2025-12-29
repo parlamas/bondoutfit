@@ -4,27 +4,29 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "./components/AuthProvider";
+import RoleBasedNavbar from "./components/RoleBasedNavbar";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "BondOutfit - Scheduled Visit Discount (SVD)",
-  description: "Schedule store visits and get exclusive discounts with our SVD platform",
+  description:
+    "Schedule store visits and get exclusive discounts with our SVD platform",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en">
       <body className={inter.className}>
         <AuthProvider>
+          <RoleBasedNavbar />
           {children}
         </AuthProvider>
       </body>
     </html>
   );
 }
-

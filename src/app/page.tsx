@@ -1,154 +1,205 @@
-// app/page.tsx - Complete file
+//src/app/page.tsx
 
-import Link from "next/link";
-import { Calendar, Clock, Tag, Users, Store, Shield } from "lucide-react";
-import AuthSection from "./components/AuthSection";
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useSession } from "next-auth/react";
+import { Store, Users, Shield } from 'lucide-react';
+import RoleBasedNavbar from "./components/RoleBasedNavbar";
+
+
+type StoreItem = {
+  id: string;
+  name: string;
+  country: string;
+  city: string;
+};
 
 export default function HomePage() {
+  const { data: session } = useSession();
+  const role = (session?.user as any)?.role;
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      {/* Navigation */}
-      <nav className="border-b border-gray-200 bg-white">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <Store className="h-8 w-8 text-blue-600" />
-              <span className="text-2xl font-bold text-gray-900">BondOutfit</span>
-              <span className="rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-800">
-                SVD
-              </span>
-            </div>
-            <div className="hidden md:flex items-center space-x-6">
-              <Link href="/about" className="text-gray-600 hover:text-gray-900">
-                About SVD
-              </Link>
-              <Link href="/how-it-works" className="text-gray-600 hover:text-gray-900">
-                How It Works
-              </Link>
-              <Link href="/stores" className="text-gray-600 hover:text-gray-900">
-                Stores
-              </Link>
-              <Link href="/contact" className="text-gray-600 hover:text-gray-900">
-                Contact
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
+    <div className="min-h-screen bg-gray-50">
 
-      {/* Hero Section */}
-      <section className="container mx-auto px-4 py-16">
-        <div className="text-center mb-16">
-          <h1 className="text-5xl font-bold text-gray-900 mb-6">
-            Welcome to <span className="text-blue-600">BondOutfit</span>
-          </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
-            Introducing <span className="font-bold text-blue-600">Scheduled Visit Discount (SVD)</span> - 
-            Book your store visit in advance and unlock exclusive discounts!
-          </p>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto mb-12">
-            <div className="bg-white p-6 rounded-xl shadow-md">
-              <Calendar className="h-12 w-12 text-blue-600 mx-auto mb-4" />
-              <h3 className="font-bold text-lg mb-2">Schedule Your Visit</h3>
-              <p className="text-gray-600">Pick a date and time that works for you</p>
-            </div>
-            <div className="bg-white p-6 rounded-xl shadow-md">
-              <Clock className="h-12 w-12 text-green-600 mx-auto mb-4" />
-              <h3 className="font-bold text-lg mb-2">Visit as Scheduled</h3>
-              <p className="text-gray-600">Show up at your chosen time and store</p>
-            </div>
-            <div className="bg-white p-6 rounded-xl shadow-md">
-              <Tag className="h-12 w-12 text-purple-600 mx-auto mb-4" />
-              <h3 className="font-bold text-lg mb-2">Get Exclusive Discounts</h3>
-              <p className="text-gray-600">Enjoy special discounts for scheduled visitors</p>
-            </div>
-          </div>
-        </div>
+      {role !== "STORE_MANAGER" && <StoreSelector />}
 
-        {/* Dual Authentication Sections */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
-          {/* Customer Section */}
-          <div className="bg-white rounded-2xl shadow-xl p-8">
-            <div className="flex items-center mb-8">
-              <Users className="h-10 w-10 text-blue-600 mr-4" />
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900">For Customers</h2>
-                <p className="text-gray-600">Find stores and schedule visits for discounts</p>
-              </div>
-            </div>
-            <AuthSection type="customer" />
-          </div>
-
-          {/* Store Manager Section */}
-          <div className="bg-gradient-to-br from-blue-50 to-white rounded-2xl shadow-xl p-8 border border-blue-100">
-            <div className="flex items-center mb-8">
-              <Shield className="h-10 w-10 text-blue-600 mr-4" />
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900">For Store Managers</h2>
-                <p className="text-gray-600">Manage SVD offers and track scheduled visits</p>
-              </div>
-            </div>
-            <AuthSection type="store-manager" />
-          </div>
-        </div>
-
-        {/* How SVD Works */}
-        <div className="mt-20">
-          <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
-            How Scheduled Visit Discount Works
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 max-w-5xl mx-auto">
-            <div className="text-center">
-              <div className="bg-blue-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="font-bold text-blue-600 text-xl">1</span>
-              </div>
-              <h3 className="font-bold mb-2">Store Announces SVD</h3>
-              <p className="text-sm text-gray-600">Manager sets discount for scheduled visits</p>
-            </div>
-            <div className="text-center">
-              <div className="bg-blue-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="font-bold text-blue-600 text-xl">2</span>
-              </div>
-              <h3 className="font-bold mb-2">Customer Schedules Visit</h3>
-              <p className="text-sm text-gray-600">Pick date & time through BondOutfit</p>
-            </div>
-            <div className="text-center">
-              <div className="bg-blue-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="font-bold text-blue-600 text-xl">3</span>
-              </div>
-              <h3 className="font-bold mb-2">Customer Visits Store</h3>
-              <p className="text-sm text-gray-600">Show up as scheduled at the store</p>
-            </div>
-            <div className="text-center">
-              <div className="bg-blue-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="font-bold text-blue-600 text-xl">4</span>
-              </div>
-              <h3 className="font-bold mb-2">Discount Applied</h3>
-              <p className="text-sm text-gray-600">Get exclusive discount on purchases</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12 mt-20">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="mb-6 md:mb-0">
-              <div className="flex items-center space-x-2">
-                <Store className="h-8 w-8 text-white" />
-                <span className="text-2xl font-bold">BondOutfit</span>
-              </div>
-              <p className="text-gray-400 mt-2">Revolutionizing retail with SVD</p>
-            </div>
-            <div className="text-center md:text-right">
-              <p className="text-gray-400">© 2024 BondOutfit. All rights reserved.</p>
-              <p className="text-gray-500 text-sm mt-1">bondoutfit.com</p>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <IntroSection />
     </div>
   );
-}// Force rebuild 12/28/2025 02:16:39
+}
+
+
+
+/* =========================
+   STORE SELECTOR
+========================= */
+
+function StoreSelector() {
+  const { data: session } = useSession();
+  const [stores, setStores] = useState<StoreItem[]>([]);
+  const [country, setCountry] = useState('');
+  const [city, setCity] = useState('');
+  const [storeId, setStoreId] = useState('');
+
+  useEffect(() => {
+    fetch('/api/stores')
+      .then(res => res.json())
+      .then(setStores)
+      .catch(() => setStores([]));
+  }, []);
+
+  const countries = Array.from(new Set(stores.map(s => s.country)));
+  const cities = Array.from(
+    new Set(stores.filter(s => s.country === country).map(s => s.city))
+  );
+  const filteredStores = stores.filter(
+    s => s.country === country && s.city === city
+  );
+
+  return (
+    <section className="max-w-4xl mx-auto px-6 py-10">
+      <div className="bg-white rounded-xl shadow-md p-6 space-y-6">
+        <h2 className="text-xl font-semibold text-gray-900">
+          Schedule a Visit & Get a Discount
+        </h2>
+
+        {/* Country */}
+        <div>
+          <label className="block text-sm font-medium mb-1">Country</label>
+          <select
+            value={country}
+            onChange={e => {
+              setCountry(e.target.value);
+              setCity('');
+              setStoreId('');
+            }}
+            className="w-full border rounded-md p-2"
+          >
+            <option value="">Select country</option>
+            {countries.map(c => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* City */}
+        {country && (
+          <div>
+            <label className="block text-sm font-medium mb-1">City</label>
+            <select
+              value={city}
+              onChange={e => {
+                setCity(e.target.value);
+                setStoreId('');
+              }}
+              className="w-full border rounded-md p-2"
+            >
+              <option value="">Select city</option>
+              {cities.map(c => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        {/* Store */}
+        {city && (
+          <div>
+            <label className="block text-sm font-medium mb-1">
+              Clothing Store
+            </label>
+            <select
+              value={storeId}
+              onChange={e => setStoreId(e.target.value)}
+              className="w-full border rounded-md p-2"
+            >
+              <option value="">Select store</option>
+              {filteredStores.map(s => (
+                <option key={s.id} value={s.id}>
+                  {s.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        {/* CTA */}
+        {storeId && (
+  <button
+    onClick={() => {
+      const date = prompt("Enter visit date (YYYY-MM-DD)");
+      const time = prompt("Enter visit time (HH:MM)");
+
+      if (!date || !time) return;
+
+      fetch("/api/visits", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          storeId,
+          scheduledDate: date,
+          scheduledTime: time,
+        }),
+      }).then(res => {
+        if (res.status === 401) {
+          window.location.href = "/auth/signin";
+        } else if (res.ok) {
+          alert("Visit scheduled successfully");
+        } else {
+          alert("Failed to schedule visit");
+        }
+      });
+    }}
+    className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition"
+  >
+    View Store & Schedule Visit
+  </button>
+)}
+
+
+      </div>
+    </section>
+  );
+}
+
+/* =========================
+   INTRO TEXT
+========================= */
+
+function IntroSection() {
+  return (
+    <section className="max-w-5xl mx-auto px-6 py-12 grid grid-cols-1 md:grid-cols-2 gap-10">
+      {/* Customers */}
+      <div className="bg-white rounded-xl shadow p-6">
+        <div className="flex items-center gap-3 mb-4">
+          <Users className="h-8 w-8 text-blue-600" />
+          <h3 className="text-xl font-semibold">For Customers</h3>
+        </div>
+        <p className="text-gray-700 leading-relaxed">
+          With <strong>Scheduled Visit Discount (SVD)</strong>, you book a store
+          visit in advance. If you arrive on time and make a purchase, you
+          receive a pre-agreed discount. No waiting, no uncertainty, better
+          prices.
+        </p>
+      </div>
+
+      {/* Stores */}
+      <div className="bg-white rounded-xl shadow p-6">
+        <div className="flex items-center gap-3 mb-4">
+          <Shield className="h-8 w-8 text-gray-800" />
+          <h3 className="text-xl font-semibold">For Store Managers</h3>
+        </div>
+        <p className="text-gray-700 leading-relaxed">
+          SVD turns planned visits into predictable demand. You know who is
+          coming, when, and why. Any discount offered is offset by higher
+          conversion, smoother operations, and better use of staff and space.
+        </p>
+      </div>
+    </section>
+  );
+}

@@ -9,7 +9,33 @@ import { sendVerificationEmail } from "@/lib/email"; // ✅ ADD THIS IMPORT
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { email, password, name, role, storeName } = body;
+    const {
+  email,
+  password,
+  name,
+  role,
+
+  // customer fields
+  phone,
+  customerCity,
+  gender,
+  age,
+  heightCm,
+  weightKg,
+  occupation,
+
+  // store manager fields
+  storeName,
+  country,
+  city,
+  street,
+  streetNumber,
+  floor,
+  state,
+  zip,
+  categories,
+} = body;
+
 
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({
@@ -37,17 +63,42 @@ export async function POST(request: NextRequest) {
 
     // Create user with verification token (email NOT verified yet)
     const user = await prisma.user.create({
-      data: {
-        email,
-        password: hashedPassword,
-        name,
-        role: role || "CUSTOMER",
-        ...(role === "STORE_MANAGER" && storeName && { storeName }),
-        verificationToken,
-        verificationTokenExpires,
-        emailVerified: null, // Not verified yet
-      },
-    });
+  data: {
+    email,
+    password: hashedPassword,
+    name,
+    role: role || "CUSTOMER",
+
+    // customer fields
+    ...(role === "CUSTOMER" && {
+      phone,
+      customerCity,
+      gender,
+      age,
+      heightCm,
+      weightKg,
+      occupation,
+    }),
+
+    // store manager fields
+    ...(role === "STORE_MANAGER" && {
+      storeName,
+      country,
+      city,
+      street,
+      streetNumber,
+      floor,
+      state,
+      zip,
+      categories,
+    }),
+
+    verificationToken,
+    verificationTokenExpires,
+    emailVerified: null,
+  },
+});
+
 
     // ✅ USE THE CENTRALIZED EMAIL SERVICE:
     await sendVerificationEmail(email, verificationToken);
