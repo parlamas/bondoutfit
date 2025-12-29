@@ -14,6 +14,14 @@ function SignInContent() {
   const verifySent = searchParams.get("verify") === "sent";
   const error = searchParams.get("error");
 
+  const roleParam = searchParams.get("role");
+  const modeParam = searchParams.get("mode");
+
+  const type =
+    roleParam === "store-manager" ? "store-manager" : "customer";
+
+  const isSignUp = modeParam === "signup";
+
   return (
     <div className="max-w-md mx-auto mt-12">
       {verifySent && (
@@ -37,7 +45,7 @@ function SignInContent() {
         </div>
       )}
 
-      <AuthSection type="customer" />
+      <AuthSection type={type} defaultSignUp={isSignUp} />
     </div>
   );
 }

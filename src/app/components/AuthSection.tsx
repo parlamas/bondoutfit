@@ -9,10 +9,15 @@ import { User, Store, Mail, Lock, Eye, EyeOff } from "lucide-react";
 
 interface AuthSectionProps {
   type: "customer" | "store-manager";
+  defaultSignUp?: boolean;
 }
 
-export default function AuthSection({ type }: AuthSectionProps) {
-  const [isSignUp, setIsSignUp] = useState(false);
+export default function AuthSection({
+  type,
+  defaultSignUp = false,
+}: AuthSectionProps) {
+
+  const [isSignUp, setIsSignUp] = useState(defaultSignUp);
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
