@@ -1,8 +1,11 @@
-// src/app/api/auth/signup/route.ts
+
+//src/app/api/auth/signup/route.ts
 
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
+import { sendVerificationEmail } from "@/lib/email";
 
 export async function POST(req: Request) {
   try {
@@ -57,9 +60,15 @@ export async function POST(req: Request) {
     // 3. Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // 4 + 5. Create user (and store if manager) atomically
-    await prisma.$transaction(async (tx) => {
-      const user = await tx.user.create({
+    // 4. Create verification token
+    const verificationToken = crypto.randomUUID();
+    const verificationTokenExpires = new Date(
+      Date.now() + 24 * 60 * 60 * 1000
+    );
+
+    // 5. Create user + store atomically
+    const user = await prisma.$transaction(async (tx) => {
+      const createdUser = await tx.user.create({
         data: {
           email,
           name,
@@ -73,6 +82,9 @@ export async function POST(req: Request) {
           heightCm,
           weightKg,
           occupation,
+
+          verificationToken,
+          verificationTokenExpires,
         },
       });
 
@@ -99,11 +111,19 @@ export async function POST(req: Request) {
             state,
             zip,
             categories,
-            managerId: user.id,
+            managerId: createdUser.id,
           },
         });
       }
+
+      return createdUser;
     });
+
+    // 6. Send verification email (correct call)
+    await sendVerificationEmail(
+      user.email,
+      verificationToken
+    );
 
     return NextResponse.json({ success: true });
   } catch (error) {
