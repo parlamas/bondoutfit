@@ -5,11 +5,15 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Mail, ArrowLeft } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 
 export default function ForgotPasswordClient() {
   const [email, setEmail] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  const searchParams = useSearchParams();
+  const type = searchParams.get("type") ?? "customer";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,7 +81,10 @@ export default function ForgotPasswordClient() {
 
         <p className="text-sm text-center text-gray-600">
           Remember your password?{" "}
-          <Link href="/" className="text-blue-600 hover:underline">
+          <Link
+            href={`/auth/signin?type=${type}`}
+            className="text-blue-600 hover:underline"
+          >
             Sign in
           </Link>
         </p>
