@@ -1,87 +1,28 @@
 // src/app/api/auth/signup/route.ts
 
-import { NextRequest, NextResponse } from "next/server";
-import { hashPassword } from "../../../../lib/auth";
-import { prisma } from "../../../../lib/prisma";
-import { randomBytes } from "crypto";
-import { sendVerificationEmail } from "@/lib/email"; // ✅ ADD THIS IMPORT
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import bcrypt from "bcryptjs";
 
-export async function POST(request: NextRequest) {
+export async function POST(req: Request) {
   try {
-    const body = await request.json();
+    const body = await req.json();
     const {
-  email,
-  password,
-  name,
-  role,
+      email,
+      password,
+      name,
+      role,
 
-  // customer fields
-  phone,
-  customerCity,
-  gender,
-  age,
-  heightCm,
-  weightKg,
-  occupation,
-
-  // store manager fields
-  storeName,
-  country,
-  city,
-  street,
-  streetNumber,
-  floor,
-  state,
-  zip,
-  categories,
-} = body;
-
-
-    // Check if user already exists
-    const existingUser = await prisma.user.findUnique({
-      where: { email },
-    });
-
-    if (existingUser) {
-      return NextResponse.json(
-        { error: "User already exists" },
-        { status: 400 }
-      );
-    }
-
-    // Hash password
-    const hashedPassword = await hashPassword(password);
-
-    // Generate verification token
-    const verificationToken = randomBytes(32).toString("hex");
-    const verificationTokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
-
-    // ✅ DEBUG LINES:
-    console.log("🔐 Generated verification token:", verificationToken);
-    console.log("🔐 Token length:", verificationToken.length);
-    console.log("🔐 Verification URL:", `${process.env.NEXTAUTH_URL}/api/auth/verify-email?token=${verificationToken}`);
-
-    // Create user with verification token (email NOT verified yet)
-    const user = await prisma.user.create({
-  data: {
-    email,
-    password: hashedPassword,
-    name,
-    role: role || "CUSTOMER",
-
-    // customer fields
-    ...(role === "CUSTOMER" && {
-      phone,
+      // customer fields
       customerCity,
       gender,
       age,
       heightCm,
       weightKg,
       occupation,
-    }),
+      phone,
 
-    // store manager fields
-    ...(role === "STORE_MANAGER" && {
+      // store fields
       storeName,
       country,
       city,
@@ -91,32 +32,84 @@ export async function POST(request: NextRequest) {
       state,
       zip,
       categories,
-    }),
+    } = body;
 
-    verificationToken,
-    verificationTokenExpires,
-    emailVerified: null,
-  },
-});
+    // 1. Guard
+    if (!email || !password) {
+      return NextResponse.json(
+        { error: "Missing email or password" },
+        { status: 400 }
+      );
+    }
 
+    // 2. Check existing user
+    const existing = await prisma.user.findUnique({
+      where: { email },
+    });
 
-    // ✅ USE THE CENTRALIZED EMAIL SERVICE:
-    await sendVerificationEmail(email, verificationToken);
+    if (existing) {
+      return NextResponse.json(
+        { error: "User already exists" },
+        { status: 400 }
+      );
+    }
 
-    // Remove password from response
-    const { password: _, ...userWithoutPassword } = user;
+    // 3. Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-    return NextResponse.json(
-      { 
-        user: userWithoutPassword, 
-        message: "User created successfully. Please check your email to verify your account." 
-      },
-      { status: 201 }
-    );
+    // 4 + 5. Create user (and store if manager) atomically
+    await prisma.$transaction(async (tx) => {
+      const user = await tx.user.create({
+        data: {
+          email,
+          name,
+          password: hashedPassword,
+          role,
+
+          phone,
+          customerCity,
+          gender,
+          age,
+          heightCm,
+          weightKg,
+          occupation,
+        },
+      });
+
+      if (role === "STORE_MANAGER") {
+        if (
+          !storeName ||
+          !country ||
+          !city ||
+          !street ||
+          !streetNumber ||
+          !zip
+        ) {
+          throw new Error("Missing store information");
+        }
+
+        await tx.store.create({
+          data: {
+            name: storeName,
+            country,
+            city,
+            street,
+            streetNumber,
+            floor,
+            state,
+            zip,
+            categories,
+            managerId: user.id,
+          },
+        });
+      }
+    });
+
+    return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Signup error:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: "Signup failed" },
       { status: 500 }
     );
   }
