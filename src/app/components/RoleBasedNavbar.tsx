@@ -37,32 +37,33 @@ export default function RoleBasedNavbar() {
     {status !== "authenticated" && isHome && (
       <>
         <Link
-          href="/auth/signup"
-          className="rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700"
-        >
-          Customer Sign Up
-        </Link>
+  href="/auth/signin?role=customer&mode=signup"
+  className="rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700"
+>
+  Customer Sign Up
+</Link>
 
-        <Link
-          href="/auth/signin"
-          className="rounded-md border px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-        >
-          Customer Sign In
-        </Link>
+<Link
+  href="/auth/signin?role=customer"
+  className="rounded-md border px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+>
+  Customer Sign In
+</Link>
 
-        <Link
-          href="/auth/store/signup"
-          className="rounded-md bg-gray-800 px-3 py-2 text-sm font-medium text-white hover:bg-gray-900"
-        >
-          Store Sign Up
-        </Link>
+<Link
+  href="/auth/signin?role=store-manager&mode=signup"
+  className="rounded-md bg-gray-800 px-3 py-2 text-sm font-medium text-white hover:bg-gray-900"
+>
+  Store Sign Up
+</Link>
 
-        <Link
-          href="/auth/signin"
-          className="rounded-md border px-3 py-2 text-sm font-medium text-gray-800 hover:bg-gray-100"
-        >
-          Store Sign In
-        </Link>
+<Link
+  href="/auth/signin?role=store-manager"
+  className="rounded-md border px-3 py-2 text-sm font-medium text-gray-800 hover:bg-gray-100"
+>
+  Store Sign In
+</Link>
+
       </>
     )}
 
