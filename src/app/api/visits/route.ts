@@ -1,6 +1,6 @@
 // src/app/api/visits/route.ts
 
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -12,9 +12,11 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const userId = (session.user as any).id;
+
   const visits = await prisma.visit.findMany({
     where: {
-      userId: (session.user as any).id,
+      userId,
     },
     orderBy: {
       scheduledDate: "desc",
@@ -22,10 +24,15 @@ export async function GET() {
     include: {
       discount: {
         select: {
-          storeManager: {
+          title: true,
+          discountPercent: true,
+          discountAmount: true,
+          store: {
             select: {
-              storeName: true,
+              id: true,
+              name: true,
               city: true,
+              country: true,
             },
           },
         },
@@ -39,10 +46,23 @@ export async function GET() {
       scheduledDate: v.scheduledDate.toISOString().slice(0, 10),
       scheduledTime: v.scheduledTime,
       status: v.status,
-      store: {
-        storeName: v.discount.storeManager.storeName,
-        city: v.discount.storeManager.city,
-      },
+      discountUnlocked: v.discountUnlocked,
+      discountUsed: v.discountUsed,
+      discount: v.discount
+        ? {
+            title: v.discount.title,
+            discountPercent: v.discount.discountPercent,
+            discountAmount: v.discount.discountAmount,
+          }
+        : null,
+      store: v.discount
+        ? {
+            id: v.discount.store.id,
+            name: v.discount.store.name,
+            city: v.discount.store.city,
+            country: v.discount.store.country,
+          }
+        : null,
     }))
   );
 }

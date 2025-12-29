@@ -20,8 +20,8 @@ export async function GET() {
 
   const visits = await prisma.visit.findMany({
     where: {
-      discount: {
-        storeManagerId,
+      store: {
+        managerId: storeManagerId,
       },
     },
     orderBy: {
@@ -37,6 +37,11 @@ export async function GET() {
           weightKg: true,
         },
       },
+      store: {
+        select: {
+          name: true,
+        },
+      },
     },
   });
 
@@ -46,6 +51,9 @@ export async function GET() {
       scheduledDate: v.scheduledDate.toISOString().slice(0, 10),
       scheduledTime: v.scheduledTime,
       status: v.status,
+      store: {
+        name: v.store.name,
+      },
       customer: {
         name: v.user.name,
         gender: v.user.gender,
