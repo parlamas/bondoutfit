@@ -80,14 +80,16 @@ export default function ForgotPasswordClient() {
         )}
 
         <p className="text-sm text-center text-gray-600">
-          Remember your password?{" "}
-          <Link
-            href={`/auth/signin?type=${type}`}
-            className="text-blue-600 hover:underline"
-          >
-            Sign in
-          </Link>
-        </p>
+  Remember your password?{" "}
+  <Link
+    href={`/auth/signin?role=${type}`}
+    className="text-blue-600 hover:underline"
+  >
+    Sign in
+  </Link>
+</p>
+
+
       </div>
     </div>
   );
