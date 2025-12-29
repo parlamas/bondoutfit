@@ -124,9 +124,8 @@ export default function AuthSection({
   return (
     <div>
       <h3 className="text-lg font-semibold mb-1">
-        {isSignUp ? "Create Account" : "Sign In"} as{" "}
-        {type === "customer" ? "Customer" : "Store Manager"}
-      </h3>
+  {isSignUp ? "Create Account" : "Sign In"}
+</h3>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {isSignUp && (
