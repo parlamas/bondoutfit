@@ -19,22 +19,34 @@ enum VisitStatus {
   CANCELLED
 }
 
+/* =========================
+   USER
+========================= */
+
 model User {
-  id            String    @id @default(cuid())
-  email         String    @unique
-  name          String?
+  id            String   @id @default(cuid())
+  email         String   @unique
+  name          String   // ✅ REQUIRED
   password      String?
   emailVerified DateTime?
-  role          UserRole  @default(CUSTOMER)
+  role          UserRole @default(CUSTOMER)
 
-  // Customer profile
-  phone        String?
-  customerCity String?
-  age          Int?
-  gender       String?
-  heightCm     Int?
-  weightKg     Int?
-  occupation   String?
+  // ✅ Phone (structured)
+  phoneCountry String?
+  phoneArea    String?
+  phoneNumber  String   // ✅ REQUIRED
+
+  // ✅ Address (required)
+  city   String
+  state  String
+  zip    String
+
+  // Optional profile
+  age        Int?
+  gender     String?
+  heightCm   Int?
+  weightKg   Int?
+  occupation String?
 
   // Relations
   stores   Store[]
@@ -52,20 +64,29 @@ model User {
   updatedAt DateTime @updatedAt
 }
 
+/* =========================
+   STORE
+========================= */
+
 model Store {
   id        String @id @default(cuid())
   managerId String
 
-  name       String
-  storePhone String?
+  name String
 
+  // ✅ Phone (structured)
+  phoneCountry String?
+  phoneArea    String?
+  phoneNumber  String   // ✅ REQUIRED
+
+  // ✅ Address (required)
   country      String
   city         String
+  state        String
+  zip          String
   street       String
   streetNumber String
   floor        String?
-  state        String?
-  zip          String
 
   categories String[]
 
@@ -76,6 +97,10 @@ model Store {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+/* =========================
+   VISIT
+========================= */
 
 model Visit {
   id         String  @id @default(cuid())
@@ -100,6 +125,10 @@ model Visit {
   createdAt DateTime @default(now())
 }
 
+/* =========================
+   DISCOUNT
+========================= */
+
 model Discount {
   id      String @id @default(cuid())
   storeId String
@@ -119,6 +148,10 @@ model Discount {
 
   createdAt DateTime @default(now())
 }
+
+/* =========================
+   AUTH (NextAuth)
+========================= */
 
 model Account {
   id                String  @id @default(cuid())

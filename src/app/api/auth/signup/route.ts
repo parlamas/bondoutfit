@@ -1,4 +1,4 @@
-//src/app/api/auth/signup/route.ts
+// src/app/api/auth/signup/route.ts
 
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
@@ -16,49 +16,64 @@ export async function POST(req: Request) {
       name,
       role,
 
-      // customer fields
-      customerCity,
-      gender,
+      // phone (shared)
+      phoneCountry,
+      phoneArea,
+      phoneNumber,
+
+      // shared required location
+      city,
+      state,
+      zip,
+
+      // customer-only (optional)
       age,
+      gender,
       heightCm,
       weightKg,
       occupation,
-      phone,
 
-      // store fields
+      // store-only
       storeName,
       country,
-      city,
       street,
       streetNumber,
       floor,
-      state,
-      zip,
       categories,
     } = body;
 
     /* =========================
-       BASIC VALIDATION
+       BASIC VALIDATION (ALL USERS)
     ========================= */
 
-    if (!email?.trim() || !password) {
+    if (
+      !email?.trim() ||
+      !password ||
+      !name?.trim() ||
+      !phoneNumber?.trim() ||
+      !city?.trim() ||
+      !state?.trim() ||
+      !zip?.trim()
+    ) {
       return NextResponse.json(
-        { error: "Missing email or password" },
+        { error: "Missing required personal information" },
         { status: 400 }
       );
     }
+
+    /* =========================
+       STORE-SPECIFIC VALIDATION
+    ========================= */
 
     if (role === "STORE_MANAGER") {
       if (
         !storeName?.trim() ||
         !country?.trim() ||
-        !city?.trim() ||
         !street?.trim() ||
-        !streetNumber?.trim() ||
-        !zip?.trim()
+        !streetNumber?.trim()
       ) {
         return NextResponse.json(
-          { error: "Missing store information" },
+          { error: "Missing required store information" },
           { status: 400 }
         );
       }
@@ -93,7 +108,7 @@ export async function POST(req: Request) {
     const safeCategories = Array.isArray(categories) ? categories : [];
 
     /* =========================
-       TRANSACTION
+       TRANSACTION (USER + STORE)
     ========================= */
 
     const user = await prisma.$transaction(async (tx) => {
@@ -104,10 +119,16 @@ export async function POST(req: Request) {
           password: hashedPassword,
           role,
 
-          phone,
-          customerCity,
-          gender,
+          phoneCountry,
+          phoneArea,
+          phoneNumber,
+
+          city,
+          state,
+          zip,
+
           age,
+          gender,
           heightCm,
           weightKg,
           occupation,
@@ -121,14 +142,20 @@ export async function POST(req: Request) {
         await tx.store.create({
           data: {
             name: storeName,
+
+            phoneCountry,
+            phoneArea,
+            phoneNumber,
+
             country,
             city,
+            state,
+            zip,
             street,
             streetNumber,
             floor,
-            state,
-            zip,
             categories: safeCategories,
+
             managerId: createdUser.id,
           },
         });
@@ -146,6 +173,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("❌ Signup error:", error);
+
     return NextResponse.json(
       { error: "Signup failed" },
       { status: 500 }
