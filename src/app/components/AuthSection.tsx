@@ -143,17 +143,40 @@ export default function AuthSection({
               className="w-full border px-4 py-2 rounded"
             />
 
-            {/* Phone Number */}
-            <input
-              type="tel"
-              required
-              placeholder="Phone number"
-              value={formData.phoneNumber}
-              onChange={(e) =>
-                setFormData({ ...formData, phoneNumber: e.target.value })
-              }
-              className="w-full border px-4 py-2 rounded"
-            />
+            {/* Phone */}
+<div className="grid grid-cols-3 gap-2">
+  <input
+    type="text"
+    placeholder="Country code"
+    value={formData.phoneCountry}
+    onChange={(e) =>
+      setFormData({ ...formData, phoneCountry: e.target.value })
+    }
+    className="border px-4 py-2 rounded"
+  />
+
+  <input
+    type="text"
+    placeholder="Area code"
+    value={formData.phoneArea}
+    onChange={(e) =>
+      setFormData({ ...formData, phoneArea: e.target.value })
+    }
+    className="border px-4 py-2 rounded"
+  />
+
+  <input
+    type="tel"
+    required
+    placeholder="Phone number"
+    value={formData.phoneNumber}
+    onChange={(e) =>
+      setFormData({ ...formData, phoneNumber: e.target.value })
+    }
+    className="border px-4 py-2 rounded"
+  />
+</div>
+
 
             {/* City */}
             <input
@@ -239,6 +262,17 @@ export default function AuthSection({
               }
               className="w-full border px-4 py-2 rounded"
             />
+
+            <input
+  type="text"
+  placeholder="Floor (optional)"
+  value={formData.floor}
+  onChange={(e) =>
+    setFormData({ ...formData, floor: e.target.value })
+  }
+  className="w-full border px-4 py-2 rounded"
+/>
+
 
             <div className="flex gap-2">
               {["Men’s wear", "Women’s wear", "Children", "Unisex / Mixed"].map(
