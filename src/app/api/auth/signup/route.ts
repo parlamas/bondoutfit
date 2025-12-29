@@ -65,7 +65,7 @@ export async function POST(req: Request) {
     }
 
     /* =========================
-       DUPLICATE CHECK
+       DUPLICATE USER CHECK
     ========================= */
 
     const existing = await prisma.user.findUnique({
@@ -90,8 +90,10 @@ export async function POST(req: Request) {
       Date.now() + 24 * 60 * 60 * 1000
     );
 
+    const safeCategories = Array.isArray(categories) ? categories : [];
+
     /* =========================
-       TRANSACTION (NO THROWS)
+       TRANSACTION
     ========================= */
 
     const user = await prisma.$transaction(async (tx) => {
@@ -126,7 +128,7 @@ export async function POST(req: Request) {
             floor,
             state,
             zip,
-            categories: categories ?? [],
+            categories: safeCategories,
             managerId: createdUser.id,
           },
         });
@@ -144,12 +146,9 @@ export async function POST(req: Request) {
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("❌ Signup error:", error);
-
     return NextResponse.json(
       { error: "Signup failed" },
       { status: 500 }
     );
   }
 }
-
-
