@@ -10,50 +10,67 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
 
-    const {
+    console.log("📦 SIGNUP PAYLOAD:", body);
+
+    /* =========================
+       EXTRACT (NO MAGIC)
+    ========================= */
+
+    const email = body.email?.trim();
+    const password = body.password;
+    const name = body.name?.trim();
+    const role = body.role;
+
+    const phoneCountry = body.phoneCountry ?? null;
+    const phoneArea = body.phoneArea ?? null;
+    const phoneNumber = body.phoneNumber?.trim();
+
+    const city = body.city?.trim();
+    const state = body.state?.trim();
+    const zip = body.zip?.trim();
+
+    const age = body.age ?? null;
+    const gender = body.gender ?? null;
+    const heightCm = body.heightCm ?? null;
+    const weightKg = body.weightKg ?? null;
+    const occupation = body.occupation ?? null;
+
+    const storeName = body.storeName?.trim();
+    const country = body.country?.trim();
+    const street = body.street?.trim();
+    const streetNumber = body.streetNumber?.trim();
+    const floor = body.floor ?? null;
+    const categories = Array.isArray(body.categories) ? body.categories : [];
+
+    console.log("🧪 VALIDATED FIELDS:", {
       email,
-      password,
       name,
       role,
-
-      // phone (shared)
       phoneCountry,
       phoneArea,
       phoneNumber,
-
-      // shared required location
       city,
       state,
       zip,
-
-      // customer-only (optional)
-      age,
-      gender,
-      heightCm,
-      weightKg,
-      occupation,
-
-      // store-only
       storeName,
       country,
       street,
       streetNumber,
-      floor,
       categories,
-    } = body;
+    });
 
     /* =========================
-       BASIC VALIDATION (ALL USERS)
+       REQUIRED (ALL USERS)
     ========================= */
 
     if (
-      !email?.trim() ||
+      !email ||
       !password ||
-      !name?.trim() ||
-      !phoneNumber?.trim() ||
-      !city?.trim() ||
-      !state?.trim() ||
-      !zip?.trim()
+      !name ||
+      !phoneNumber ||
+      !city ||
+      !state ||
+      !zip
     ) {
       return NextResponse.json(
         { error: "Missing required personal information" },
@@ -62,16 +79,11 @@ export async function POST(req: Request) {
     }
 
     /* =========================
-       STORE-SPECIFIC VALIDATION
+       REQUIRED (STORE MANAGER)
     ========================= */
 
     if (role === "STORE_MANAGER") {
-      if (
-        !storeName?.trim() ||
-        !country?.trim() ||
-        !street?.trim() ||
-        !streetNumber?.trim()
-      ) {
+      if (!storeName || !country || !street || !streetNumber) {
         return NextResponse.json(
           { error: "Missing required store information" },
           { status: 400 }
@@ -80,7 +92,7 @@ export async function POST(req: Request) {
     }
 
     /* =========================
-       DUPLICATE USER CHECK
+       DUPLICATE CHECK
     ========================= */
 
     const existing = await prisma.user.findUnique({
@@ -95,20 +107,17 @@ export async function POST(req: Request) {
     }
 
     /* =========================
-       PREPARE DATA
+       PREP
     ========================= */
 
     const hashedPassword = await bcrypt.hash(password, 10);
-
     const verificationToken = crypto.randomUUID();
     const verificationTokenExpires = new Date(
       Date.now() + 24 * 60 * 60 * 1000
     );
 
-    const safeCategories = Array.isArray(categories) ? categories : [];
-
     /* =========================
-       TRANSACTION (USER + STORE)
+       TRANSACTION
     ========================= */
 
     const user = await prisma.$transaction(async (tx) => {
@@ -141,20 +150,19 @@ export async function POST(req: Request) {
       if (role === "STORE_MANAGER") {
         await tx.store.create({
           data: {
-            name: storeName,
-
+            name: storeName!,
             phoneCountry,
             phoneArea,
             phoneNumber,
 
-            country,
+            country: country!,
             city,
             state,
             zip,
-            street,
-            streetNumber,
+            street: street!,
+            streetNumber: streetNumber!,
             floor,
-            categories: safeCategories,
+            categories,
 
             managerId: createdUser.id,
           },
@@ -165,15 +173,16 @@ export async function POST(req: Request) {
     });
 
     /* =========================
-       SEND VERIFICATION EMAIL
+       EMAIL
     ========================= */
 
     await sendVerificationEmail(user.email, verificationToken);
 
+    console.log("✅ Signup successful:", user.email);
+
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("❌ Signup error:", error);
-
     return NextResponse.json(
       { error: "Signup failed" },
       { status: 500 }
