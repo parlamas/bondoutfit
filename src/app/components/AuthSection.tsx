@@ -330,7 +330,7 @@ const toggleCategory = (category: string) => {
     <div className="grid grid-cols-2 gap-3">
       <div>
         <label className="block text-sm font-medium mb-1">
-          Floor (optional)
+          Floor
         </label>
         <input
           type="text"
