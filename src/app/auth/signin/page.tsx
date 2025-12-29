@@ -1,4 +1,4 @@
-// src/app/auth/signin/page.tsx
+//src/app/auth/signin/page.tsx
 
 "use client";
 
@@ -14,16 +14,13 @@ function SignInContent() {
   const verifySent = searchParams.get("verify") === "sent";
   const error = searchParams.get("error");
 
-  // ✅ SINGLE SOURCE OF TRUTH
+  // SINGLE SOURCE OF TRUTH
   const typeParam = searchParams.get("type");
   const modeParam = searchParams.get("mode");
 
-  if (typeParam !== "customer" && typeParam !== "store-manager") {
-  throw new Error("Missing or invalid auth type");
-}
-
-const type = typeParam;
-
+  // SAFE DEFAULT (no crashes)
+  const type =
+    typeParam === "store-manager" ? "store-manager" : "customer";
 
   const isSignUp = modeParam === "signup";
 
