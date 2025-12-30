@@ -19,6 +19,13 @@ enum VisitStatus {
   CANCELLED
 }
 
+enum StoreItemCategory {
+  CLOTHING
+  FOOTWEAR
+  ACCESSORIES
+}
+
+
 /* =========================
    USER
 ========================= */
@@ -87,6 +94,8 @@ model Store {
   street       String
   streetNumber String
   floor        String?
+  items        StoreItem[]
+
 
   categories String[]
 
@@ -148,6 +157,36 @@ model Discount {
 
   createdAt DateTime @default(now())
 }
+
+model StoreItem {
+  id          String   @id @default(uuid())
+  storeId     String
+
+  name        String
+  category    StoreItemCategory
+  description String?
+  price       Int?     // stored in cents
+  visible     Boolean  @default(true)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  store       Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  images      StoreItemImage[]
+
+  @@index([storeId])
+}
+
+model StoreItemImage {
+  id          String @id @default(uuid())
+  storeItemId String
+
+  imageUrl    String
+  order       Int    @default(0)
+
+  storeItem   StoreItem @relation(fields: [storeItemId], references: [id], onDelete: Cascade)
+}
+
 
 /* =========================
    AUTH (NextAuth)

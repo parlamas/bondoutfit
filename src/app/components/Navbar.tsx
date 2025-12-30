@@ -42,7 +42,7 @@ export default function Navbar() {
         {/* STORE MANAGER */}
         {session?.user && (session.user as any).role === "STORE_MANAGER" && (
           <>
-            <Link href="/dashboard/store">Store Dashboard</Link>
+            <Link href="/dashboard/store">Dashboard</Link>
             <button onClick={() => signOut({ callbackUrl: "/" })}>
               Sign Out
             </button>
