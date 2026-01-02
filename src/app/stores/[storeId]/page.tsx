@@ -1,9 +1,6 @@
 // src/app/stores/[storeId]/page.tsx
 
-"use client";
-
-import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import Image from "next/image";
 
 type StoreItemImage = {
   id: string;
@@ -19,65 +16,111 @@ type StoreItem = {
   images: StoreItemImage[];
 };
 
-export default function StorePublicPage() {
-  const params = useParams();
-  const storeId = params.storeId as string;
+type Store = {
+  id: string;
+  name: string;
+  phoneNumber: string;
+  country: string;
+  city: string;
+  state: string;
+  zip: string;
+  street: string;
+  streetNumber: string;
+  floor: string | null;
+  items: StoreItem[];
+};
 
-  const [items, setItems] = useState<StoreItem[]>([]);
-  const [loading, setLoading] = useState(true);
+async function getStore(storeId: string): Promise<Store> {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_APP_URL}/api/stores/${storeId}`,
+    { cache: "no-store" }
+  );
 
-  useEffect(() => {
-    fetch(`/api/stores/${storeId}/items`)
-      .then(res => res.json())
-      .then(data => setItems(data))
-      .finally(() => setLoading(false));
-  }, [storeId]);
-
-  if (loading) {
-    return <div className="p-6">Loading store items…</div>;
+  if (!res.ok) {
+    throw new Error("Failed to load store");
   }
 
+  return res.json();
+}
+
+export default async function StorePage({
+  params,
+}: {
+  params: { storeId: string };
+}) {
+  const store = await getStore(params.storeId);
+
   return (
-    <div className="max-w-6xl mx-auto p-6">
-      <h1 className="text-2xl font-semibold mb-6">Store Items</h1>
+    <div className="max-w-5xl mx-auto p-6 space-y-10">
+      {/* STORE INFO */}
+      <section className="space-y-1">
+        <h1 className="text-3xl font-semibold">{store.name}</h1>
 
-      {items.length === 0 ? (
-        <p className="text-gray-600">No items available.</p>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {items.map(item => (
-            <div
-              key={item.id}
-              className="border rounded-lg bg-white p-4"
-            >
-              {item.images[0] && (
-                <img
-                  src={item.images[0].imageUrl}
-                  className="w-full h-48 object-cover rounded mb-3"
-                />
-              )}
-
-              <div className="font-medium">{item.name}</div>
-
-              <div className="text-sm text-gray-600">
-                {item.category}
-              </div>
-
-              {item.description && (
-                <div className="mt-2 text-sm text-gray-700">
-                  {item.description}
-                </div>
-              )}
-
-              {item.price !== null && (
-                <div className="mt-2 font-medium">
-                  € {(item.price / 100).toFixed(2)}
-                </div>
-              )}
-            </div>
-          ))}
+        <div className="text-gray-700">
+          {store.street} {store.streetNumber}
+          {store.floor ? `, ${store.floor}` : ""}
         </div>
-      )}
+
+        <div className="text-gray-700">
+          {store.zip} {store.city}, {store.state}
+        </div>
+
+        <div className="text-gray-700">{store.country}</div>
+
+        <div className="text-gray-700">
+          Phone: {store.phoneNumber}
+        </div>
+      </section>
+
+      {/* ITEMS */}
+      <section>
+        <h2 className="text-2xl font-semibold mb-4">What we sell</h2>
+
+        {store.items.length === 0 ? (
+          <p className="text-gray-600">No items listed.</p>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {store.items.map(item => (
+              <div
+                key={item.id}
+                className="border rounded-lg p-4 bg-white space-y-2"
+              >
+                <div className="font-medium">{item.name}</div>
+                <div className="text-sm text-gray-600">
+                  {item.category}
+                </div>
+
+                {item.price !== null && (
+                  <div className="text-sm font-medium">
+                    € {(item.price / 100).toFixed(2)}
+                  </div>
+                )}
+
+                {item.description && (
+                  <p className="text-sm text-gray-700">
+                    {item.description}
+                  </p>
+                )}
+
+                {item.images.length > 0 && (
+                  <div className="flex gap-2 flex-wrap mt-2">
+                    {item.images.map(img => (
+                      <Image
+                        key={img.id}
+                        src={img.imageUrl}
+                        alt={item.name}
+                        width={120}
+                        height={120}
+                        className="rounded object-cover"
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
     </div>
   );
 }

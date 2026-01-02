@@ -1,0 +1,398 @@
+//src/app/auth/store/signup/page.tsx
+
+'use client';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+
+export default function StoreSignUpPage() {
+  const router = useRouter();
+  
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    name: '',
+    phoneCountry: '+1',
+    phoneArea: '',
+    phoneNumber: '',
+    city: '',
+    state: '',
+    zip: '',
+    role: 'STORE_MANAGER',
+    storeName: '',
+    country: '',
+    street: '',
+    streetNumber: '',
+    categories: [] as string[],
+  });
+  
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    try {
+      const response = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Signup failed');
+      }
+
+      setSuccess(true);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleCategoryChange = (category: string) => {
+    setFormData(prev => ({
+      ...prev,
+      categories: prev.categories.includes(category)
+        ? prev.categories.filter(c => c !== category)
+        : [...prev.categories, category]
+    }));
+  };
+
+  if (success) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4">
+        <div className="max-w-md w-full text-center">
+          <h2 className="text-2xl font-bold text-green-600 mb-4">Store Signup Successful!</h2>
+          <p className="text-gray-700 mb-6">Please check your email to verify your account.</p>
+          <Link
+            href="/auth/store/signin"
+            className="inline-block bg-gray-800 text-white px-6 py-2 rounded-md hover:bg-gray-900"
+          >
+            Go to Store Sign In
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-2xl w-full space-y-8">
+        <div>
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+            Store Manager Sign Up
+          </h2>
+          <p className="mt-2 text-center text-sm text-gray-600">
+            Already have a store account?{' '}
+            <Link
+              href="/auth/store/signin"
+              className="font-medium text-blue-600 hover:text-blue-500"
+            >
+              Store Sign In
+            </Link>
+          </p>
+        </div>
+
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+              {error}
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Left column - Personal Info */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-medium text-gray-900">Personal Information</h3>
+              
+              <div>
+                <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                  Full Name *
+                </label>
+                <input
+                  id="name"
+                  name="name"
+                  type="text"
+                  required
+                  value={formData.name}
+                  onChange={handleChange}
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="John Doe"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                  Email Address *
+                </label>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  required
+                  value={formData.email}
+                  onChange={handleChange}
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="you@example.com"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                  Password *
+                </label>
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  required
+                  value={formData.password}
+                  onChange={handleChange}
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="••••••••"
+                />
+              </div>
+
+              {/* Phone Fields */}
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label htmlFor="phoneCountry" className="block text-sm font-medium text-gray-700">
+                    Country Code *
+                  </label>
+                  <select
+                    id="phoneCountry"
+                    name="phoneCountry"
+                    required
+                    value={formData.phoneCountry}
+                    onChange={handleChange}
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="+1">USA (+1)</option>
+                    <option value="+44">UK (+44)</option>
+                    <option value="+33">France (+33)</option>
+                    <option value="+49">Germany (+49)</option>
+                    <option value="+39">Italy (+39)</option>
+                    <option value="+34">Spain (+34)</option>
+                    <option value="+31">Netherlands (+31)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label htmlFor="phoneArea" className="block text-sm font-medium text-gray-700">
+                    Area Code *
+                  </label>
+                  <input
+                    id="phoneArea"
+                    name="phoneArea"
+                    type="text"
+                    required
+                    value={formData.phoneArea}
+                    onChange={handleChange}
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="212"
+                    maxLength={3}
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700">
+                    Phone Number *
+                  </label>
+                  <input
+                    id="phoneNumber"
+                    name="phoneNumber"
+                    type="tel"
+                    required
+                    value={formData.phoneNumber}
+                    onChange={handleChange}
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="5551234"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label htmlFor="city" className="block text-sm font-medium text-gray-700">
+                    City *
+                  </label>
+                  <input
+                    id="city"
+                    name="city"
+                    type="text"
+                    required
+                    value={formData.city}
+                    onChange={handleChange}
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="City"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="state" className="block text-sm font-medium text-gray-700">
+                    State *
+                  </label>
+                  <input
+                    id="state"
+                    name="state"
+                    type="text"
+                    required
+                    value={formData.state}
+                    onChange={handleChange}
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="State"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="zip" className="block text-sm font-medium text-gray-700">
+                    ZIP *
+                  </label>
+                  <input
+                    id="zip"
+                    name="zip"
+                    type="text"
+                    required
+                    value={formData.zip}
+                    onChange={handleChange}
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="12345"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Right column - Store Info */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-medium text-gray-900">Store Information</h3>
+              
+              <div>
+                <label htmlFor="storeName" className="block text-sm font-medium text-gray-700">
+                  Store Name *
+                </label>
+                <input
+                  id="storeName"
+                  name="storeName"
+                  type="text"
+                  required
+                  value={formData.storeName}
+                  onChange={handleChange}
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="My Store"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="country" className="block text-sm font-medium text-gray-700">
+                  Country *
+                </label>
+                <input
+                  id="country"
+                  name="country"
+                  type="text"
+                  required
+                  value={formData.country}
+                  onChange={handleChange}
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Country"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="street" className="block text-sm font-medium text-gray-700">
+                  Street *
+                </label>
+                <input
+                  id="street"
+                  name="street"
+                  type="text"
+                  required
+                  value={formData.street}
+                  onChange={handleChange}
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Street Address"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="streetNumber" className="block text-sm font-medium text-gray-700">
+                  Street Number *
+                </label>
+                <input
+                  id="streetNumber"
+                  name="streetNumber"
+                  type="text"
+                  required
+                  value={formData.streetNumber}
+                  onChange={handleChange}
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="123"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Store Categories (Select all that apply)
+                </label>
+                <div className="space-y-2">
+                  {['CLOTHING', 'FOOTWEAR', 'ACCESSORIES'].map((category) => (
+                    <div key={category} className="flex items-center">
+                      <input
+                        type="checkbox"
+                        id={`category-${category}`}
+                        checked={formData.categories.includes(category)}
+                        onChange={() => handleCategoryChange(category)}
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                      />
+                      <label
+                        htmlFor={`category-${category}`}
+                        className="ml-2 text-sm text-gray-700"
+                      >
+                        {category.charAt(0) + category.slice(1).toLowerCase()}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="pt-6">
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-800 disabled:opacity-50"
+            >
+              {loading ? 'Creating store account...' : 'Sign up as Store Manager'}
+            </button>
+          </div>
+
+          <div className="text-sm text-center pt-4">
+            <p className="text-gray-600">
+              Want to sign up as a customer instead?{' '}
+              <Link
+                href="/auth/customer/signup"
+                className="font-medium text-blue-600 hover:text-blue-500"
+              >
+                Customer Sign Up
+              </Link>
+            </p>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}

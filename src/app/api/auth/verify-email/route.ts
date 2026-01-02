@@ -16,9 +16,8 @@ export async function GET(request: NextRequest) {
 
     if (!token) {
       console.log("❌ No token provided");
-      return NextResponse.json(
-        { error: "Invalid verification token" },
-        { status: 400 }
+      return NextResponse.redirect(
+        new URL("/auth/customer/signin?error=InvalidToken", request.url)
       );
     }
 
@@ -34,11 +33,12 @@ export async function GET(request: NextRequest) {
 
     console.log("🔍 User found:", user?.email);
     console.log("🔍 Token matches:", !!user);
+    console.log("🔍 User role:", user?.role);
 
     if (!user) {
       console.log("❌ No user found or token expired");
       return NextResponse.redirect(
-        new URL("/auth/signin?error=InvalidToken", request.url)
+        new URL("/auth/customer/signin?error=InvalidToken", request.url)
       );
     }
 
@@ -54,14 +54,21 @@ export async function GET(request: NextRequest) {
 
     console.log("✅ User verified successfully:", user.email);
     
+    // Redirect based on user role
+    const redirectPath = user.role === "STORE_MANAGER" 
+      ? "/auth/store/signin?verified=true" 
+      : "/auth/customer/signin?verified=true";
+    
+    console.log("🔀 Redirecting to:", redirectPath);
+    
     return NextResponse.redirect(
-      new URL("/auth/signin?verified=true", request.url)
+      new URL(redirectPath, request.url)
     );
     
   } catch (error) {
     console.error("❌ Verification error:", error);
     return NextResponse.redirect(
-      new URL("/auth/signin?error=VerificationFailed", request.url)
+      new URL("/auth/customer/signin?error=VerificationFailed", request.url)
     );
   }
 }

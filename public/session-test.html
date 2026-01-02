@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Session Test</title>
+</head>
+<body>
+    <h1>Session Test</h1>
+    <div id="result">Loading...</div>
+    <script>
+        fetch("/api/auth/session")
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById("result").innerHTML = `
+                    <h2>Session Info:</h2>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                    <p><strong>Role:</strong> ${data?.user?.role || "None"}</p>
+                    <p><strong>Is Store Manager:</strong> ${data?.user?.role === "STORE_MANAGER" ? "YES" : "NO"}</p>
+                `;
+            })
+            .catch(err => {
+                document.getElementById("result").innerHTML = "Error: " + err.message;
+            });
+    </script>
+</body>
+</html>
