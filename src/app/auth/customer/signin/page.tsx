@@ -3,7 +3,7 @@
 'use client';
 
 import { useState } from 'react';
-import { signIn } from 'next-auth/react';
+import { signIn, signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
@@ -14,7 +14,7 @@ export default function CustomerSignInPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
@@ -33,7 +33,18 @@ export default function CustomerSignInPage() {
           setError('Invalid email or password');
         }
       } else {
-        router.push('/dashboard/customer');
+        // Fetch session to check role
+        const sessionRes = await fetch('/api/auth/session');
+        const session = await sessionRes.json();
+        
+        // Check if user is a CUSTOMER
+        if (session.user?.role === 'CUSTOMER') {
+          router.push('/dashboard/customer');
+        } else {
+          // User is STORE_MANAGER - sign them out and show error
+          await signOut({ redirect: false });
+          setError('This is a customer sign in page. Store managers should use the Store Sign In page.');
+        }
       }
     } catch (err) {
       setError('An error occurred. Please try again.');
