@@ -1,4 +1,4 @@
-//src/app/components/RoleBasedNavbar.tsx
+//src/app/components/NavBar.tsx
 
 "use client";
 
@@ -67,9 +67,9 @@ export default function RoleBasedNavbar() {
       </>
     )}
 
-    {status !== "authenticated" && !isHome && (
+        {status !== "authenticated" && !isHome && !pathname.includes("/auth/") && (
       <Link
-                href="/auth/customer/signin"
+        href="/auth/customer/signin"
         className="rounded-md border px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
       >
         Sign in
