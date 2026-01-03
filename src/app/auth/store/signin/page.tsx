@@ -2,7 +2,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { signIn, signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -14,15 +14,34 @@ export default function StoreSignInPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-    const handleSubmit = async (e: React.FormEvent) => {
+  // Check if user is already signed in as store manager
+  useEffect(() => {
+    fetch('/api/auth/session')
+      .then(res => res.json())
+      .then(session => {
+        if (session.user?.role === 'STORE_MANAGER') {
+          router.push('/dashboard/store');
+        } else if (session.user?.role === 'CUSTOMER') {
+          // If customer is logged in, sign them out
+          signOut({ redirect: false });
+        }
+      })
+      .catch(() => {
+        // Ignore errors, just means no session
+      });
+  }, [router]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
     try {
+      // Add callbackUrl for proper redirect handling
       const result = await signIn('credentials', {
         email,
         password,
+        callbackUrl: '/dashboard/store', // Added callbackUrl
         redirect: false,
       });
 
@@ -33,26 +52,28 @@ export default function StoreSignInPage() {
           setError('Invalid email or password');
         }
       } else {
-        // Fetch session to check role
-        const sessionRes = await fetch('/api/auth/session');
-        const session = await sessionRes.json();
+        // Success! NextAuth has set the session
         
-        // Check if user is a STORE_MANAGER (NOT CUSTOMER!)
-        if (session.user?.role === 'STORE_MANAGER') {
-          router.push('/dashboard/store');
+        // Check if we're in production
+        const isProduction = process.env.NODE_ENV === 'production';
+        
+        if (isProduction) {
+          // For production: Force a full page reload to ensure session cookies are set
+          // This is a common workaround for NextAuth in production
+          window.location.href = '/dashboard/store';
         } else {
-          // User is CUSTOMER - sign them out and show error
-          await signOut({ redirect: false });
-          setError('This is a store manager sign in page. Customers should use the Customer Sign In page.');
+          // For development: Use router and refresh
+          router.push('/dashboard/store');
+          router.refresh(); // Refresh to get updated session
         }
       }
     } catch (err) {
+      console.error('Sign in error:', err);
       setError('An error occurred. Please try again.');
     } finally {
       setLoading(false);
     }
   };
-
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
