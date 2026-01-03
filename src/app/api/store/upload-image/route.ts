@@ -1,4 +1,4 @@
-// app/api/upload/store-image/route.ts
+// app/api/store/upload-image/route.ts
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
@@ -24,8 +24,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  console.log('User email from session:', session.user.email);
-
   try {
     const formData = await req.formData();
     const file = formData.get('file') as File;
@@ -39,12 +37,6 @@ export async function POST(req: NextRequest) {
     // Convert file to buffer
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    console.log('Cloudinary config check:', {
-      hasCloudName: !!process.env.CLOUDINARY_CLOUD_NAME,
-      hasApiKey: !!process.env.CLOUDINARY_API_KEY,
-      hasApiSecret: !!process.env.CLOUDINARY_API_SECRET,
-      fileInfo: { name: file.name, size: file.size, type: file.type }
-    });
     
     // Upload to Cloudinary
     const uploadResult = await new Promise<any>((resolve, reject) => {
@@ -62,16 +54,9 @@ export async function POST(req: NextRequest) {
     });
 
     // Save to database
-    const store = await prisma.store.findFirst({
-      where: { 
-        OR: [
-          { email: session.user.email },
-          { manager: { email: session.user.email } }
-        ]
-      },
+    const store = await prisma.store.findUnique({
+      where: { email: session.user.email },
     });
-
-    console.log('Store found:', store ? { id: store.id, name: store.name } : 'No store found');
 
     if (!store) {
       return NextResponse.json({ error: 'Store not found' }, { status: 404 });
@@ -79,7 +64,7 @@ export async function POST(req: NextRequest) {
 
     if (type === 'logo') {
       const updatedStore = await prisma.store.update({
-        where: { id: store.id },
+        where: { email: session.user.email },
         data: { logoUrl: uploadResult.secure_url },
       });
       
@@ -89,7 +74,7 @@ export async function POST(req: NextRequest) {
       });
     } else if (type === 'storefront') {
       const updatedStore = await prisma.store.update({
-        where: { id: store.id },
+        where: { email: session.user.email },
         data: { storefrontUrl: uploadResult.secure_url },
       });
       
@@ -123,17 +108,8 @@ export async function POST(req: NextRequest) {
     }
   } catch (error) {
     console.error('Upload failed:', error);
-    console.error('Error details:', {
-      message: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : undefined,
-      name: error instanceof Error ? error.name : undefined
-    });
-    
     return NextResponse.json(
-      { 
-        error: 'Failed to upload image',
-        details: error instanceof Error ? error.message : String(error)
-      },
+      { error: 'Failed to upload image' },
       { status: 500 }
     );
   }

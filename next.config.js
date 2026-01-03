@@ -1,17 +1,15 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  webpack: (config, { dev, isServer }) => {
-    if (dev && !isServer) {
-      config.watchOptions = {
-        ignored: [
-          '**/node_modules/**',
-          '**/.next/**',
-          '**/C:/**' // Ignore Windows system paths
-        ]
-      }
-    }
-    return config
-  }
-}
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+        pathname: '/**',
+      },
+      // Add other domains you use for images
+    ],
+  },
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;

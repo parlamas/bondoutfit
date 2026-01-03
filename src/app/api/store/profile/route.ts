@@ -20,12 +20,13 @@ export async function GET() {
   const store = await prisma.store.findFirst({
     where: { managerId: userId },
     select: {
+      id: true,
       name: true,
       email: true,
       phoneCountry: true,
       phoneArea: true,
       phoneNumber: true,
-      currency: true,
+      acceptedCurrencies: true,
       country: true,
       city: true,
       state: true,
@@ -33,6 +34,7 @@ export async function GET() {
       street: true,
       streetNumber: true,
       floor: true,
+      categories: true,
     },
   });
 
@@ -41,4 +43,56 @@ export async function GET() {
   }
 
   return NextResponse.json(store);
+}
+
+export async function PATCH(request: Request) {
+  const session = await getServerSession(authOptions);
+
+  if (!session || (session.user as any)?.role !== "STORE_MANAGER") {
+    return NextResponse.json(
+      { error: "Unauthorized" },
+      { status: 401 }
+    );
+  }
+
+  const userId = (session.user as any).id;
+
+  try {
+    const body = await request.json();
+    
+    // Find the store
+    const store = await prisma.store.findFirst({
+      where: { managerId: userId },
+    });
+
+    if (!store) {
+      return NextResponse.json(
+        { error: "Store not found" },
+        { status: 404 }
+      );
+    }
+
+    // Update the store
+    const updatedStore = await prisma.store.update({
+      where: { id: store.id },
+      data: {
+        name: body.name,
+        description: body.description,
+        website: body.website,
+        phoneCountry: body.phoneCountry,
+        phoneArea: body.phoneArea,
+        phoneNumber: body.phoneNumber,
+        categories: body.categories,
+        openingHours: body.openingHours,
+      },
+    });
+
+    return NextResponse.json(updatedStore);
+  } catch (error) {
+    console.error("Failed to update store profile:", error);
+    return NextResponse.json(
+      { error: "Failed to update store profile" },
+      { status: 500 }
+    );
+  }
 }

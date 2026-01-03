@@ -136,8 +136,6 @@ model Store {
   description String?
   email       String?   @unique
   website     String?
-  logoUrl      String?
-  storefrontUrl String?
 
   // Contact
   phoneCountry String?
@@ -482,7 +480,7 @@ model Review {
   id        String   @id @default(cuid())
   userId    String
   storeId   String
-  visitId   String?   @unique
+  visitId   String?
 
   rating    Int      // 1-5
   title     String?

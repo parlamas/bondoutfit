@@ -13,11 +13,11 @@ export const transporter = nodemailer.createTransport({
 export async function sendPasswordResetEmail(
   email: string,
   token: string,
-  role: "CUSTOMER" | "STORE_MANAGER"
+  role: "CUSTOMER" | "STORE_MANAGER" | "ADMIN"
 ) {
 
   const resetUrl = `${process.env.NEXTAUTH_URL}/auth/reset-password?token=${token}&type=${
-  role === "STORE_MANAGER" ? "store-manager" : "customer"
+    role === "STORE_MANAGER" || role === "ADMIN" ? "store-manager" : "customer"
 }`;
 
   
