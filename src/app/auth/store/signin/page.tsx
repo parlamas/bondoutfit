@@ -31,39 +31,35 @@ export default function StoreSignInPage() {
       });
   }, [router]);
 
-      const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setLoading(true);
+  setError('');
 
-    try {
-      // Let NextAuth handle everything with redirect: true
-      // This will redirect on success, or throw an error on failure
-      await signIn('credentials', {
-        email,
-        password,
-        callbackUrl: '/dashboard/store',
-        redirect: true,
-      });
-      
-      // If signIn succeeds, we won't reach here (page will redirect)
-      // If signIn fails, it will throw an error
-      
-    } catch (err: any) {
-      // Handle errors
-      console.error('Sign in error:', err);
-      
-      if (err?.message?.includes('EmailNotVerified')) {
-        setError('Please verify your email before signing in.');
-      } else if (err?.message?.includes('CredentialsSignin')) {
-        setError('Invalid email or password');
-      } else {
-        setError('An error occurred. Please try again.');
-      }
-    } finally {
-      setLoading(false);
+  try {
+    // Use the simple sign-in endpoint
+    const response = await fetch('/api/auth/simple-signin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+
+    const data = await response.json();
+    
+    if (response.ok) {
+      // Redirect to dashboard
+      window.location.href = '/dashboard/store';
+    } else {
+      setError(data.error || 'Authentication failed');
     }
-  };
+  } catch (err: any) {
+    console.error('Sign in error:', err);
+    setError('An error occurred. Please try again.');
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
