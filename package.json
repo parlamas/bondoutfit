@@ -27,7 +27,6 @@
     "zod": "^4.2.1"
   },
   "devDependencies": {
-    "@types/bcrypt": "^6.0.0",
     "@types/bcryptjs": "^2.4.6",
     "@types/next-auth": "^3.13.0",
     "@types/node": "^20",
@@ -35,7 +34,6 @@
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "autoprefixer": "^10.4.20",
-    "bcrypt": "^6.0.0",
     "eslint": "^8",
     "eslint-config-next": "14.2.35",
     "postcss": "^8.4.41",

@@ -2,9 +2,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { v2 as cloudinary } from 'cloudinary';
+import { v2 as cloudinary, UploadApiResponse, UploadApiErrorResponse } from 'cloudinary';
 import { prisma } from '@/lib/prisma';
-import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions';
+import { authOptions } from '@/lib/auth';
 
 // Configure Cloudinary
 if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
@@ -47,15 +47,15 @@ export async function POST(req: NextRequest) {
     });
     
     // Upload to Cloudinary
-    const uploadResult = await new Promise<any>((resolve, reject) => {
+    const uploadResult = await new Promise<UploadApiResponse>((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
         {
           folder: `stores/${session.user?.email}/${type}`,
           resource_type: 'image',
         },
-        (error, result) => {
+        (error: UploadApiErrorResponse | undefined, result: UploadApiResponse | undefined) => {
           if (error) reject(error);
-          else resolve(result);
+          else resolve(result!);
         }
       );
       uploadStream.end(buffer);

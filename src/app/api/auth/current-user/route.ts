@@ -4,6 +4,8 @@ import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+// Add this at the top or bottom of the file
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {

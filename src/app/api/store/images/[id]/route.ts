@@ -4,7 +4,18 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { prisma } from '@/lib/prisma';
 import { v2 as cloudinary } from 'cloudinary';
-import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions';
+import { authOptions } from '@/lib/auth'; // CHANGED
+
+// Configure Cloudinary
+if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
+  console.warn('Cloudinary environment variables not set');
+}
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || '',
+  api_key: process.env.CLOUDINARY_API_KEY || '',
+  api_secret: process.env.CLOUDINARY_API_SECRET || '',
+});
 
 export async function PATCH(
   req: NextRequest,
@@ -19,12 +30,34 @@ export async function PATCH(
   try {
     const { description } = await req.json();
     
-    const image = await prisma.storeImage.update({
-      where: { id: params.id },
+    // Find the store for this user
+    const store = await prisma.store.findFirst({
+      where: {
+        OR: [
+          { email: session.user.email },
+          { manager: { email: session.user.email } }
+        ]
+      },
+    });
+
+    if (!store) {
+      return NextResponse.json({ error: 'Store not found' }, { status: 404 });
+    }
+
+    // Update only if image belongs to user's store
+    const image = await prisma.storeImage.updateMany({
+      where: { 
+        id: params.id,
+        storeId: store.id // Security check
+      },
       data: { description },
     });
 
-    return NextResponse.json(image);
+    if (image.count === 0) {
+      return NextResponse.json({ error: 'Image not found' }, { status: 404 });
+    }
+
+    return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Failed to update image:', error);
     return NextResponse.json(
@@ -45,11 +78,33 @@ export async function DELETE(
   }
 
   try {
-    // Find and delete from Cloudinary first
-    const image = await prisma.storeImage.findUnique({
-      where: { id: params.id },
+    // Find the store for this user
+    const store = await prisma.store.findFirst({
+      where: {
+        OR: [
+          { email: session.user.email },
+          { manager: { email: session.user.email } }
+        ]
+      },
     });
 
+    if (!store) {
+      return NextResponse.json({ error: 'Store not found' }, { status: 404 });
+    }
+
+    // Find the image (check ownership)
+    const image = await prisma.storeImage.findFirst({
+      where: { 
+        id: params.id,
+        storeId: store.id // Security check
+      },
+    });
+
+    if (!image) {
+      return NextResponse.json({ error: 'Image not found' }, { status: 404 });
+    }
+
+    // Delete from Cloudinary first
     if (image?.imageUrl) {
       const publicId = image.imageUrl.split('/').pop()?.split('.')[0];
       if (publicId) {
