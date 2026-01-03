@@ -31,45 +31,35 @@ export default function StoreSignInPage() {
       });
   }, [router]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+      const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
     try {
-      // Add callbackUrl for proper redirect handling
-      const result = await signIn('credentials', {
+      // Let NextAuth handle everything with redirect: true
+      // This will redirect on success, or throw an error on failure
+      await signIn('credentials', {
         email,
         password,
-        callbackUrl: '/dashboard/store', // Added callbackUrl
-        redirect: false,
+        callbackUrl: '/dashboard/store',
+        redirect: true,
       });
-
-      if (result?.error) {
-        if (result.error === 'EmailNotVerified') {
-          setError('Please verify your email before signing in.');
-        } else {
-          setError('Invalid email or password');
-        }
-      } else {
-        // Success! NextAuth has set the session
-        
-        // Check if we're in production
-        const isProduction = process.env.NODE_ENV === 'production';
-        
-        if (isProduction) {
-          // For production: Force a full page reload to ensure session cookies are set
-          // This is a common workaround for NextAuth in production
-          window.location.href = '/dashboard/store';
-        } else {
-          // For development: Use router and refresh
-          router.push('/dashboard/store');
-          router.refresh(); // Refresh to get updated session
-        }
-      }
-    } catch (err) {
+      
+      // If signIn succeeds, we won't reach here (page will redirect)
+      // If signIn fails, it will throw an error
+      
+    } catch (err: any) {
+      // Handle errors
       console.error('Sign in error:', err);
-      setError('An error occurred. Please try again.');
+      
+      if (err?.message?.includes('EmailNotVerified')) {
+        setError('Please verify your email before signing in.');
+      } else if (err?.message?.includes('CredentialsSignin')) {
+        setError('Invalid email or password');
+      } else {
+        setError('An error occurred. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
