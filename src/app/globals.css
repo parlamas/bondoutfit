@@ -109,3 +109,14 @@ body {
     border-radius: 0.75rem;
   }
 }
+
+
+/* =========================
+   MOBILE TOP BAR OFFSET
+========================= */
+
+@media (max-width: 768px) {
+  body {
+    padding-top: 56px; /* height of mobile top bar */
+  }
+}
