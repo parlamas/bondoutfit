@@ -3,6 +3,11 @@
 import Image from "next/image";
 import { headers } from "next/headers";
 
+type StoreImage = {
+  id: string;
+  imageUrl: string;
+};
+
 type StoreItemImage = {
   id: string;
   imageUrl: string;
@@ -20,7 +25,11 @@ type StoreItem = {
 type Store = {
   id: string;
   name: string;
+  email: string | null;
   phoneNumber: string | null;
+  acceptedCurrencies: string[];
+  openingHours: any | null;
+
   country: string;
   city: string;
   state: string;
@@ -28,6 +37,11 @@ type Store = {
   street: string;
   streetNumber: string;
   floor: string | null;
+
+  logoUrl: string | null;
+  storefrontUrl: string | null;
+  images: StoreImage[];
+
   items: StoreItem[];
 };
 
@@ -62,28 +76,90 @@ export default async function StorePage({
   const store = await getStore(params.storeId);
 
   return (
-    <div className="max-w-5xl mx-auto p-6 space-y-10">
-      {/* STORE INFO */}
-      <section className="space-y-1">
-        <h1 className="text-3xl font-semibold">{store.name}</h1>
+    <div className="max-w-5xl mx-auto p-6 space-y-12">
 
-        <div className="text-gray-700">
-          {store.street} {store.streetNumber}
-          {store.floor ? `, ${store.floor}` : ""}
-        </div>
-
-        <div className="text-gray-700">
-          {store.zip} {store.city}, {store.state}
-        </div>
-
-        <div className="text-gray-700">{store.country}</div>
-
-        {store.phoneNumber && (
-          <div className="text-gray-700">
-            Phone: {store.phoneNumber}
-          </div>
+      {/* HEADER */}
+      <section className="flex items-start gap-6">
+        {store.logoUrl && (
+          <Image
+            src={store.logoUrl}
+            alt={`${store.name} logo`}
+            width={120}
+            height={120}
+            className="rounded"
+          />
         )}
+
+        <div className="space-y-1">
+          <h1 className="text-3xl font-semibold">{store.name}</h1>
+
+          {store.email && (
+            <div className="text-gray-700">
+              Email: {store.email}
+            </div>
+          )}
+
+          {store.phoneNumber && (
+            <div className="text-gray-700">
+              Phone: {store.phoneNumber}
+            </div>
+          )}
+
+          <div className="text-gray-700">
+            {store.street} {store.streetNumber}
+            {store.floor ? `, ${store.floor}` : ""}
+          </div>
+
+          <div className="text-gray-700">
+            {store.zip} {store.city}, {store.state}
+          </div>
+
+          <div className="text-gray-700">{store.country}</div>
+
+          <div className="text-gray-700">
+            Accepted currencies:{" "}
+            {store.acceptedCurrencies.join(", ")}
+          </div>
+
+          {store.openingHours && (
+            <div className="text-blue-600 underline cursor-pointer">
+              View opening hours
+            </div>
+          )}
+        </div>
       </section>
+
+      {/* STOREFRONT IMAGE */}
+      {store.storefrontUrl && (
+        <section>
+          <Image
+            src={store.storefrontUrl}
+            alt="Storefront"
+            width={1200}
+            height={500}
+            className="rounded-lg object-cover"
+          />
+        </section>
+      )}
+
+      {/* GALLERY */}
+      {store.images.length > 0 && (
+        <section>
+          <h2 className="text-2xl font-semibold mb-4">Gallery</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {store.images.map((img) => (
+              <Image
+                key={img.id}
+                src={img.imageUrl}
+                alt="Gallery image"
+                width={300}
+                height={300}
+                className="rounded object-cover"
+              />
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* ITEMS */}
       <section>
