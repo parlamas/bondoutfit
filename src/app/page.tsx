@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Users, Shield } from 'lucide-react';
+import MobileMenu from "./components/MobileMenu";
 
 function StoreSelector() {
   const [stores, setStores] = useState<
@@ -160,9 +161,11 @@ export default function HomePage() {
   }, [role, router]);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {role !== "STORE_MANAGER" && <StoreSelector />}
-      <IntroSection />
-    </div>
-  );
+  <div className="min-h-screen bg-gray-50 pt-14 md:pt-0">
+    <MobileMenu />
+    {role !== "STORE_MANAGER" && <StoreSelector />}
+    <IntroSection />
+  </div>
+);
+
 }

@@ -127,9 +127,30 @@ export default async function StorePage({
       Opening hours
     </summary>
 
-    <pre className="mt-2 text-sm bg-gray-50 border rounded-md p-3 overflow-x-auto">
-      {JSON.stringify(store.openingHours, null, 2)}
-    </pre>
+    <div className="mt-3 bg-gray-50 border rounded-md divide-y text-sm">
+  {(store.openingHours as {
+    day: string;
+    open: string;
+    close: string;
+    closed: boolean;
+  }[]).map((d) => (
+    <div
+      key={d.day}
+      className="flex justify-between px-4 py-2"
+    >
+      <span className="font-medium text-gray-800">
+        {d.day}
+      </span>
+
+      <span className="text-gray-700">
+        {d.closed
+          ? "Closed"
+          : `${d.open} – ${d.close}`}
+      </span>
+    </div>
+  ))}
+</div>
+
   </details>
 )}
 
