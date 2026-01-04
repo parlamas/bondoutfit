@@ -17,9 +17,9 @@ export async function GET() {
 
   const userId = (session.user as any).id;
 
-  const store = await prisma.store.findFirst({
-    where: { managerId: userId },
-    select: {
+  const store = await prisma.store.findUnique({
+  where: { managerId: userId },
+  select: {
       id: true,
       name: true,
       email: true,
@@ -61,9 +61,9 @@ export async function PATCH(request: Request) {
     const body = await request.json();
     
     // Find the store
-    const store = await prisma.store.findFirst({
-      where: { managerId: userId },
-    });
+    const store = await prisma.store.findUnique({
+  where: { managerId: userId },
+});
 
     if (!store) {
       return NextResponse.json(
@@ -76,15 +76,9 @@ export async function PATCH(request: Request) {
     const updatedStore = await prisma.store.update({
       where: { id: store.id },
       data: {
-        name: body.name,
-        description: body.description,
-        website: body.website,
-        phoneCountry: body.phoneCountry,
-        phoneArea: body.phoneArea,
-        phoneNumber: body.phoneNumber,
-        categories: body.categories,
-        openingHours: body.openingHours,
-      },
+  acceptedCurrencies: body.acceptedCurrencies,
+},
+
     });
 
     return NextResponse.json(updatedStore);
