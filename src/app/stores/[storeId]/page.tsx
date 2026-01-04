@@ -1,6 +1,7 @@
 // src/app/stores/[storeId]/page.tsx
 
 import Image from "next/image";
+import { headers } from "next/headers";
 
 type StoreItemImage = {
   id: string;
@@ -19,7 +20,7 @@ type StoreItem = {
 type Store = {
   id: string;
   name: string;
-  phoneNumber: string;
+  phoneNumber: string | null;
   country: string;
   city: string;
   state: string;
@@ -31,8 +32,18 @@ type Store = {
 };
 
 async function getStore(storeId: string): Promise<Store> {
+  const headersList = headers();
+  const host = headersList.get("host");
+
+  if (!host) {
+    throw new Error("Host header not found");
+  }
+
+  const protocol =
+    process.env.NODE_ENV === "development" ? "http" : "https";
+
   const res = await fetch(
-    `/api/stores/${storeId}/public`,
+    `${protocol}://${host}/api/stores/${storeId}/public`,
     { cache: "no-store" }
   );
 
@@ -42,7 +53,6 @@ async function getStore(storeId: string): Promise<Store> {
 
   return res.json();
 }
-
 
 export default async function StorePage({
   params,
@@ -68,9 +78,11 @@ export default async function StorePage({
 
         <div className="text-gray-700">{store.country}</div>
 
-        <div className="text-gray-700">
-          Phone: {store.phoneNumber}
-        </div>
+        {store.phoneNumber && (
+          <div className="text-gray-700">
+            Phone: {store.phoneNumber}
+          </div>
+        )}
       </section>
 
       {/* ITEMS */}
@@ -81,12 +93,13 @@ export default async function StorePage({
           <p className="text-gray-600">No items listed.</p>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {store.items.map(item => (
+            {store.items.map((item) => (
               <div
                 key={item.id}
                 className="border rounded-lg p-4 bg-white space-y-2"
               >
                 <div className="font-medium">{item.name}</div>
+
                 <div className="text-sm text-gray-600">
                   {item.category}
                 </div>
@@ -105,7 +118,7 @@ export default async function StorePage({
 
                 {item.images.length > 0 && (
                   <div className="flex gap-2 flex-wrap mt-2">
-                    {item.images.map(img => (
+                    {item.images.map((img) => (
                       <Image
                         key={img.id}
                         src={img.imageUrl}
