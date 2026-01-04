@@ -15,21 +15,7 @@ export default function StoreSignInPage() {
   const [loading, setLoading] = useState(false);
 
   // Check if user is already signed in as store manager
-  useEffect(() => {
-    fetch('/api/auth/session')
-      .then(res => res.json())
-      .then(session => {
-        if (session.user?.role === 'STORE_MANAGER') {
-          router.push('/dashboard/store');
-        } else if (session.user?.role === 'CUSTOMER') {
-          // If customer is logged in, sign them out
-          signOut({ redirect: false });
-        }
-      })
-      .catch(() => {
-        // Ignore errors, just means no session
-      });
-  }, [router]);
+  
 
 const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
@@ -38,20 +24,18 @@ const handleSubmit = async (e: React.FormEvent) => {
 
   try {
     // Use the simple sign-in endpoint
-    const response = await fetch('/api/auth/simple-signin', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    });
+    const result = await signIn('credentials', {
+  email,
+  password,
+  redirect: false,
+});
 
-    const data = await response.json();
-    
-    if (response.ok) {
-      // Redirect to dashboard
-      window.location.href = '/dashboard/store';
-    } else {
-      setError(data.error || 'Authentication failed');
-    }
+if (result?.error) {
+  setError('Invalid email or password');
+} else {
+  router.push('/dashboard/store');
+}
+
   } catch (err: any) {
     console.error('Sign in error:', err);
     setError('An error occurred. Please try again.');

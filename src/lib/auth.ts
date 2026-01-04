@@ -10,10 +10,6 @@ export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
   
   // Important: Set the base URL for production
-  ...(process.env.NEXTAUTH_URL && { 
-    basePath: "/api/auth",
-    baseUrl: process.env.NEXTAUTH_URL 
-  }),
 
   providers: [
     Credentials({
@@ -71,32 +67,12 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
 
-    async redirect({ url, baseUrl }) {
-      // Fix: Handle both development and production URLs
-      const allowedBaseUrl = process.env.NEXTAUTH_URL || baseUrl;
-      
-      // Allow relative URLs
-      if (url.startsWith("/")) return `${allowedBaseUrl}${url}`;
-      
-      // Allow same-origin URLs
-      try {
-        const urlObj = new URL(url);
-        if (urlObj.origin === allowedBaseUrl) return url;
-      } catch {
-        // Invalid URL, fallback to baseUrl
-      }
-      
-      // Default redirect to dashboard based on role
-      return `${allowedBaseUrl}/dashboard`;
-    },
   },
 
   pages: {
-    // IMPORTANT: This needs to match your actual sign-in page
-    signIn: "/auth/store/signin", // Changed from "/auth/signin"
-    error: "/auth/store/signin", // Changed from "/auth/signin"
-  },
-
+  signIn: "/auth/customer/signin",
+  error: "/auth/customer/signin",
+},
   session: {
     strategy: "jwt",
     maxAge: 30 * 24 * 60 * 60, // 30 days

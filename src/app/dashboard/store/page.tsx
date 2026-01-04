@@ -2,7 +2,6 @@
 
 'use client';
 
-import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { 
@@ -30,7 +29,6 @@ interface StoreData {
 }
 
 export default function StoreDashboard() {
-  const { data: session, status } = useSession();
   const router = useRouter();
   const [storeData, setStoreData] = useState<StoreData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -41,12 +39,9 @@ export default function StoreDashboard() {
   const [currencyError, setCurrencyError] = useState('');
 
   useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/auth/store/signin');
-    } else if (status === 'authenticated') {
-      fetchStoreData();
-    }
-  }, [status, router]);
+    fetchStoreData();
+  }, []);
+
 
   const fetchStoreData = async () => {
     try {
@@ -126,17 +121,12 @@ export default function StoreDashboard() {
     }
   };
 
-  if (status === 'loading' || loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
-      </div>
-    );
-  }
+  if (loading) { return ( <div className="min-h-screen bg-gray-50 flex items-center justify-center"> <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div> </div> ); }
 
-  if (!session || !storeData) {
-    return null;
-  }
+  if (!storeData) {
+  return null;
+}
+
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -149,7 +139,7 @@ export default function StoreDashboard() {
               <p className="text-gray-600 mt-1">Manage your store, visits, and discounts</p>
             </div>
             <div className="text-sm text-gray-600">
-              Welcome, <span className="font-semibold">{session.user?.name}</span>
+Welcome
             </div>
           </div>
         </div>
@@ -332,7 +322,7 @@ export default function StoreDashboard() {
                   <p className="text-gray-600">Contact</p>
                   <p className="text-gray-900 font-medium">
                     {storeData.phoneCountry} {storeData.phoneArea} {storeData.phoneNumber}<br />
-                    {storeData.email || session.user?.email}
+                    {storeData.email}
                   </p>
                 </div>
               </div>

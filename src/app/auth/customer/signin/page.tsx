@@ -33,18 +33,7 @@ export default function CustomerSignInPage() {
           setError('Invalid email or password');
         }
       } else {
-        // Fetch session to check role
-        const sessionRes = await fetch('/api/auth/session');
-        const session = await sessionRes.json();
-        
-        // Check if user is a CUSTOMER
-        if (session.user?.role === 'CUSTOMER') {
-          router.push('/dashboard/customer');
-        } else {
-          // User is STORE_MANAGER - sign them out and show error
-          await signOut({ redirect: false });
-          setError('This is a customer sign in page. Store managers should use the Store Sign In page.');
-        }
+        router.push('/dashboard/customer');
       }
     } catch (err) {
       setError('An error occurred. Please try again.');
