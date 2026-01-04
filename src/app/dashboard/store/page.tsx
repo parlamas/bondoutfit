@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { 
   Building2, Calendar, Tag, Package, Image, BarChart, 
-  Users, Clock, Settings, Bell, TrendingUp, DollarSign, Edit,
+  Users, Clock, Settings, Bell, TrendingUp, Edit,
   X, Plus
 } from 'lucide-react';
 
@@ -167,10 +167,9 @@ Welcome
               {/* Accepted Currencies Section */}
               <div className="mb-6 p-4 bg-gray-50 rounded-lg">
                 <div className="flex items-center justify-between mb-3">
-                  <h3 className="font-semibold text-gray-800 flex items-center gap-2">
-                    <DollarSign className="h-5 w-5" />
-                    Accepted Currencies
-                  </h3>
+                  <h3 className="font-semibold text-gray-800">
+  Accepted Currencies
+</h3>
                   <button
                     onClick={() => {
                       setEditingCurrencies(!editingCurrencies);
@@ -233,18 +232,18 @@ Welcome
                         <div className="flex flex-wrap gap-2">
                           {tempCurrencies.map((currency) => (
                             <div
-                              key={currency}
-                              className="bg-blue-100 text-blue-800 px-3 py-2 rounded-lg flex items-center gap-2"
-                            >
-                              <DollarSign className="h-4 w-4" />
-                              <span className="font-medium">{currency}</span>
-                              <button
-                                onClick={() => removeCurrency(currency)}
-                                className="text-blue-600 hover:text-blue-800 ml-2"
-                              >
-                                <X className="h-4 w-4" />
-                              </button>
-                            </div>
+  key={currency}
+  className="bg-blue-100 text-blue-800 px-3 py-2 rounded-lg flex items-center gap-2"
+>
+  <span className="font-medium">{currency}</span>
+  <button
+    onClick={() => removeCurrency(currency)}
+    className="text-blue-600 hover:text-blue-800 ml-2"
+  >
+    <X className="h-4 w-4" />
+  </button>
+</div>
+
                           ))}
                         </div>
                       ) : (
@@ -278,12 +277,12 @@ Welcome
                     {storeData.acceptedCurrencies?.length > 0 ? (
                       storeData.acceptedCurrencies.map((currency) => (
                         <span
-                          key={currency}
-                          className="bg-green-100 text-green-800 px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-2"
-                        >
-                          <DollarSign className="h-4 w-4" />
-                          {currency}
-                        </span>
+  key={currency}
+  className="bg-green-100 text-green-800 px-3 py-2 rounded-lg text-sm font-medium"
+>
+  {currency}
+</span>
+
                       ))
                     ) : (
                       <p className="text-gray-500 italic py-2">No currencies set yet</p>
