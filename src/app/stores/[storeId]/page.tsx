@@ -32,7 +32,7 @@ type Store = {
 
 async function getStore(storeId: string): Promise<Store> {
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_APP_URL}/api/stores/${storeId}`,
+    `/api/stores/${storeId}/public`,
     { cache: "no-store" }
   );
 
@@ -42,6 +42,7 @@ async function getStore(storeId: string): Promise<Store> {
 
   return res.json();
 }
+
 
 export default async function StorePage({
   params,
