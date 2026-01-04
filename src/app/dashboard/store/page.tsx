@@ -199,7 +199,6 @@ Welcome
                       setEditingCurrencies(!editingCurrencies);
                       setNewCurrency('');
                       setCurrencyError('');
-                      setSuccessMessage('');
                       if (!editingCurrencies) {
                         setTempCurrencies(storeData.acceptedCurrencies || []);
                       }
