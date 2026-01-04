@@ -21,9 +21,10 @@ async function getStore(storeId: string): Promise<Store> {
     process.env.NODE_ENV === "development" ? "http" : "https";
 
   const res = await fetch(
-    `${protocol}://${host}/api/stores/${storeId}/public`,
-    { cache: "no-store" }
-  );
+  `${protocol}://${host}/api/stores/${storeId}/schedule`,
+  { cache: "no-store" }
+);
+
 
   if (!res.ok) {
     throw new Error("Failed to load store");
@@ -40,12 +41,12 @@ export default async function SchedulePage({
   const store = await getStore(params.storeId);
 
   return (
-    <div className="max-w-3xl mx-auto p-6 space-y-6">
-      <h1 className="text-3xl font-semibold">
+    <div className="max-w-3xl mx-auto px-4 py-6 space-y-5">
+      <h1 className="text-2xl sm:text-3xl font-semibold">
         Schedule a Visit
       </h1>
 
-      <div className="bg-white rounded-lg shadow p-4 space-y-1">
+      <div className="bg-white rounded-lg shadow p-3 space-y-1">
         <div className="font-medium text-lg">
           {store.name}
         </div>
