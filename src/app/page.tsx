@@ -98,7 +98,7 @@ function StoreSelector() {
         {/* CTA */}
         {storeId && (
           <button
-            onClick={() => router.push(`/schedule/${storeId}`)}
+            onClick={() => router.push(`/stores/${storeId}`)}
             className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition"
           >
             View Store & Schedule Visit
