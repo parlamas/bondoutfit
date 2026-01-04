@@ -3,7 +3,8 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
+
 import { 
   Building2, Calendar, Tag, Package, Image, BarChart, 
   Users, Clock, Settings, Bell, TrendingUp, Edit,
@@ -37,10 +38,22 @@ export default function StoreDashboard() {
   const [saving, setSaving] = useState(false);
   const [newCurrency, setNewCurrency] = useState('');
   const [currencyError, setCurrencyError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+  const successTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
 
   useEffect(() => {
     fetchStoreData();
   }, []);
+
+  useEffect(() => {
+  return () => {
+    if (successTimeoutRef.current) {
+      clearTimeout(successTimeoutRef.current);
+    }
+  };
+}, []);
+
 
 
   const fetchStoreData = async () => {
@@ -60,7 +73,7 @@ export default function StoreDashboard() {
 
   const saveCurrencies = async () => {
     if (!storeData) return;
-    
+    setSuccessMessage('');
     setSaving(true);
     try {
       const response = await fetch('/api/store/profile', {
@@ -70,11 +83,22 @@ export default function StoreDashboard() {
       });
 
       if (response.ok) {
-        const updatedData = await response.json();
-        setStoreData(updatedData);
-        setEditingCurrencies(false);
-        setCurrencyError('');
-      }
+  const updatedData = await response.json();
+  setStoreData(updatedData);
+  setEditingCurrencies(false);
+  setCurrencyError('');
+
+  if (successTimeoutRef.current) {
+    clearTimeout(successTimeoutRef.current);
+  }
+
+  setSuccessMessage('Currencies saved');
+  successTimeoutRef.current = setTimeout(() => {
+    setSuccessMessage('');
+  }, 3000);
+}
+
+
     } catch (error) {
       console.error('Failed to save currencies:', error);
     } finally {
@@ -175,6 +199,7 @@ Welcome
                       setEditingCurrencies(!editingCurrencies);
                       setNewCurrency('');
                       setCurrencyError('');
+                      setSuccessMessage('');
                       if (!editingCurrencies) {
                         setTempCurrencies(storeData.acceptedCurrencies || []);
                       }
@@ -185,6 +210,13 @@ Welcome
                     {editingCurrencies ? 'Cancel' : 'Edit'}
                   </button>
                 </div>
+
+                {successMessage && (
+  <p className="text-green-600 text-sm mt-2">
+    {successMessage}
+  </p>
+)}
+
 
                 {editingCurrencies ? (
                   <div className="space-y-4">
