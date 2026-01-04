@@ -122,10 +122,17 @@ export default async function StorePage({
           </div>
 
           {store.openingHours && (
-            <div className="text-blue-600 underline cursor-pointer">
-              View opening hours
-            </div>
-          )}
+  <details className="mt-2">
+    <summary className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border border-gray-300 text-sm font-medium text-gray-800 cursor-pointer hover:bg-gray-100 transition">
+      Opening hours
+    </summary>
+
+    <pre className="mt-2 text-sm bg-gray-50 border rounded-md p-3 overflow-x-auto">
+      {JSON.stringify(store.openingHours, null, 2)}
+    </pre>
+  </details>
+)}
+
         </div>
       </section>
 

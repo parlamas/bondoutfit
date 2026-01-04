@@ -33,8 +33,8 @@ function StoreSelector() {
   );
 
   return (
-    <section className="max-w-4xl mx-auto px-6 py-10">
-      <div className="bg-white rounded-xl shadow-md p-6 space-y-6">
+    <section className="max-w-4xl mx-auto px-4 py-8 sm:px-6 sm:py-10">
+      <div className="bg-white rounded-xl shadow-md p-4 sm:p-6 space-y-4 sm:space-y-6">
         <h2 className="text-xl font-semibold text-gray-900">
           Schedule a Visit & Get a Discount
         </h2>
@@ -99,7 +99,7 @@ function StoreSelector() {
         {storeId && (
           <button
             onClick={() => router.push(`/stores/${storeId}`)}
-            className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition"
+            className="w-full bg-blue-600 text-white py-3 rounded-lg text-base font-medium hover:bg-blue-700 transition"
           >
             View Store & Schedule Visit
           </button>
@@ -111,7 +111,7 @@ function StoreSelector() {
 
 function IntroSection() {
   return (
-    <section className="max-w-5xl mx-auto px-6 py-12 grid grid-cols-1 md:grid-cols-2 gap-10">
+    <section className="max-w-5xl mx-auto px-4 py-10 grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-10">
       {/* Customers */}
       <div className="bg-white rounded-xl shadow p-6">
         <div className="flex items-center gap-3 mb-4">
