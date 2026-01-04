@@ -18,7 +18,7 @@ export default function RoleBasedNavbar() {
     <header className="w-full border-b bg-white">
   <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
   {/* LEFT */}
-  <div className="flex items-center gap-3">
+  <div className="hidden md:flex items-center gap-3">
     <Link
       href="/"
       className="rounded-md p-2 text-gray-800 hover:bg-gray-100"
