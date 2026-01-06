@@ -590,7 +590,7 @@ export default function StoreProfilePage() {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Categories
+                      Store Type
                     </label>
                     <div className="flex flex-wrap gap-2">
                       {storeProfile.categories?.map((category, index) => (
