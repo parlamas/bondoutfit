@@ -328,8 +328,8 @@ export default function StoreSignUpPage() {
               </div>
 
               <div>
-                <label htmlFor="phoneNumber" className="block text-xs font-medium text-gray-700">
-                  Store Categories (Select all that apply)
+                <label htmlFor="categories" className="block text-xs font-medium text-gray-700">
+                  Store Type
                 </label>
                 <div className="space-y-2">
                   <input
