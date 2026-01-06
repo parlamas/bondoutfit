@@ -330,7 +330,7 @@ export default function StoreDashboard() {
 
               {/* Store Categories */}
               <div className="mb-4">
-                <h3 className="font-semibold text-gray-800 mb-2">Store Categories</h3>
+                <h3 className="font-semibold text-gray-800 mb-2">Store Type</h3>
                 <div className="flex flex-wrap gap-2">
                   {storeData.categories?.map((category) => (
                     <span
