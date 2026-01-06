@@ -1,4 +1,5 @@
 //src/app/dashboard/store/profile/page.tsx
+
 'use client';
 
 import { useSession } from 'next-auth/react';
@@ -212,7 +213,7 @@ export default function StoreProfilePage() {
 
 
     if (type === 'gallery') {
-      const description = prompt('Enter a description for this image:');
+      const description = '';
       handleImageUpload(file, type, description || '');
     } else {
       handleImageUpload(file, type);
@@ -249,28 +250,29 @@ export default function StoreProfilePage() {
   const deleteImage = async (imageId: string, type: 'logo' | 'storefront' | 'gallery') => {
     if (!storeProfile) return;
 
-    if (!confirm('Are you sure you want to delete this image?')) return;
-
     try {
       const response = await fetch(`/api/store/images/${imageId}`, {
         method: 'DELETE',
       });
 
       if (response.ok) {
-        if (type === 'logo') {
-          setStoreProfile({ ...storeProfile, logoUrl: undefined });
-        } else if (type === 'storefront') {
-          setStoreProfile({ ...storeProfile, storefrontUrl: undefined });
-        } else {
-          setStoreProfile({
-            ...storeProfile,
-            galleryImages: storeProfile.galleryImages.filter(img => img.id !== imageId)
-          });
-        }
-      }
+  if (type === 'logo') {
+    setStoreProfile({ ...storeProfile, logoUrl: undefined });
+  } else if (type === 'storefront') {
+    setStoreProfile({ ...storeProfile, storefrontUrl: undefined });
+  } else {
+    setStoreProfile({
+      ...storeProfile,
+      galleryImages: storeProfile.galleryImages.filter(img => img.id !== imageId)
+    });
+  }
+
+  setInlineMessage({ type: 'success', text: 'Image removed.' });
+}
+
     } catch (error) {
-      console.error('Failed to delete image:', error);
-    }
+  setInlineMessage({ type: 'error', text: 'Failed to remove image.' });
+}
   };
 
   const reorderGalleryImage = async (imageId: string, newOrder: number) => {
