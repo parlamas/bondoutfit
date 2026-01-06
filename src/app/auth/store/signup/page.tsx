@@ -3,17 +3,15 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 export default function StoreSignUpPage() {
-  const router = useRouter();
   
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     name: '',
-    phoneCountry: '+1',
+    phoneCountry: '',
     phoneArea: '',
     phoneNumber: '',
     city: '',
@@ -60,15 +58,6 @@ export default function StoreSignUpPage() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleCategoryChange = (category: string) => {
-    setFormData(prev => ({
-      ...prev,
-      categories: prev.categories.includes(category)
-        ? prev.categories.filter(c => c !== category)
-        : [...prev.categories, category]
-    }));
   };
 
   if (success) {
@@ -119,7 +108,7 @@ export default function StoreSignUpPage() {
               <h3 className="text-lg font-medium text-gray-900">Personal Information</h3>
               
               <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="name" className="block text-xs font-medium text-gray-700">
                   Full Name *
                 </label>
                 <input
@@ -129,13 +118,13 @@ export default function StoreSignUpPage() {
                   required
                   value={formData.name}
                   onChange={handleChange}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  className="mt-1 block w-full text-sm border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                   placeholder="John Doe"
                 />
               </div>
 
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="email" className="block text-xs font-medium text-gray-700">
                   Email Address *
                 </label>
                 <input
@@ -145,13 +134,13 @@ export default function StoreSignUpPage() {
                   required
                   value={formData.email}
                   onChange={handleChange}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  className="mt-1 block w-full text-sm border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                   placeholder="you@example.com"
                 />
               </div>
 
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="phoneNumber" className="block text-xs font-medium text-gray-700">
                   Password *
                 </label>
                 <input
@@ -161,37 +150,32 @@ export default function StoreSignUpPage() {
                   required
                   value={formData.password}
                   onChange={handleChange}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  className="mt-1 block w-full text-sm border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                   placeholder="••••••••"
                 />
               </div>
 
               {/* Phone Fields */}
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label htmlFor="phoneCountry" className="block text-sm font-medium text-gray-700">
+                  <label htmlFor="phoneNumber" className="block text-xs font-medium text-gray-700">
                     Country Code *
                   </label>
-                  <select
-                    id="phoneCountry"
-                    name="phoneCountry"
-                    required
-                    value={formData.phoneCountry}
-                    onChange={handleChange}
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="+1">USA (+1)</option>
-                    <option value="+44">UK (+44)</option>
-                    <option value="+33">France (+33)</option>
-                    <option value="+49">Germany (+49)</option>
-                    <option value="+39">Italy (+39)</option>
-                    <option value="+34">Spain (+34)</option>
-                    <option value="+31">Netherlands (+31)</option>
-                  </select>
+                  <input
+  id="phoneCountry"
+  name="phoneCountry"
+  type="text"
+  required
+  value={formData.phoneCountry}
+  onChange={handleChange}
+  className="mt-1 block w-full text-sm border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+  placeholder="+1"
+/>
+
                 </div>
 
                 <div>
-                  <label htmlFor="phoneArea" className="block text-sm font-medium text-gray-700">
+                  <label htmlFor="phoneNumber" className="block text-xs font-medium text-gray-700">
                     Area Code *
                   </label>
                   <input
@@ -201,14 +185,14 @@ export default function StoreSignUpPage() {
                     required
                     value={formData.phoneArea}
                     onChange={handleChange}
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    className="mt-1 block w-full text-sm border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                     placeholder="212"
                     maxLength={3}
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700">
+                    <label htmlFor="phoneNumber" className="block text-xs font-medium text-gray-700">
                     Phone Number *
                   </label>
                   <input
@@ -218,15 +202,15 @@ export default function StoreSignUpPage() {
                     required
                     value={formData.phoneNumber}
                     onChange={handleChange}
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    className="mt-1 block w-full text-sm border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                     placeholder="5551234"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label htmlFor="city" className="block text-sm font-medium text-gray-700">
+                  <label htmlFor="phoneNumber" className="block text-xs font-medium text-gray-700">
                     City *
                   </label>
                   <input
@@ -236,13 +220,13 @@ export default function StoreSignUpPage() {
                     required
                     value={formData.city}
                     onChange={handleChange}
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    className="mt-1 block w-full text-sm border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                     placeholder="City"
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="state" className="block text-sm font-medium text-gray-700">
+                  <label htmlFor="phoneNumber" className="block text-xs font-medium text-gray-700">
                     State *
                   </label>
                   <input
@@ -252,13 +236,13 @@ export default function StoreSignUpPage() {
                     required
                     value={formData.state}
                     onChange={handleChange}
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    className="mt-1 block w-full text-sm border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                     placeholder="State"
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="zip" className="block text-sm font-medium text-gray-700">
+                  <label htmlFor="phoneNumber" className="block text-xs font-medium text-gray-700">
                     ZIP *
                   </label>
                   <input
@@ -268,7 +252,7 @@ export default function StoreSignUpPage() {
                     required
                     value={formData.zip}
                     onChange={handleChange}
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    className="mt-1 block w-full text-sm border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                     placeholder="12345"
                   />
                 </div>
@@ -280,7 +264,7 @@ export default function StoreSignUpPage() {
               <h3 className="text-lg font-medium text-gray-900">Store Information</h3>
               
               <div>
-                <label htmlFor="storeName" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="storeName" className="block text-xs font-medium text-gray-700">
                   Store Name *
                 </label>
                 <input
@@ -290,13 +274,13 @@ export default function StoreSignUpPage() {
                   required
                   value={formData.storeName}
                   onChange={handleChange}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  className="mt-1 block w-full text-sm border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                   placeholder="My Store"
                 />
               </div>
 
               <div>
-                <label htmlFor="country" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="country" className="block text-xs font-medium text-gray-700">
                   Country *
                 </label>
                 <input
@@ -306,13 +290,13 @@ export default function StoreSignUpPage() {
                   required
                   value={formData.country}
                   onChange={handleChange}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  className="mt-1 block w-full text-sm border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                   placeholder="Country"
                 />
               </div>
 
               <div>
-                <label htmlFor="street" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="street" className="block text-xs font-medium text-gray-700">
                   Street *
                 </label>
                 <input
@@ -322,13 +306,13 @@ export default function StoreSignUpPage() {
                   required
                   value={formData.street}
                   onChange={handleChange}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  className="mt-1 block w-full text-sm border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                   placeholder="Street Address"
                 />
               </div>
 
               <div>
-                <label htmlFor="streetNumber" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="phoneNumber" className="block text-xs font-medium text-gray-700">
                   Street Number *
                 </label>
                 <input
@@ -338,33 +322,33 @@ export default function StoreSignUpPage() {
                   required
                   value={formData.streetNumber}
                   onChange={handleChange}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  className="mt-1 block w-full text-sm border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                   placeholder="123"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="phoneNumber" className="block text-xs font-medium text-gray-700">
                   Store Categories (Select all that apply)
                 </label>
                 <div className="space-y-2">
-                  {['CLOTHING', 'FOOTWEAR', 'ACCESSORIES'].map((category) => (
-                    <div key={category} className="flex items-center">
-                      <input
-                        type="checkbox"
-                        id={`category-${category}`}
-                        checked={formData.categories.includes(category)}
-                        onChange={() => handleCategoryChange(category)}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                      />
-                      <label
-                        htmlFor={`category-${category}`}
-                        className="ml-2 text-sm text-gray-700"
-                      >
-                        {category.charAt(0) + category.slice(1).toLowerCase()}
-                      </label>
-                    </div>
-                  ))}
+                  <input
+  type="text"
+  name="categories"
+  value={formData.categories.join(', ')}
+  onChange={(e) =>
+    setFormData(prev => ({
+      ...prev,
+      categories: e.target.value
+        .split(',')
+        .map(c => c.trim())
+        .filter(Boolean),
+    }))
+  }
+  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+  placeholder="e.g. footwear, handbags, dresses"
+/>
+
                 </div>
               </div>
             </div>
