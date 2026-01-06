@@ -20,29 +20,38 @@ export async function GET() {
   const store = await prisma.store.findUnique({
   where: { managerId: userId },
   select: {
-      id: true,
-      name: true,
+  id: true,
+  name: true,
+  phoneCountry: true,
+  phoneArea: true,
+  phoneNumber: true,
+  acceptedCurrencies: true,
+  country: true,
+  city: true,
+  state: true,
+  zip: true,
+  street: true,
+  streetNumber: true,
+  floor: true,
+  categories: true,
+  manager: {
+    select: {
       email: true,
-      phoneCountry: true,
-      phoneArea: true,
-      phoneNumber: true,
-      acceptedCurrencies: true,
-      country: true,
-      city: true,
-      state: true,
-      zip: true,
-      street: true,
-      streetNumber: true,
-      floor: true,
-      categories: true,
     },
+  },
+},
+
   });
 
   if (!store) {
     return NextResponse.json(null);
   }
 
-  return NextResponse.json(store);
+  return NextResponse.json({
+  ...store,
+  email: store.manager?.email ?? null,
+});
+
 }
 
 export async function PATCH(request: Request) {
