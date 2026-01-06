@@ -162,9 +162,15 @@ export default function StoreDashboard() {
               <h1 className="text-3xl font-bold text-gray-900">{storeData.name} Dashboard</h1>
               <p className="text-gray-600 mt-1">Manage your store, visits, and discounts</p>
             </div>
-            <div className="text-sm text-gray-600">
-Welcome
-            </div>
+            <div className="text-sm text-gray-600 text-right">
+  <div>Welcome</div>
+  {storeData.email && (
+    <div className="text-xs text-gray-500">
+      {storeData.email}
+    </div>
+  )}
+</div>
+
           </div>
         </div>
       </div>
