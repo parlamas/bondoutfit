@@ -27,8 +27,10 @@ const handleSubmit = async (e: React.FormEvent) => {
     const result = await signIn('credentials', {
   email,
   password,
+  expectedRole: 'STORE_MANAGER',
   redirect: false,
 });
+
 
 if (result?.error) {
   setError('Invalid email or password');

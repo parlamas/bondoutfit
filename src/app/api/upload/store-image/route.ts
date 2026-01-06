@@ -77,50 +77,43 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Store not found' }, { status: 404 });
     }
 
-    if (type === 'logo') {
-      const updatedStore = await prisma.store.update({
-        where: { id: store.id },
-        data: { logoUrl: uploadResult.secure_url },
-      });
-      
-      return NextResponse.json({ 
-        url: uploadResult.secure_url,
-        store: updatedStore 
-      });
-    } else if (type === 'storefront') {
-      const updatedStore = await prisma.store.update({
-        where: { id: store.id },
-        data: { storefrontUrl: uploadResult.secure_url },
-      });
-      
-      return NextResponse.json({ 
-        url: uploadResult.secure_url,
-        store: updatedStore 
-      });
-    } else {
-      // Get current gallery count for order
-      const galleryCount = await prisma.storeImage.count({
-        where: { 
-          storeId: store.id,
-          type: 'GALLERY' 
-        },
-      });
+    const imageType =
+  type === "logo"
+    ? "LOGO"
+    : type === "storefront"
+    ? "STOREFRONT"
+    : "GALLERY";
 
-      const storeImage = await prisma.storeImage.create({
-        data: {
-          imageUrl: uploadResult.secure_url,
-          description: description || '',
-          type: 'GALLERY',
-          order: galleryCount,
-          storeId: store.id,
-        },
-      });
+const existing = await prisma.storeImage.findFirst({
+  where: {
+    storeId: store.id,
+    type: imageType,
+  },
+});
 
-      return NextResponse.json({
-        id: storeImage.id,
-        url: storeImage.imageUrl,
-      });
-    }
+const storeImage = existing
+  ? await prisma.storeImage.update({
+      where: { id: existing.id },
+      data: {
+        imageUrl: uploadResult.secure_url,
+        status: "ACTIVE",
+      },
+    })
+  : await prisma.storeImage.create({
+      data: {
+        storeId: store.id,
+        imageUrl: uploadResult.secure_url,
+        type: imageType,
+        order: 0,
+        status: "ACTIVE",
+      },
+    });
+
+return NextResponse.json({
+  id: storeImage.id,
+  url: storeImage.imageUrl,
+});
+ 
   } catch (error) {
     console.error('Upload failed:', error);
     console.error('Error details:', {

@@ -21,10 +21,12 @@ export default function CustomerSignInPage() {
 
     try {
       const result = await signIn('credentials', {
-        email,
-        password,
-        redirect: false,
-      });
+  email,
+  password,
+  expectedRole: 'CUSTOMER',
+  redirect: false,
+});
+
 
       if (result?.error) {
         if (result.error === 'EmailNotVerified') {
