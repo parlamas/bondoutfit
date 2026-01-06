@@ -196,6 +196,8 @@ model Store {
   orders          Order[]
   analytics       StoreAnalytics[]
   auditLogs       AuditLog[]
+  collections     StoreCollection[]
+
 
   // Analytics
   totalVisits    Int   @default(0)
@@ -790,4 +792,25 @@ model StoreImageCategory {
 
   @@unique([storeId, name])
   @@index([storeId])
+}
+
+
+model StoreCollection {
+  id        String   @id @default(cuid())
+  storeId   String
+  title     String
+  createdAt DateTime @default(now())
+
+  store     Store    @relation(fields: [storeId], references: [id])
+  images    CollectionImage[]
+}
+
+model CollectionImage {
+  id           String   @id @default(cuid())
+  collectionId String
+  url          String
+  description  String
+  order        Int
+
+  collection   StoreCollection @relation(fields: [collectionId], references: [id])
 }

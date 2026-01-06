@@ -29,8 +29,8 @@ interface StoreProfile {
   floor?: string;
   categories: string[];
   acceptedCurrencies: string[];
-  logoUrl?: string;
-  storefrontUrl?: string;
+  logo?: { id: string; url: string };
+  storefront?: { id: string; url: string };
   galleryImages: GalleryImage[];
   website?: string;
   openingHours?: OpeningHours[];
@@ -66,7 +66,10 @@ export default function StoreProfilePage() {
   const [uploadProgress, setUploadProgress] = useState<UploadProgress[]>([]);
   const [editingImageId, setEditingImageId] = useState<string | null>(null);
   const [imageDescription, setImageDescription] = useState('');
-  const [activeTab, setActiveTab] = useState<'info' | 'images' | 'hours'>('info');
+  const [activeTab, setActiveTab] = useState<'info' | 'images' | 'collections' | 'hours'>('info');
+  const [collections, setCollections] = useState<any[]>([]);
+  const [newCollectionTitle, setNewCollectionTitle] = useState('');
+  const [collectionsLoading, setCollectionsLoading] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [inlineMessage, setInlineMessage] = useState<{ type: 'error' | 'success'; text: string } | null>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
@@ -74,23 +77,44 @@ export default function StoreProfilePage() {
   const galleryInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/auth/store/signin');
-    } else if (status === 'authenticated') {
-      fetchStoreProfile();
+  if (status === 'unauthenticated') {
+    router.push('/auth/store/signin');
+  } else if (status === 'authenticated') {
+    fetchStoreProfile();
+    fetchCollections();
+  }
+}, [status, router]);
+
+const fetchCollections = async () => {
+  setCollectionsLoading(true);
+  try {
+    const res = await fetch('/api/store/collections');
+    if (res.ok) {
+      const data = await res.json();
+      setCollections(data);
     }
-  }, [status, router]);
+  } catch (e) {
+    console.error('Failed to load collections');
+  } finally {
+    setCollectionsLoading(false);
+  }
+};
+
 
     const fetchStoreProfile = async () => {
+
     try {
       const response = await fetch('/api/store/profile');
       if (response.ok) {
         const data = await response.json();
         // Ensure galleryImages is always an array
         setStoreProfile({
-          ...data,
-          galleryImages: data.galleryImages || []
-        });
+  ...data,
+  galleryImages: data.galleryImages || [],
+  ...(data.logo && { logo: data.logo }),
+  ...(data.storefront && { storefront: data.storefront }),
+});
+
       }
     } catch (error) {
       console.error('Failed to fetch store profile:', error);
@@ -140,9 +164,17 @@ export default function StoreProfilePage() {
         // Update store profile with new image
         if (storeProfile) {
           if (type === 'logo') {
-            setStoreProfile({ ...storeProfile, logoUrl: result.url });
+            setStoreProfile({
+  ...storeProfile,
+  logo: { id: result.id, url: result.url },
+});
+
           } else if (type === 'storefront') {
-            setStoreProfile({ ...storeProfile, storefrontUrl: result.url });
+            setStoreProfile({
+  ...storeProfile,
+  storefront: { id: result.id, url: result.url },
+});
+
           } else {
             const newGalleryImage: GalleryImage = {
               id: result.id,
@@ -230,7 +262,9 @@ export default function StoreProfilePage() {
       const response = await fetch(`/api/store/images/${imageId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ description }),
+        body: JSON.stringify({
+  description,
+}),
       });
 
       if (response.ok) {
@@ -257,9 +291,9 @@ export default function StoreProfilePage() {
 
       if (response.ok) {
   if (type === 'logo') {
-    setStoreProfile({ ...storeProfile, logoUrl: undefined });
+    setStoreProfile({ ...storeProfile, logo: undefined });
   } else if (type === 'storefront') {
-    setStoreProfile({ ...storeProfile, storefrontUrl: undefined });
+    setStoreProfile({ ...storeProfile, storefront: undefined });
   } else {
     setStoreProfile({
       ...storeProfile,
@@ -398,6 +432,53 @@ export default function StoreProfilePage() {
     }
   };
 
+  const reorderCollectionImages = async (
+  collectionId: string,
+  imageId: string,
+  newOrder: number
+) => {
+  let reorderedImages: { id: string; order: number }[] = [];
+
+  setCollections(prev =>
+    prev.map(col => {
+      if (col.id !== collectionId) return col;
+
+      const images = [...col.images];
+      const fromIndex = images.findIndex((i: any) => i.id === imageId);
+      if (fromIndex === -1) return col;
+
+      const [moved] = images.splice(fromIndex, 1);
+      images.splice(newOrder, 0, moved);
+
+      const withOrder = images.map((img: any, index: number) => ({
+        ...img,
+        order: index,
+      }));
+
+      reorderedImages = withOrder.map(img => ({
+        id: img.id,
+        order: img.order,
+      }));
+
+      return {
+        ...col,
+        images: withOrder,
+      };
+    })
+  );
+
+  await fetch('/api/store/collections/images/reorder', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      collectionId,
+      images: reorderedImages,
+    }),
+  });
+};
+
+
+
   if (status === 'loading' || loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -466,6 +547,19 @@ export default function StoreProfilePage() {
               <ImageIcon className="inline-block h-4 w-4 mr-2" />
               Images & Gallery
             </button>
+<button
+  onClick={() => setActiveTab('collections')}
+  className={`px-4 py-2 rounded-lg font-medium ${
+    activeTab === 'collections'
+      ? 'bg-blue-100 text-blue-700'
+      : 'text-gray-600 hover:bg-gray-100'
+  }`}
+>
+  <ImageIcon className="inline-block h-4 w-4 mr-2" />
+  Collections
+</button>
+
+
             <button
               onClick={() => setActiveTab('hours')}
               className={`px-4 py-2 rounded-lg font-medium ${activeTab === 'hours' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'}`}
@@ -782,16 +876,16 @@ export default function StoreProfilePage() {
                   className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 flex items-center gap-2"
                 >
                   <Upload className="h-4 w-4" />
-                  {storeProfile.logoUrl ? 'Change Logo' : 'Upload Logo'}
+                  {storeProfile.logo?.url ? 'Change Logo' : 'Upload Logo'}
                 </button>
               </div>
 
               <div className="flex items-center justify-center p-8 border-2 border-dashed border-gray-300 rounded-xl">
-                {storeProfile.logoUrl ? (
+                {storeProfile.logo ? (
                   <div className="relative group">
                     <div className="relative w-48 h-48 overflow-hidden rounded-lg">
                                         <Image
-                    src={storeProfile.logoUrl}
+                    src={storeProfile.logo.url}
   alt="Store Logo"
   fill
   className="object-contain"
@@ -799,7 +893,7 @@ export default function StoreProfilePage() {
 />
                     </div>
                     <button
-                      onClick={() => deleteImage('logo', 'logo')}
+                      onClick={() => deleteImage(storeProfile.logo!.id, 'logo')}
                       className="absolute top-2 right-2 p-2 bg-red-600 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -831,23 +925,23 @@ export default function StoreProfilePage() {
                   className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 flex items-center gap-2"
                 >
                   <Upload className="h-4 w-4" />
-                  {storeProfile.storefrontUrl ? 'Change Image' : 'Upload Storefront'}
+                  {storeProfile.storefront ? 'Change Image' : 'Upload Storefront'}
                 </button>
               </div>
 
               <div className="flex items-center justify-center p-8 border-2 border-dashed border-gray-300 rounded-xl">
-                {storeProfile.storefrontUrl ? (
+                {storeProfile.storefront ? (
                   <div className="relative group w-full max-w-2xl">
                     <div className="relative w-full h-64 overflow-hidden rounded-lg">
                       <Image
-                        src={storeProfile.storefrontUrl}
+                        src={storeProfile.storefront.url}
                         alt="Storefront"
                         fill
                         className="object-cover"
                       />
                     </div>
                     <button
-                      onClick={() => deleteImage('storefront', 'storefront')}
+                      onClick={() => deleteImage(storeProfile.storefront!.id, 'storefront')}
                       className="absolute top-2 right-2 p-2 bg-red-600 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -990,6 +1084,112 @@ export default function StoreProfilePage() {
             </div>
           </div>
         )}
+
+        {activeTab === 'collections' && (
+  <div className="bg-white rounded-xl shadow-lg p-6 space-y-6">
+    <h2 className="text-xl font-bold text-gray-900">Collections</h2>
+
+    <div className="flex gap-3">
+      <input
+        type="text"
+        value={newCollectionTitle}
+        onChange={(e) => setNewCollectionTitle(e.target.value)}
+        placeholder="New collection title"
+        className="flex-1 border border-gray-300 rounded-lg px-4 py-2"
+      />
+      <button
+        onClick={async () => {
+          if (!newCollectionTitle.trim()) return;
+          await fetch('/api/store/collections', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title: newCollectionTitle }),
+          });
+          setNewCollectionTitle('');
+          fetchCollections();
+        }}
+        className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700"
+      >
+        Add
+      </button>
+    </div>
+
+    {collectionsLoading ? (
+      <p className="text-sm text-gray-500">Loading collections…</p>
+    ) : collections.length === 0 ? (
+      <p className="text-sm text-gray-500">No collections yet.</p>
+    ) : (
+      <div className="space-y-3">
+        {collections.map((collection) => (
+          <div
+  key={collection.id}
+  className="border rounded-lg px-4 py-3 space-y-3"
+>
+  <div className="flex items-center justify-between">
+    <span className="font-medium text-gray-800">
+      {collection.title}
+    </span>
+    <button
+      onClick={async () => {
+        await fetch(`/api/store/collections/${collection.id}`, {
+          method: 'DELETE',
+        });
+        fetchCollections();
+      }}
+      className="text-red-600 text-sm hover:text-red-800"
+    >
+      Delete
+    </button>
+  </div>
+
+  {collection.images?.length > 0 && (
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      {collection.images.map((img: any, index: number) => (
+        <div
+          key={img.id}
+          className="relative group border rounded overflow-hidden"
+        >
+          <Image
+            src={img.url}
+            alt={img.description || ''}
+            width={300}
+            height={300}
+            className="object-cover w-full h-32"
+          />
+
+          <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100">
+            {index > 0 && (
+              <button
+                onClick={() =>
+                  reorderCollectionImages(collection.id, img.id, index - 1)
+                }
+                className="bg-white px-2 text-xs rounded shadow"
+              >
+                ↑
+              </button>
+            )}
+            {index < collection.images.length - 1 && (
+              <button
+                onClick={() =>
+                  reorderCollectionImages(collection.id, img.id, index + 1)
+                }
+                className="bg-white px-2 text-xs rounded shadow"
+              >
+                ↓
+              </button>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  )}
+</div>
+
+        ))}
+      </div>
+    )}
+  </div>
+)}
 
         {activeTab === 'hours' && (
           <div className="bg-white rounded-xl shadow-lg p-6">

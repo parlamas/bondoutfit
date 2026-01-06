@@ -85,8 +85,17 @@ export async function PATCH(request: Request) {
     const updatedStore = await prisma.store.update({
       where: { id: store.id },
       data: {
+  name: body.name,
+  description: body.description,
+  website: body.website,
+  phoneCountry: body.phoneCountry,
+  phoneArea: body.phoneArea,
+  phoneNumber: body.phoneNumber,
+  categories: body.categories,
   acceptedCurrencies: body.acceptedCurrencies,
+  openingHours: body.openingHours,
 },
+
 
     });
 
