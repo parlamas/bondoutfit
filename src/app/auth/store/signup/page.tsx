@@ -8,22 +8,24 @@ import Link from 'next/link';
 export default function StoreSignUpPage() {
   
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    name: '',
-    phoneCountry: '',
-    phoneArea: '',
-    phoneNumber: '',
-    city: '',
-    state: '',
-    zip: '',
-    role: 'STORE_MANAGER',
-    storeName: '',
-    country: '',
-    street: '',
-    streetNumber: '',
-    categories: [] as string[],
-  });
+  email: '',
+  password: '',
+  name: '',
+  phoneCountry: '',
+  phoneArea: '',
+  phoneNumber: '',
+  city: '',
+  state: '',
+  zip: '',
+  role: 'STORE_MANAGER',
+  storeName: '',
+  country: '',
+  street: '',
+  streetNumber: '',
+  floor: '',
+  categories: [] as string[],
+});
+
   
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -326,6 +328,22 @@ export default function StoreSignUpPage() {
                   placeholder="123"
                 />
               </div>
+
+              <div>
+  <label htmlFor="floor" className="block text-xs font-medium text-gray-700">
+    Floor / Unit
+  </label>
+  <input
+    id="floor"
+    name="floor"
+    type="text"
+    value={formData.floor}
+    onChange={handleChange}
+    className="mt-1 block w-full text-sm border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+    placeholder="e.g. 2nd floor, Unit 5"
+  />
+</div>
+
 
               <div>
                 <label htmlFor="categories" className="block text-xs font-medium text-gray-700">

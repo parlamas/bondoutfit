@@ -67,7 +67,7 @@ export default function StoreProfilePage() {
   const [imageDescription, setImageDescription] = useState('');
   const [activeTab, setActiveTab] = useState<'info' | 'images' | 'hours'>('info');
   const [saveSuccess, setSaveSuccess] = useState(false);
-  
+  const [inlineMessage, setInlineMessage] = useState<{ type: 'error' | 'success'; text: string } | null>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
   const storefrontInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
@@ -200,14 +200,16 @@ export default function StoreProfilePage() {
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
-      alert('Please select an image file');
-      return;
-    }
+  setInlineMessage({ type: 'error', text: 'Invalid file type.' });
+  return;
+}
 
-    if (file.size > 5 * 1024 * 1024) { // 5MB limit
-      alert('Image size should be less than 5MB');
-      return;
-    }
+
+    if (file.size > 5 * 1024 * 1024) {
+  setInlineMessage({ type: 'error', text: 'File too large.' });
+  return;
+}
+
 
     if (type === 'gallery') {
       const description = prompt('Enter a description for this image:');
@@ -326,11 +328,12 @@ export default function StoreProfilePage() {
 
             if (response.ok) {
         setSaveSuccess(true);
+        setInlineMessage({ type: 'success', text: 'Saved.' });
         setTimeout(() => setSaveSuccess(false), 3000); // Hide after 3 seconds
       }
     } catch (error) {
       console.error('Failed to save profile:', error);
-      alert('Failed to save profile');
+      setInlineMessage({ type: 'error', text: 'Failed to save profile.' });
     } finally {
       setSaving(false);
     }
@@ -382,11 +385,12 @@ export default function StoreProfilePage() {
 
             if (response.ok) {
         setSaveSuccess(true);
+        setInlineMessage({ type: 'success', text: 'Saved.' });
         setTimeout(() => setSaveSuccess(false), 3000); // Hide after 3 seconds
       }
     } catch (error) {
       console.error('Failed to save opening hours:', error);
-      alert('Failed to save opening hours');
+      setInlineMessage({ type: 'error', text: 'Failed to save opening hours.' });
     } finally {
       setSaving(false);
     }
@@ -472,6 +476,18 @@ export default function StoreProfilePage() {
       </div>
 
       <div className="container mx-auto px-4 py-8">
+        {inlineMessage && (
+  <div
+    className={`mb-4 rounded-lg px-4 py-3 text-sm ${
+      inlineMessage.type === 'success'
+        ? 'bg-green-50 text-green-700 border border-green-200'
+        : 'bg-red-50 text-red-700 border border-red-200'
+    }`}
+  >
+    {inlineMessage.text}
+  </div>
+)}
+
         {activeTab === 'info' && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Left Column - Basic Info */}
