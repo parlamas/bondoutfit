@@ -22,6 +22,9 @@ export async function GET() {
   select: {
   id: true,
   name: true,
+  description: true,
+  website: true,
+  openingHours: true,
   phoneCountry: true,
   phoneArea: true,
   phoneNumber: true,
@@ -40,6 +43,7 @@ export async function GET() {
     },
   },
 },
+
 
   });
 
@@ -85,17 +89,16 @@ export async function PATCH(request: Request) {
     const updatedStore = await prisma.store.update({
       where: { id: store.id },
       data: {
-  name: body.name,
-  description: body.description,
-  website: body.website,
-  phoneCountry: body.phoneCountry,
-  phoneArea: body.phoneArea,
-  phoneNumber: body.phoneNumber,
-  categories: body.categories,
-  acceptedCurrencies: body.acceptedCurrencies,
-  openingHours: body.openingHours,
+  ...(body.name !== undefined && { name: body.name }),
+  ...(body.description !== undefined && { description: body.description }),
+  ...(body.website !== undefined && { website: body.website }),
+  ...(body.phoneCountry !== undefined && { phoneCountry: body.phoneCountry }),
+  ...(body.phoneArea !== undefined && { phoneArea: body.phoneArea }),
+  ...(body.phoneNumber !== undefined && { phoneNumber: body.phoneNumber }),
+  ...(body.categories !== undefined && { categories: body.categories }),
+  ...(body.acceptedCurrencies !== undefined && { acceptedCurrencies: body.acceptedCurrencies }),
+  ...(body.openingHours !== undefined && { openingHours: body.openingHours }),
 },
-
 
     });
 
