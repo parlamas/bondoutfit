@@ -126,12 +126,30 @@ const reorderImages = async (
   );
 };
 
+const handleSave = async () => {
+  await fetch('/api/store/categories/save', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ categories }),
+  });
+
+  loadCategories();
+};
+
 
   if (loading) return <p>Loading…</p>;
 
   return (
     <div className="max-w-5xl mx-auto p-6 space-y-8">
       <h1 className="text-3xl font-bold">Store Categories</h1>
+
+<button
+  onClick={handleSave}
+  className="bg-green-600 text-white px-4 py-2 rounded"
+>
+  Save
+</button>
+
 
       {/* CREATE CATEGORY */}
       <div className="flex gap-2">
