@@ -137,7 +137,21 @@ const reorderImages = async (
       {/* CATEGORIES */}
       {categories.map((category) => (
         <div key={category.id} className="border rounded p-4 space-y-4">
-          <h2 className="text-xl font-semibold">{category.title}</h2>
+        <div className="flex items-center justify-between">
+  <h2 className="text-xl font-semibold">{category.title}</h2>
+  <button
+    onClick={async () => {
+      await fetch(`/api/store/categories/${category.id}`, {
+        method: 'DELETE',
+      });
+      loadCategories();
+    }}
+    className="text-red-600 text-sm underline"
+  >
+    Delete
+  </button>
+</div>
+
 
           <input
             type="file"
