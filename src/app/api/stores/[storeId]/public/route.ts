@@ -24,17 +24,16 @@ export async function GET(
       streetNumber: true,
       floor: true,
       acceptedCurrencies: true,
+      categories: true,
       openingHours: true,
-      logoUrl: true,
-      storefrontUrl: true,
       images: {
   where: {
-    type: "GALLERY",
     status: "ACTIVE",
   },
   select: {
     id: true,
     imageUrl: true,
+    type: true,
   },
 },
 
