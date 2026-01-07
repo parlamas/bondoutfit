@@ -675,23 +675,7 @@ const fetchCollections = async () => {
                           </button>
                         </div>
                       ))}
-                      <input
-                        type="text"
-                        placeholder="Add a category"
-                        className="border border-gray-300 rounded-full px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter' && e.currentTarget.value.trim()) {
-                            const newCategory = e.currentTarget.value.trim();
-                            if (!storeProfile.categories.includes(newCategory)) {
-                              setStoreProfile({
-                                ...storeProfile,
-                                categories: [...storeProfile.categories, newCategory]
-                              });
-                            }
-                            e.currentTarget.value = '';
-                          }
-                        }}
-                      />
+                      
                     </div>
                   </div>
                 </div>
