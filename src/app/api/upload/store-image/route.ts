@@ -31,6 +31,7 @@ export async function POST(req: NextRequest) {
     const file = formData.get('file') as File;
     const type = formData.get('type') as 'logo' | 'storefront' | 'gallery';
     const description = formData.get('description') as string;
+    const categoryId = formData.get('categoryId') as string | null;
 
     if (!file) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
@@ -123,14 +124,16 @@ if (imageType === "LOGO" || imageType === "STOREFRONT") {
   });
 
   storeImage = await prisma.storeImage.create({
-    data: {
-      storeId: store.id,
-      imageUrl: uploadResult.secure_url,
-      type: "GALLERY",
-      order: lastImage ? lastImage.order + 1 : 0,
-      status: "ACTIVE",
-    },
-  });
+  data: {
+    storeId: store.id,
+    categoryId: categoryId,
+    imageUrl: uploadResult.secure_url,
+    type: "GALLERY",
+    order: lastImage ? lastImage.order + 1 : 0,
+    status: "ACTIVE",
+  },
+});
+
 }
 
 
