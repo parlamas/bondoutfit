@@ -28,16 +28,12 @@ export default function StoreCategoriesPage() {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ description }),
   });
-
-  loadCategories();
 };
 
 const deleteImage = async (imageId: string) => {
   await fetch(`/api/store/categories/images/${imageId}`, {
     method: 'DELETE',
   });
-
-  loadCategories();
 };
 
 const reorderImages = async (
@@ -62,12 +58,9 @@ const reorderImages = async (
       })),
     }),
   });
-
-  loadCategories();
 };
 
   const [categories, setCategories] = useState<StoreCategory[]>([]);
-  const [localPreviews, setLocalPreviews] = useState<Record<string, string[]>>({});
   const [newTitle, setNewTitle] = useState('');
   const [loading, setLoading] = useState(true);
 
@@ -97,13 +90,6 @@ const reorderImages = async (
   };
 
   const uploadImage = async (file: File, categoryId: string) => {
-  const previewUrl = URL.createObjectURL(file);
-
-  setLocalPreviews(prev => ({
-    ...prev,
-    [categoryId]: [...(prev[categoryId] || []), previewUrl],
-  }));
-
   const formData = new FormData();
   formData.append('file', file);
   formData.append('type', 'gallery');
@@ -113,8 +99,6 @@ const reorderImages = async (
     method: 'POST',
     body: formData,
   });
-
-  loadCategories();
 };
 
 
@@ -168,20 +152,6 @@ const reorderImages = async (
               }
             }}
           />
-
-          {localPreviews[category.id]?.length > 0 && (
-  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-    {localPreviews[category.id].map((src, i) => (
-      <img
-        key={i}
-        src={src}
-        className="rounded object-cover"
-        alt=""
-      />
-    ))}
-  </div>
-)}
-
 
           {category.images.length > 0 && (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
