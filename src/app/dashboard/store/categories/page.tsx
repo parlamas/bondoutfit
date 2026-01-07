@@ -19,16 +19,22 @@ type StoreCategory = {
 };
 
 export default function StoreCategoriesPage() {
-  const updateDescription = async (
+  const updateDescription = (
   imageId: string,
   description: string
 ) => {
-  await fetch(`/api/store/categories/images/${imageId}`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ description }),
-  });
+  setCategories(prev =>
+    prev.map(category => ({
+      ...category,
+      images: category.images.map(img =>
+        img.id === imageId
+          ? { ...img, description }
+          : img
+      ),
+    }))
+  );
 };
+
 
 const deleteImage = async (imageId: string) => {
   await fetch(`/api/store/categories/images/${imageId}`, {
@@ -92,13 +98,24 @@ const reorderImages = async (
   const uploadImage = async (file: File, categoryId: string) => {
   const formData = new FormData();
   formData.append('file', file);
-  formData.append('type', 'gallery');
   formData.append('categoryId', categoryId);
 
-  await fetch('/api/upload/store-image', {
+  const res = await fetch('/api/upload/store-image', {
     method: 'POST',
     body: formData,
   });
+
+  if (!res.ok) return;
+
+  const image = await res.json();
+
+  setCategories(prev =>
+    prev.map(cat =>
+      cat.id === categoryId
+        ? { ...cat, images: [...cat.images, image] }
+        : cat
+    )
+  );
 };
 
 
