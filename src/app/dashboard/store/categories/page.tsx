@@ -77,6 +77,7 @@ const reorderImages = async (
   const [categories, setCategories] = useState<StoreCategory[]>([]);
   const [newTitle, setNewTitle] = useState('');
   const [loading, setLoading] = useState(true);
+  const [saved, setSaved] = useState(false);
 
   const loadCategories = async () => {
     const res = await fetch('/api/store/categories');
@@ -133,6 +134,9 @@ const handleSave = async () => {
     body: JSON.stringify({ categories }),
   });
 
+  setSaved(true);
+  setTimeout(() => setSaved(false), 2000);
+
   loadCategories();
 };
 
@@ -149,6 +153,12 @@ const handleSave = async () => {
 >
   Save
 </button>
+
+{saved && (
+  <span className="text-green-600 text-sm ml-3">
+    Saved!
+  </span>
+)}
 
 
       {/* CREATE CATEGORY */}
