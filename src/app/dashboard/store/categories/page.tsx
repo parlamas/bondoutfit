@@ -67,6 +67,7 @@ const reorderImages = async (
 };
 
   const [categories, setCategories] = useState<StoreCategory[]>([]);
+  const [localPreviews, setLocalPreviews] = useState<Record<string, string[]>>({});
   const [newTitle, setNewTitle] = useState('');
   const [loading, setLoading] = useState(true);
 
@@ -95,22 +96,27 @@ const reorderImages = async (
     loadCategories();
   };
 
-  const uploadImage = async (
-    file: File,
-    categoryId: string
-  ) => {
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('type', 'gallery');
-    formData.append('categoryId', categoryId);
+  const uploadImage = async (file: File, categoryId: string) => {
+  const previewUrl = URL.createObjectURL(file);
 
-    await fetch('/api/upload/store-image', {
-      method: 'POST',
-      body: formData,
-    });
+  setLocalPreviews(prev => ({
+    ...prev,
+    [categoryId]: [...(prev[categoryId] || []), previewUrl],
+  }));
 
-    loadCategories();
-  };
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('type', 'gallery');
+  formData.append('categoryId', categoryId);
+
+  await fetch('/api/upload/store-image', {
+    method: 'POST',
+    body: formData,
+  });
+
+  loadCategories();
+};
+
 
   if (loading) return <p>Loading…</p>;
 
@@ -162,6 +168,20 @@ const reorderImages = async (
               }
             }}
           />
+
+          {localPreviews[category.id]?.length > 0 && (
+  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+    {localPreviews[category.id].map((src, i) => (
+      <img
+        key={i}
+        src={src}
+        className="rounded object-cover"
+        alt=""
+      />
+    ))}
+  </div>
+)}
+
 
           {category.images.length > 0 && (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
