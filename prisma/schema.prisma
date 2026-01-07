@@ -197,6 +197,8 @@ model Store {
   analytics       StoreAnalytics[]
   auditLogs       AuditLog[]
   collections     StoreCollection[]
+  storeCategories StoreCategory[]
+
 
 
   // Analytics
@@ -814,3 +816,28 @@ model CollectionImage {
 
   collection   StoreCollection @relation(fields: [collectionId], references: [id])
 }
+
+
+model StoreCategory {
+  id        String   @id @default(cuid())
+  storeId   String
+  title     String
+  order     Int
+  createdAt DateTime @default(now())
+
+  store     Store    @relation(fields: [storeId], references: [id])
+  images    StoreCategoryImage[]
+}
+
+model StoreCategoryImage {
+  id          String   @id @default(cuid())
+  categoryId  String
+  imageUrl    String
+  description String?
+  order       Int
+  status      ImageStatus @default(ACTIVE)
+
+  category    StoreCategory @relation(fields: [categoryId], references: [id])
+}
+
+
