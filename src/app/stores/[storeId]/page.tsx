@@ -7,7 +7,9 @@ type StoreImage = {
   id: string;
   imageUrl: string;
   type: "LOGO" | "STOREFRONT" | "GALLERY";
+  description: string | null;
 };
+
 
 
 type StoreItemImage = {
@@ -113,7 +115,7 @@ export default async function StorePage({
       href={store.website}
       target="_blank"
       rel="noopener noreferrer"
-      className="text-blue-600 underline"
+      className="text-blue-600 hover:text-blue-800 hover:underline underline-offset-4"
     >
       {store.website}
     </a>
@@ -205,25 +207,34 @@ export default async function StorePage({
 
 
       {/* GALLERY */}
-      {store.images.length > 0 && (
-        <section>
-          <h2 className="text-2xl font-semibold mb-4">Gallery</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {store.images
-  .filter(img => img.type === "GALLERY")
-  .map((img) => (
-              <Image
-                key={img.id}
-                src={img.imageUrl}
-                alt="Gallery image"
-                width={300}
-                height={300}
-                className="rounded object-cover"
-              />
-            ))}
+{store.images.some(img => img.type === "GALLERY") && (
+  <section>
+    <h2 className="text-2xl font-semibold mb-4">Gallery</h2>
+
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      {store.images
+        .filter(img => img.type === "GALLERY")
+        .map((img) => (
+          <div key={img.id} className="space-y-1">
+            <Image
+              src={img.imageUrl}
+              alt={img.description || "Gallery image"}
+              width={300}
+              height={300}
+              className="rounded object-cover"
+            />
+
+            {img.description && (
+              <p className="text-sm text-gray-600">
+                {img.description}
+              </p>
+            )}
           </div>
-        </section>
-      )}
+        ))}
+    </div>
+  </section>
+)}
+
 
       {/* ITEMS */}
       <section>
