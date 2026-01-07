@@ -753,6 +753,9 @@ const fetchCollections = async () => {
               </div>
             )}
 
+            
+
+
             {/* Logo Upload */}
             <div className="bg-white rounded-xl shadow-lg p-6">
               <div className="flex items-center justify-between mb-6">
@@ -840,123 +843,19 @@ const fetchCollections = async () => {
                       <Trash2 className="h-4 w-4" />
                     </button>
                   </div>
-                ) : (
+                                ) : (
                   <div className="text-center">
                     <Building2 className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                     <p className="text-gray-600">No storefront image uploaded yet</p>
-                    <p className="text-gray-500 text-sm mt-1">Show your store exterior or entrance</p>
+                    <p className="text-gray-500 text-sm mt-1">
+                      Show your store exterior or entrance
+                    </p>
                   </div>
                 )}
               </div>
             </div>
-
-            
-
-        {activeTab === 'collections' && (
-  <div className="bg-white rounded-xl shadow-lg p-6 space-y-6">
-    <h2 className="text-xl font-bold text-gray-900">Collections</h2>
-
-    <div className="flex gap-3">
-      <input
-        type="text"
-        value={newCollectionTitle}
-        onChange={(e) => setNewCollectionTitle(e.target.value)}
-        placeholder="New collection title"
-        className="flex-1 border border-gray-300 rounded-lg px-4 py-2"
-      />
-      <button
-        onClick={async () => {
-          if (!newCollectionTitle.trim()) return;
-          await fetch('/api/store/collections', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ title: newCollectionTitle }),
-          });
-          setNewCollectionTitle('');
-          fetchCollections();
-        }}
-        className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700"
-      >
-        Add
-      </button>
-    </div>
-
-    {collectionsLoading ? (
-      <p className="text-sm text-gray-500">Loading collections…</p>
-    ) : collections.length === 0 ? (
-      <p className="text-sm text-gray-500">No collections yet.</p>
-    ) : (
-      <div className="space-y-3">
-        {collections.map((collection) => (
-          <div
-  key={collection.id}
-  className="border rounded-lg px-4 py-3 space-y-3"
->
-  <div className="flex items-center justify-between">
-    <span className="font-medium text-gray-800">
-      {collection.title}
-    </span>
-    <button
-      onClick={async () => {
-        await fetch(`/api/store/collections/${collection.id}`, {
-          method: 'DELETE',
-        });
-        fetchCollections();
-      }}
-      className="text-red-600 text-sm hover:text-red-800"
-    >
-      Delete
-    </button>
-  </div>
-
-  {collection.images?.length > 0 && (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-      {collection.images.map((img: any, index: number) => (
-        <div
-          key={img.id}
-          className="relative group border rounded overflow-hidden"
-        >
-          <Image
-            src={img.url}
-            alt={img.description || ''}
-            width={300}
-            height={300}
-            className="object-cover w-full h-32"
-          />
-
-          <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100">
-            {index > 0 && (
-              <button
-                onClick={() =>
-                  reorderCollectionImages(collection.id, img.id, index - 1)
-                }
-                className="bg-white px-2 text-xs rounded shadow"
-              >
-                ↑
-              </button>
-            )}
-            {index < collection.images.length - 1 && (
-              <button
-                onClick={() =>
-                  reorderCollectionImages(collection.id, img.id, index + 1)
-                }
-                className="bg-white px-2 text-xs rounded shadow"
-              >
-                ↓
-              </button>
-            )}
           </div>
-        </div>
-      ))}
-    </div>
-  )}
-</div>
-
-        ))}
-      </div>
-    )}
-  </div>
-)}
+        )}
 
         {activeTab === 'hours' && (
           <div className="bg-white rounded-xl shadow-lg p-6">
