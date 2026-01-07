@@ -24,12 +24,14 @@ export async function GET() {
   }
 
   const images = await prisma.storeImage.findMany({
-    where: {
-      storeId: store.id,
-      status: "ACTIVE",
-    },
-    orderBy: { createdAt: "desc" },
-  });
+  where: {
+    storeId: store.id,
+    status: "ACTIVE",
+    type: "GALLERY",
+  },
+  orderBy: { createdAt: "desc" },
+});
+
 
   return NextResponse.json(images);
 }

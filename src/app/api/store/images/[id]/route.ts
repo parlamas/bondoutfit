@@ -23,22 +23,19 @@ export async function PATCH(
 ) {
   const session = await getServerSession(authOptions);
   
-  if (!session?.user?.email) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  if (!session || (session.user as any).role !== "STORE_MANAGER") {
+  return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+}
+
 
   try {
     const { description } = await req.json();
     
     // Find the store for this user
-    const store = await prisma.store.findFirst({
-      where: {
-        OR: [
-          { email: session.user.email },
-          { manager: { email: session.user.email } }
-        ]
-      },
-    });
+    const store = await prisma.store.findUnique({
+  where: { managerId: (session.user as any).id },
+});
+
 
     if (!store) {
       return NextResponse.json({ error: 'Store not found' }, { status: 404 });
@@ -73,20 +70,18 @@ export async function DELETE(
 ) {
   const session = await getServerSession(authOptions);
   
-  if (!session?.user?.email) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+
+  if (!session || (session.user as any).role !== "STORE_MANAGER") {
+  return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+}
+
 
   try {
     // Find the store for this user
-    const store = await prisma.store.findFirst({
-      where: {
-        OR: [
-          { email: session.user.email },
-          { manager: { email: session.user.email } }
-        ]
-      },
-    });
+    const store = await prisma.store.findUnique({
+  where: { managerId: (session.user as any).id },
+});
+
 
     if (!store) {
       return NextResponse.json({ error: 'Store not found' }, { status: 404 });
@@ -106,10 +101,13 @@ export async function DELETE(
 
     // Delete from Cloudinary first
     if (image?.imageUrl) {
-      const publicId = image.imageUrl.split('/').pop()?.split('.')[0];
-      if (publicId) {
-        await cloudinary.uploader.destroy(publicId);
-      }
+      const matches = image.imageUrl.match(/upload\/(?:v\d+\/)?(.+)\./);
+const publicId = matches?.[1];
+
+if (publicId) {
+  await cloudinary.uploader.destroy(publicId);
+}
+
     }
 
     // Delete from database
