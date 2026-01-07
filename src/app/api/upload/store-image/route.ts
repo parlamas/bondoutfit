@@ -136,17 +136,18 @@ if (imageType === "LOGO" || imageType === "STOREFRONT") {
   });
 
   return NextResponse.json({
-    id: categoryImage.id,
-    url: categoryImage.imageUrl,
-  });
+  id: categoryImage.id,
+  imageUrl: categoryImage.imageUrl,
+  description: null,
+  order: categoryImage.order,
+});
 }
-
-
 
 return NextResponse.json({
   id: storeImage.id,
-  url: storeImage.imageUrl,
+  imageUrl: storeImage.imageUrl,
 });
+
  
   } catch (error) {
     console.error('Upload failed:', error);
