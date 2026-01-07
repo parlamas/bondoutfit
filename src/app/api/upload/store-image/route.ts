@@ -84,30 +84,55 @@ export async function POST(req: NextRequest) {
     ? "STOREFRONT"
     : "GALLERY";
 
-const existing = await prisma.storeImage.findFirst({
-  where: {
-    storeId: store.id,
-    type: imageType,
-  },
-});
+let storeImage;
 
-const storeImage = existing
-  ? await prisma.storeImage.update({
-      where: { id: existing.id },
-      data: {
-        imageUrl: uploadResult.secure_url,
-        status: "ACTIVE",
-      },
-    })
-  : await prisma.storeImage.create({
-      data: {
-        storeId: store.id,
-        imageUrl: uploadResult.secure_url,
-        type: imageType,
-        order: 0,
-        status: "ACTIVE",
-      },
-    });
+if (imageType === "LOGO" || imageType === "STOREFRONT") {
+  const existing = await prisma.storeImage.findFirst({
+    where: {
+      storeId: store.id,
+      type: imageType,
+    },
+  });
+
+  storeImage = existing
+    ? await prisma.storeImage.update({
+        where: { id: existing.id },
+        data: {
+          imageUrl: uploadResult.secure_url,
+          status: "ACTIVE",
+        },
+      })
+    : await prisma.storeImage.create({
+        data: {
+          storeId: store.id,
+          imageUrl: uploadResult.secure_url,
+          type: imageType,
+          order: 0,
+          status: "ACTIVE",
+        },
+      });
+} else {
+  const lastImage = await prisma.storeImage.findFirst({
+    where: {
+      storeId: store.id,
+      type: "GALLERY",
+    },
+    orderBy: {
+      order: "desc",
+    },
+  });
+
+  storeImage = await prisma.storeImage.create({
+    data: {
+      storeId: store.id,
+      imageUrl: uploadResult.secure_url,
+      type: "GALLERY",
+      order: lastImage ? lastImage.order + 1 : 0,
+      status: "ACTIVE",
+    },
+  });
+}
+
 
 return NextResponse.json({
   id: storeImage.id,

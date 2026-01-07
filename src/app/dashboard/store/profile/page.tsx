@@ -64,8 +64,7 @@ export default function StoreProfilePage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<UploadProgress[]>([]);
-  const [editingImageId, setEditingImageId] = useState<string | null>(null);
-  const [imageDescription, setImageDescription] = useState('');
+  const [editingImage, setEditingImage] = useState<{ id: string; description: string } | null>(null);
   const [activeTab, setActiveTab] = useState<'info' | 'images' | 'collections' | 'hours'>('info');
   const [collections, setCollections] = useState<any[]>([]);
   const [newCollectionTitle, setNewCollectionTitle] = useState('');
@@ -226,34 +225,30 @@ const fetchCollections = async () => {
   };
 
   const handleFileChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    type: 'logo' | 'storefront' | 'gallery'
-  ) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  e: React.ChangeEvent<HTMLInputElement>,
+  type: 'logo' | 'storefront' | 'gallery'
+) => {
+  const files = Array.from(e.target.files || []);
+  if (files.length === 0) return;
 
+  for (const file of files) {
     if (!file.type.startsWith('image/')) {
-  setInlineMessage({ type: 'error', text: 'Invalid file type.' });
-  return;
-}
-
-
-    if (file.size > 5 * 1024 * 1024) {
-  setInlineMessage({ type: 'error', text: 'File too large.' });
-  return;
-}
-
-
-    if (type === 'gallery') {
-      const description = '';
-      handleImageUpload(file, type, description || '');
-    } else {
-      handleImageUpload(file, type);
+      setInlineMessage({ type: 'error', text: 'Invalid file type.' });
+      continue;
     }
 
-    // Reset input
-    e.target.value = '';
-  };
+    if (file.size > 5 * 1024 * 1024) {
+      setInlineMessage({ type: 'error', text: 'File too large.' });
+      continue;
+    }
+
+    handleImageUpload(file, type, type === 'gallery' ? '' : undefined);
+  }
+
+  e.target.value = '';
+};
+
+
 
   const updateImageDescription = async (imageId: string, description: string) => {
     if (!storeProfile) return;
@@ -274,7 +269,7 @@ const fetchCollections = async () => {
             img.id === imageId ? { ...img, description } : img
           )
         });
-        setEditingImageId(null);
+        setEditingImage(null);
       }
     } catch (error) {
       console.error('Failed to update image description:', error);
@@ -941,12 +936,13 @@ const fetchCollections = async () => {
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-bold text-gray-900">Gallery Images</h2>
                 <input
-                  type="file"
-                  ref={galleryInputRef}
-                  onChange={(e) => handleFileChange(e, 'gallery')}
-                  accept="image/*"
-                  className="hidden"
-                />
+  type="file"
+  ref={galleryInputRef}
+  onChange={(e) => handleFileChange(e, 'gallery')}
+  accept="image/*"
+  multiple
+  className="hidden"
+/>
                 <button
                   onClick={handleGalleryUpload}
                   className="bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 flex items-center gap-2"
@@ -1003,26 +999,31 @@ const fetchCollections = async () => {
 
                       {/* Description */}
                       <div className="p-4">
-                        {editingImageId === image.id ? (
-                          <div className="space-y-2">
-                            <textarea
-                              value={imageDescription}
-                              onChange={(e) => setImageDescription(e.target.value)}
-                              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-                              rows={2}
-                              placeholder="Describe this image..."
-                            />
+                        {editingImage?.id === image.id ? (
+  <div className="space-y-2">
+    <textarea
+      value={editingImage.description}
+      onChange={(e) =>
+        setEditingImage({ ...editingImage, description: e.target.value })
+      }
+      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+      rows={2}
+      placeholder="Describe this image..."
+    />
+
                             <div className="flex gap-2">
                               <button
-                                onClick={() => updateImageDescription(image.id, imageDescription)}
+                                onClick={() =>
+  editingImage &&
+  updateImageDescription(editingImage.id, editingImage.description)
+}
                                 className="bg-blue-600 text-white px-3 py-1 rounded text-sm"
                               >
                                 Save
                               </button>
                               <button
                                 onClick={() => {
-                                  setEditingImageId(null);
-                                  setImageDescription('');
+                                  setEditingImage(null);
                                 }}
                                 className="bg-gray-200 text-gray-700 px-3 py-1 rounded text-sm"
                               >
@@ -1038,8 +1039,7 @@ const fetchCollections = async () => {
                             </div>
                             <button
                               onClick={() => {
-                                setEditingImageId(image.id);
-                                setImageDescription(image.description);
+                                setEditingImage({ id: image.id, description: image.description });
                               }}
                               className="p-1 text-gray-500 hover:text-gray-700"
                             >
