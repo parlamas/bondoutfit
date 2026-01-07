@@ -64,7 +64,6 @@ export default function StoreProfilePage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<UploadProgress[]>([]);
-  const [editingImage, setEditingImage] = useState<{ id: string; description: string } | null>(null);
   const [activeTab, setActiveTab] = useState<'info' | 'images' | 'collections' | 'hours'>('info');
   const [collections, setCollections] = useState<any[]>([]);
   const [newCollectionTitle, setNewCollectionTitle] = useState('');
@@ -73,7 +72,6 @@ export default function StoreProfilePage() {
   const [inlineMessage, setInlineMessage] = useState<{ type: 'error' | 'success'; text: string } | null>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
   const storefrontInputRef = useRef<HTMLInputElement>(null);
-  const galleryInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
   if (status === 'unauthenticated') {
@@ -220,9 +218,7 @@ const fetchCollections = async () => {
     storefrontInputRef.current?.click();
   };
 
-  const handleGalleryUpload = () => {
-    galleryInputRef.current?.click();
-  };
+  
 
   const handleFileChange = (
   e: React.ChangeEvent<HTMLInputElement>,
@@ -242,39 +238,12 @@ const fetchCollections = async () => {
       continue;
     }
 
-    handleImageUpload(file, type, type === 'gallery' ? '' : undefined);
+    handleImageUpload(file, type);
   }
 
   e.target.value = '';
 };
 
-
-
-  const updateImageDescription = async (imageId: string, description: string) => {
-    if (!storeProfile) return;
-
-    try {
-      const response = await fetch(`/api/store/images/${imageId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-  description,
-}),
-      });
-
-      if (response.ok) {
-        setStoreProfile({
-          ...storeProfile,
-          galleryImages: storeProfile.galleryImages.map(img =>
-            img.id === imageId ? { ...img, description } : img
-          )
-        });
-        setEditingImage(null);
-      }
-    } catch (error) {
-      console.error('Failed to update image description:', error);
-    }
-  };
 
   const deleteImage = async (imageId: string, type: 'logo' | 'storefront' | 'gallery') => {
     if (!storeProfile) return;
@@ -302,40 +271,6 @@ const fetchCollections = async () => {
     } catch (error) {
   setInlineMessage({ type: 'error', text: 'Failed to remove image.' });
 }
-  };
-
-  const reorderGalleryImage = async (imageId: string, newOrder: number) => {
-    if (!storeProfile) return;
-
-    const updatedGallery = [...storeProfile.galleryImages];
-    const currentIndex = updatedGallery.findIndex(img => img.id === imageId);
-    
-    if (currentIndex === -1) return;
-
-    const [movedImage] = updatedGallery.splice(currentIndex, 1);
-    updatedGallery.splice(newOrder, 0, movedImage);
-    
-    // Update orders
-    const reorderedGallery = updatedGallery.map((img, index) => ({
-      ...img,
-      order: index
-    }));
-
-    setStoreProfile({
-      ...storeProfile,
-      galleryImages: reorderedGallery
-    });
-
-    // Save to backend
-    try {
-      await fetch('/api/store/images/reorder', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ images: reorderedGallery }),
-      });
-    } catch (error) {
-      console.error('Failed to reorder images:', error);
-    }
   };
 
   const saveProfile = async () => {
@@ -915,138 +850,7 @@ const fetchCollections = async () => {
               </div>
             </div>
 
-            {/* Gallery Images */}
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-gray-900">Gallery Images</h2>
-                <input
-  type="file"
-  ref={galleryInputRef}
-  onChange={(e) => handleFileChange(e, 'gallery')}
-  accept="image/*"
-  multiple
-  className="hidden"
-/>
-                <button
-                  onClick={handleGalleryUpload}
-                  className="bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 flex items-center gap-2"
-                >
-                  <Upload className="h-4 w-4" />
-                  Add to Gallery
-                </button>
-              </div>
-
-              {storeProfile?.galleryImages?.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {storeProfile.galleryImages.map((image, index) => (
-                    <div key={image.id} className="relative group border rounded-xl overflow-hidden">
-                      <div className="relative h-64">
-                        <Image
-                          src={image.url}
-                          alt={image.description || 'Gallery image'}
-                          fill
-                          className="object-cover"
-                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                        />
-                        <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-200" />
-                        
-                        {/* Controls */}
-                        <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button
-                            onClick={() => deleteImage(image.id, 'gallery')}
-                            className="p-2 bg-red-600 text-white rounded-lg"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
-                        </div>
-
-                        {/* Move buttons */}
-                        <div className="absolute top-2 left-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                          {index > 0 && (
-                            <button
-                              onClick={() => reorderGalleryImage(image.id, index - 1)}
-                              className="p-2 bg-white text-gray-800 rounded-lg shadow"
-                            >
-                              ↑
-                            </button>
-                          )}
-                          {index < storeProfile.galleryImages.length - 1 && (
-                            <button
-                              onClick={() => reorderGalleryImage(image.id, index + 1)}
-                              className="p-2 bg-white text-gray-800 rounded-lg shadow"
-                            >
-                              ↓
-                            </button>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Description */}
-                      <div className="p-4">
-                        {editingImage?.id === image.id ? (
-  <div className="space-y-2">
-    <textarea
-      value={editingImage.description}
-      onChange={(e) =>
-        setEditingImage({ ...editingImage, description: e.target.value })
-      }
-      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-      rows={2}
-      placeholder="Describe this image..."
-    />
-
-                            <div className="flex gap-2">
-                              <button
-                                onClick={() =>
-  editingImage &&
-  updateImageDescription(editingImage.id, editingImage.description)
-}
-                                className="bg-blue-600 text-white px-3 py-1 rounded text-sm"
-                              >
-                                Save
-                              </button>
-                              <button
-                                onClick={() => {
-                                  setEditingImage(null);
-                                }}
-                                className="bg-gray-200 text-gray-700 px-3 py-1 rounded text-sm"
-                              >
-                                Cancel
-                              </button>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <p className="text-sm text-gray-700">{image.description || 'No description'}</p>
-                              <p className="text-xs text-gray-500 mt-1">Position: {index + 1}</p>
-                            </div>
-                            <button
-                              onClick={() => {
-                                setEditingImage({ id: image.id, description: image.description });
-                              }}
-                              className="p-1 text-gray-500 hover:text-gray-700"
-                            >
-                              <Edit className="h-4 w-4" />
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-12 border-2 border-dashed border-gray-300 rounded-xl">
-                  <ImageIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-600">No gallery images yet</p>
-                  <p className="text-gray-500 text-sm mt-1">
-                    Upload images of your products, interior, or services
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
+            
 
         {activeTab === 'collections' && (
   <div className="bg-white rounded-xl shadow-lg p-6 space-y-6">

@@ -444,6 +444,18 @@ export default function StoreDashboard() {
                 </button>
 
                 <button
+  onClick={() => router.push('/dashboard/store/categories')}
+  className="w-full text-left px-4 py-3 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition flex items-center gap-3"
+>
+  <Tag className="h-5 w-5 text-indigo-600" />
+  <div>
+    <span className="font-medium text-indigo-800">Categories</span>
+    <p className="text-sm text-indigo-600">Organize gallery sections</p>
+  </div>
+</button>
+
+
+                <button
                   onClick={() => router.push('/dashboard/store/images')}
                   className="w-full text-left px-4 py-3 bg-amber-50 hover:bg-amber-100 rounded-lg transition flex items-center gap-3"
                 >

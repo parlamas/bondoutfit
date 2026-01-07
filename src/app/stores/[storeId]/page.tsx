@@ -3,6 +3,17 @@
 import Image from "next/image";
 import { headers } from "next/headers";
 
+type StoreCategory = {
+  id: string;
+  title: string;
+  images: {
+    id: string;
+    imageUrl: string;
+    description: string | null;
+  }[];
+};
+
+
 type StoreImage = {
   id: string;
   imageUrl: string;
@@ -75,12 +86,34 @@ async function getStore(storeId: string): Promise<Store> {
   return res.json();
 }
 
+async function getStoreCategories(storeId: string): Promise<StoreCategory[]> {
+  const headersList = headers();
+  const host = headersList.get("host");
+
+  if (!host) throw new Error("Host header not found");
+
+  const protocol =
+    process.env.NODE_ENV === "development" ? "http" : "https";
+
+  const res = await fetch(
+    `${protocol}://${host}/api/stores/${storeId}/categories`,
+    { cache: "no-store" }
+  );
+
+  if (!res.ok) return [];
+
+  return res.json();
+}
+
+
 export default async function StorePage({
   params,
 }: {
   params: { storeId: string };
 }) {
   const store = await getStore(params.storeId);
+  const categories = await getStoreCategories(params.storeId);
+
 
   return (
     <div className="max-w-5xl mx-auto p-6 space-y-12">
@@ -193,7 +226,7 @@ export default async function StorePage({
       </section>
 
       {/* STOREFRONT IMAGE */}
-      {store.images.find(i => i.type === "STOREFRONT") && (
+{store.images.find(i => i.type === "STOREFRONT") && (
   <section>
     <Image
       src={store.images.find(i => i.type === "STOREFRONT")!.imageUrl}
@@ -205,33 +238,36 @@ export default async function StorePage({
   </section>
 )}
 
+{/* STORE CATEGORIES */}
+{categories.length > 0 && (
+  <section className="space-y-12">
+    {categories.map((category) => (
+      <div key={category.id}>
+        <h2 className="text-2xl font-semibold mb-4">
+          {category.title}
+        </h2>
 
-      {/* GALLERY */}
-{store.images.some(img => img.type === "GALLERY") && (
-  <section>
-    <h2 className="text-2xl font-semibold mb-4">Gallery</h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {category.images.map((img) => (
+            <div key={img.id} className="space-y-1">
+              <Image
+                src={img.imageUrl}
+                alt={img.description || category.title}
+                width={300}
+                height={300}
+                className="rounded object-cover"
+              />
 
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-      {store.images
-        .filter(img => img.type === "GALLERY")
-        .map((img) => (
-          <div key={img.id} className="space-y-1">
-            <Image
-              src={img.imageUrl}
-              alt={img.description || "Gallery image"}
-              width={300}
-              height={300}
-              className="rounded object-cover"
-            />
-
-            {img.description && (
-              <p className="text-sm text-gray-600">
-                {img.description}
-              </p>
-            )}
-          </div>
-        ))}
-    </div>
+              {img.description && (
+                <p className="text-sm text-gray-600">
+                  {img.description}
+                </p>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    ))}
   </section>
 )}
 
