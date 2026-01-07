@@ -22,8 +22,7 @@ export async function POST(req: Request) {
         where: { id: image.id },
         data: {
           order: i,
-          description: image.description ?? null,
-          status: "ACTIVE",
+          description: image.description,
         },
       });
     }

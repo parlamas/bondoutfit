@@ -183,12 +183,14 @@ const reorderImages = async (
               {category.images.map((img, index) => (
                 <div key={img.id} className="space-y-2">
   <Image
-    src={img.imageUrl}
-    alt={img.description || category.title}
-    width={300}
-    height={300}
-    className="rounded object-cover"
-  />
+  src={img.imageUrl}
+  alt={img.description || category.title}
+  width={300}
+  height={300}
+  className="rounded object-cover"
+  unoptimized
+/>
+
 
   <textarea
     value={img.description || ''}
