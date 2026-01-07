@@ -6,7 +6,9 @@ import { headers } from "next/headers";
 type StoreImage = {
   id: string;
   imageUrl: string;
+  type: "LOGO" | "STOREFRONT" | "GALLERY";
 };
+
 
 type StoreItemImage = {
   id: string;
@@ -27,6 +29,7 @@ type Store = {
   name: string;
   email: string | null;
   phoneNumber: string | null;
+  categories: string[];
   acceptedCurrencies: string[];
   openingHours: any | null;
 
@@ -38,12 +41,11 @@ type Store = {
   streetNumber: string;
   floor: string | null;
 
-  logoUrl: string | null;
-  storefrontUrl: string | null;
   images: StoreImage[];
 
   items: StoreItem[];
 };
+
 
 async function getStore(storeId: string): Promise<Store> {
   const headersList = headers();
@@ -80,15 +82,16 @@ export default async function StorePage({
 
       {/* HEADER */}
       <section className="flex items-start gap-6">
-        {store.logoUrl && (
-          <Image
-            src={store.logoUrl}
-            alt={`${store.name} logo`}
-            width={120}
-            height={120}
-            className="rounded"
-          />
-        )}
+        {store.images.find(i => i.type === "LOGO") && (
+  <Image
+    src={store.images.find(i => i.type === "LOGO")!.imageUrl}
+    alt={`${store.name} logo`}
+    width={120}
+    height={120}
+    className="rounded"
+  />
+)}
+
 
         <div className="space-y-1">
           <h1 className="text-3xl font-semibold">{store.name}</h1>
@@ -117,9 +120,14 @@ export default async function StorePage({
           <div className="text-gray-700">{store.country}</div>
 
           <div className="text-gray-700">
-            Accepted currencies:{" "}
-            {store.acceptedCurrencies.join(", ")}
-          </div>
+  Store type: {store.categories.join(", ")}
+</div>
+
+<div className="text-gray-700">
+  Accepted currencies:{" "}
+  {store.acceptedCurrencies.join(", ")}
+</div>
+
 
           {store.openingHours && (
   <details className="mt-2">
@@ -158,24 +166,27 @@ export default async function StorePage({
       </section>
 
       {/* STOREFRONT IMAGE */}
-      {store.storefrontUrl && (
-        <section>
-          <Image
-            src={store.storefrontUrl}
-            alt="Storefront"
-            width={1200}
-            height={500}
-            className="rounded-lg object-cover"
-          />
-        </section>
-      )}
+      {store.images.find(i => i.type === "STOREFRONT") && (
+  <section>
+    <Image
+      src={store.images.find(i => i.type === "STOREFRONT")!.imageUrl}
+      alt="Storefront"
+      width={1200}
+      height={500}
+      className="rounded-lg object-cover"
+    />
+  </section>
+)}
+
 
       {/* GALLERY */}
       {store.images.length > 0 && (
         <section>
           <h2 className="text-2xl font-semibold mb-4">Gallery</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {store.images.map((img) => (
+            {store.images
+  .filter(img => img.type === "GALLERY")
+  .map((img) => (
               <Image
                 key={img.id}
                 src={img.imageUrl}
