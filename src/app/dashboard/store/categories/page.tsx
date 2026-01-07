@@ -40,7 +40,15 @@ const deleteImage = async (imageId: string) => {
   await fetch(`/api/store/categories/images/${imageId}`, {
     method: 'DELETE',
   });
+
+  setCategories(prev =>
+    prev.map(category => ({
+      ...category,
+      images: category.images.filter(img => img.id !== imageId),
+    }))
+  );
 };
+
 
 const reorderImages = async (
   categoryId: string,
