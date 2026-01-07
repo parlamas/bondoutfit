@@ -12,24 +12,28 @@ export async function GET() {
   const session = await getServerSession(authOptions);
 
   if (!session || (session.user as any).role !== "STORE_MANAGER") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json([], { status: 401 });
   }
 
-  const store = await prisma.store.findFirst({
+  const store = await prisma.store.findUnique({
     where: { managerId: (session.user as any).id },
-    include: {
-      images: {
-        orderBy: { order: "asc" },
-      },
-    },
   });
 
   if (!store) {
-    return NextResponse.json([], { status: 200 });
+    return NextResponse.json([]);
   }
 
-  return NextResponse.json(store.images);
+  const images = await prisma.storeImage.findMany({
+    where: {
+      storeId: store.id,
+      status: "ACTIVE",
+    },
+    orderBy: { createdAt: "desc" },
+  });
+
+  return NextResponse.json(images);
 }
+
 
 /**
  * POST → add store image (URL already uploaded, e.g. Cloudinary)
@@ -41,16 +45,16 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { imageUrl, order = 0 } = await req.json();
+  const { imageUrl, type } = await req.json();
 
-  if (!imageUrl) {
+  if (!imageUrl || !type) {
     return NextResponse.json(
-      { error: "imageUrl required" },
+      { error: "imageUrl and type are required" },
       { status: 400 }
     );
   }
 
-  const store = await prisma.store.findFirst({
+  const store = await prisma.store.findUnique({
     where: { managerId: (session.user as any).id },
   });
 
@@ -62,13 +66,13 @@ export async function POST(req: Request) {
   }
 
   const image = await prisma.storeImage.create({
-  data: {
-    storeId: store.id,
-    imageUrl,
-    order,
-    type: "GALLERY",
-  },
-});
+    data: {
+      storeId: store.id,
+      imageUrl,
+      type,
+    },
+  });
 
   return NextResponse.json(image);
 }
+

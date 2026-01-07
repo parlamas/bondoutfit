@@ -4,6 +4,8 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { StoreImageType } from "@prisma/client";
+
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -19,31 +21,16 @@ export async function GET() {
 
   const store = await prisma.store.findUnique({
   where: { managerId: userId },
-  select: {
-  id: true,
-  name: true,
-  description: true,
-  website: true,
-  openingHours: true,
-  phoneCountry: true,
-  phoneArea: true,
-  phoneNumber: true,
-  acceptedCurrencies: true,
-  country: true,
-  city: true,
-  state: true,
-  zip: true,
-  street: true,
-  streetNumber: true,
-  floor: true,
-  categories: true,
+  include: {
   manager: {
     select: {
       email: true,
     },
   },
+  images: {
+    orderBy: { order: 'asc' },
+  },
 },
-
 
   });
 
@@ -51,10 +38,25 @@ export async function GET() {
     return NextResponse.json(null);
   }
 
-  return NextResponse.json({
-  ...store,
-  email: store.manager?.email ?? null,
+const logo = store.images.find(i => i.type === StoreImageType.LOGO) ?? null;
+const storefront = store.images.find(i => i.type === StoreImageType.STOREFRONT) ?? null;
+const galleryImages = store.images.filter(i => i.type === StoreImageType.GALLERY);
+const { images, manager, ...storeData } = store;
+
+return NextResponse.json({
+  ...storeData,
+  email: manager?.email ?? null,
+  logo: logo ? { id: logo.id, url: logo.imageUrl } : null,
+  storefront: storefront ? { id: storefront.id, url: storefront.imageUrl } : null,
+  galleryImages: galleryImages.map(img => ({
+    id: img.id,
+    url: img.imageUrl,
+    description: img.description ?? "",
+    type: "gallery",
+    order: img.order,
+  })),
 });
+
 
 }
 

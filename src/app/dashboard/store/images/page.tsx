@@ -9,7 +9,9 @@ import { useRouter } from "next/navigation";
 type StoreImage = {
   id: string;
   imageUrl: string;
+  type: "LOGO" | "STOREFRONT" | "GALLERY";
 };
+
 
 export default function StoreImagesPage() {
   const { data: session, status } = useSession();
@@ -18,6 +20,8 @@ export default function StoreImagesPage() {
   const [images, setImages] = useState<StoreImage[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [imageType, setImageType] = useState<"LOGO" | "STOREFRONT" | "GALLERY">("GALLERY");
+
 
   /* ─────────── Protect page ─────────── */
   useEffect(() => {
@@ -74,10 +78,13 @@ export default function StoreImagesPage() {
           const { url } = await uploadRes.json();
 
           const saveRes = await fetch("/api/store/images", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ imageUrl: url }),
-          });
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    imageUrl: url,
+    type: imageType,
+  }),
+});
 
           const created = await saveRes.json();
           setImages(prev => [created, ...prev]);
@@ -87,12 +94,24 @@ export default function StoreImagesPage() {
         }}
         className="border rounded-lg p-4 bg-white space-y-3"
       >
-        <input
-          type="file"
-          name="file"
-          accept="image/*"
-          required
-        />
+        <select
+  value={imageType}
+  onChange={e =>
+    setImageType(e.target.value as "LOGO" | "STOREFRONT" | "GALLERY")
+  }
+  className="border rounded px-2 py-1"
+>
+  <option value="LOGO">Logo</option>
+  <option value="STOREFRONT">Storefront</option>
+  <option value="GALLERY">Gallery</option>
+</select>
+
+<input
+  type="file"
+  name="file"
+  accept="image/*"
+  required
+/>
 
         <button
           disabled={uploading}
@@ -108,12 +127,26 @@ export default function StoreImagesPage() {
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           {images.map(img => (
-            <img
-              key={img.id}
-              src={img.imageUrl}
-              className="w-full h-40 object-cover rounded"
-            />
-          ))}
+  <div key={img.id} className="relative group">
+    <img
+      src={img.imageUrl}
+      className="w-full h-40 object-cover rounded"
+    />
+
+    <button
+      onClick={async () => {
+        await fetch(`/api/store/images/${img.id}`, {
+          method: "DELETE",
+        });
+
+        setImages(prev => prev.filter(i => i.id !== img.id));
+      }}
+      className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100"
+    >
+      Delete
+    </button>
+  </div>
+))}
         </div>
       )}
     </div>

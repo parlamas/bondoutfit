@@ -4,7 +4,7 @@
 
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Image from 'next/image';
 import {
   Upload, Camera, X, Edit, Trash2, Save,
@@ -344,36 +344,37 @@ const fetchCollections = async () => {
   };
 
   const saveProfile = async () => {
-    if (!storeProfile) return;
+  if (!storeProfile) return;
 
-    setSaving(true);
-    try {
-      const response = await fetch('/api/store/profile', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: storeProfile.name,
-          description: storeProfile.description,
-          website: storeProfile.website,
-          phoneCountry: storeProfile.phoneCountry,
-          phoneArea: storeProfile.phoneArea,
-          phoneNumber: storeProfile.phoneNumber,
-          categories: storeProfile.categories,
-        }),
-      });
+  setSaving(true);
+  try {
+    const response = await fetch('/api/store/profile', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: storeProfile.name,
+        description: storeProfile.description,
+        website: storeProfile.website,
+        phoneCountry: storeProfile.phoneCountry,
+        phoneArea: storeProfile.phoneArea,
+        phoneNumber: storeProfile.phoneNumber,
+        categories: storeProfile.categories,
+        openingHours: storeProfile.openingHours,
+      }),
+    });
 
-            if (response.ok) {
-        setSaveSuccess(true);
-        setInlineMessage({ type: 'success', text: 'Saved.' });
-        setTimeout(() => setSaveSuccess(false), 3000); // Hide after 3 seconds
-      }
-    } catch (error) {
-      console.error('Failed to save profile:', error);
-      setInlineMessage({ type: 'error', text: 'Failed to save profile.' });
-    } finally {
-      setSaving(false);
+    if (response.ok) {
+      setInlineMessage({ type: 'success', text: 'Saved.' });
+    } else {
+      setInlineMessage({ type: 'error', text: 'Save failed.' });
     }
-      }
+  } catch {
+    setInlineMessage({ type: 'error', text: 'Save failed.' });
+  } finally {
+    setSaving(false);
+  }
+};
+
 
     const handleOpeningHoursChange = (index: number, field: 'open' | 'close' | 'closed', value: string | boolean) => {
     if (!storeProfile) return;
@@ -404,32 +405,6 @@ const fetchCollections = async () => {
       ...storeProfile,
       openingHours: updatedHours
     });
-  };
-
-  const saveOpeningHours = async () => {
-    if (!storeProfile) return;
-
-    setSaving(true);
-    try {
-      const response = await fetch('/api/store/profile', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          openingHours: storeProfile.openingHours
-        }),
-      });
-
-            if (response.ok) {
-        setSaveSuccess(true);
-        setInlineMessage({ type: 'success', text: 'Saved.' });
-        setTimeout(() => setSaveSuccess(false), 3000); // Hide after 3 seconds
-      }
-    } catch (error) {
-      console.error('Failed to save opening hours:', error);
-      setInlineMessage({ type: 'error', text: 'Failed to save opening hours.' });
-    } finally {
-      setSaving(false);
-    }
   };
 
   const reorderCollectionImages = async (
@@ -1238,12 +1213,7 @@ const fetchCollections = async () => {
                 </div>
               ))}
               <div className="pt-4">
-                                <button 
-                  onClick={saveOpeningHours}
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700"
-                >
-                  Save Hours
-                </button>
+                                
               </div>
             </div>
           </div>
