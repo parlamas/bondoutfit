@@ -112,29 +112,35 @@ if (imageType === "LOGO" || imageType === "STOREFRONT") {
           status: "ACTIVE",
         },
       });
-} else {
-  const lastImage = await prisma.storeImage.findFirst({
-    where: {
-      storeId: store.id,
-      type: "GALLERY",
-    },
-    orderBy: {
-      order: "desc",
+
+      } else {
+  if (!categoryId) {
+    return NextResponse.json(
+      { error: "categoryId required for category images" },
+      { status: 400 }
+    );
+  }
+
+  const lastImage = await prisma.storeCategoryImage.findFirst({
+    where: { categoryId },
+    orderBy: { order: "desc" },
+  });
+
+  const categoryImage = await prisma.storeCategoryImage.create({
+    data: {
+      categoryId,
+      imageUrl: uploadResult.secure_url,
+      order: lastImage ? lastImage.order + 1 : 0,
+      status: "ACTIVE",
     },
   });
 
-  storeImage = await prisma.storeImage.create({
-  data: {
-    storeId: store.id,
-    categoryId: categoryId,
-    imageUrl: uploadResult.secure_url,
-    type: "GALLERY",
-    order: lastImage ? lastImage.order + 1 : 0,
-    status: "ACTIVE",
-  },
-});
-
+  return NextResponse.json({
+    id: categoryImage.id,
+    url: categoryImage.imageUrl,
+  });
 }
+
 
 
 return NextResponse.json({

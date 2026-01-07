@@ -199,13 +199,11 @@ model Store {
   collections     StoreCollection[]
   storeCategories StoreCategory[]
 
-
-
   // Analytics
   totalVisits    Int   @default(0)
   totalCustomers Int   @default(0)
   totalSales     Float @default(0)
-  monthlyVisits  Json? // Stores monthly visit counts
+  monthlyVisits  Json?
 
   createdAt            DateTime             @default(now())
   updatedAt            DateTime             @updatedAt
@@ -234,11 +232,11 @@ model StoreImage {
   title        String?
   description  String?
   altText      String?
-  order        Int            @default(0)
-  status       ImageStatus    @default(ACTIVE)
+  order        Int         @default(0)
+  status       ImageStatus @default(ACTIVE)
 
   // Metadata
-  fileSize Int? // in bytes
+  fileSize Int?
   width    Int?
   height   Int?
   mimeType String?
@@ -268,24 +266,24 @@ model StoreWeeklyDiscount {
 
   // Timing
   dayOfWeek DayOfWeek
-  startTime String // HH:mm
-  endTime   String // HH:mm
+  startTime String
+  endTime   String
 
   // Discount
   type        DiscountType @default(PERCENTAGE)
-  value       Float // percentage or amount
-  minPurchase Float? // Minimum purchase required
-  maxDiscount Float? // Maximum discount amount
-  code        String? // Optional discount code
+  value       Float
+  minPurchase Float?
+  maxDiscount Float?
+  code        String?
 
   // Restrictions
-  applicableCategories String[] // Which categories this applies to
-  excludedItems        String[] // Item IDs that are excluded
-  isActive             Boolean  @default(true)
+  applicableCategories String[]
+  excludedItems        String[]
+  isActive             Boolean @default(true)
 
   // Usage
-  maxUses   Int? // Per customer
-  totalUses Int  @default(0)
+  maxUses   Int?
+  totalUses Int @default(0)
 
   store Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
 
@@ -318,9 +316,9 @@ model StoreItem {
   size        String?
 
   // Pricing
-  price         Int? // in cents
-  comparePrice  Int? // original price in cents
-  costPrice     Int? // in cents
+  price         Int?
+  comparePrice  Int?
+  costPrice     Int?
   currency      String  @default("EUR")
   isTaxIncluded Boolean @default(true)
   taxRate       Float?  @default(0)
@@ -330,8 +328,8 @@ model StoreItem {
   lowStockThreshold Int?    @default(10)
   isInStock         Boolean @default(true)
   allowBackorder    Boolean @default(false)
-  weight            Float? // in kg
-  dimensions        Json? // {length, width, height}
+  weight            Float?
+  dimensions        Json?
 
   // Visibility
   visible  Boolean @default(true)
@@ -404,9 +402,9 @@ model Visit {
 
   // Scheduling
   scheduledDate DateTime
-  scheduledTime String // HH:mm
-  scheduledEnd  DateTime? // End time if duration is known
-  duration      Int? // in minutes
+  scheduledTime String
+  scheduledEnd  DateTime?
+  duration      Int?
   notes         String?
 
   // Visit Details
@@ -426,7 +424,7 @@ model Visit {
   // Customer Details
   customerNotes   String?
   specialRequests String?
-  numberOfPeople  Int     @default(1)
+  numberOfPeople  Int @default(1)
 
   // Relations
   user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -446,7 +444,7 @@ model Visit {
 
 /**
  * =========================
- * DISCOUNT (EVENT / VISIT BASED)
+ * DISCOUNT
  * =========================
  */
 
@@ -463,16 +461,16 @@ model Discount {
   // Discount Value
   discountPercent Float?
   discountAmount  Float?
-  minPurchase     Float? // Minimum purchase required
-  maxDiscount     Float? // Maximum discount amount
+  minPurchase     Float?
+  maxDiscount     Float?
 
   // Validity
   validFrom DateTime?
   validTo   DateTime?
-  isActive  Boolean   @default(true)
+  isActive  Boolean @default(true)
 
   // Usage Limits
-  maxUses        Int? // Total max uses
+  maxUses        Int?
   currentUses    Int     @default(0)
   maxUsesPerUser Int?    @default(1)
   isSingleUse    Boolean @default(false)
@@ -480,9 +478,9 @@ model Discount {
   // Restrictions
   applicableCategories String[]
   excludedItems        String[]
-  svdOnly              Boolean  @default(false) // Scheduled Visit Discount
-  isPublic             Boolean  @default(true)
-  isStackable          Boolean  @default(false)
+  svdOnly              Boolean @default(false)
+  isPublic             Boolean @default(true)
+  isStackable          Boolean @default(false)
 
   // Relations
   store  Store               @relation(fields: [storeId], references: [id], onDelete: Cascade)
@@ -510,18 +508,18 @@ model Review {
   storeId String
   visitId String? @unique
 
-  rating  Int // 1-5
+  rating  Int
   title   String?
   comment String?
-  images  String[] // Array of image URLs
+  images  String[]
 
   // Response
   ownerReply     String?
   ownerReplyDate DateTime?
 
   // Metadata
-  isVerified Boolean @default(false) // Verified purchase
-  isHelpful  Int     @default(0) // Helpful votes
+  isVerified Boolean @default(false)
+  isHelpful  Int     @default(0)
   isReported Boolean @default(false)
 
   // Relations
@@ -574,10 +572,10 @@ model Notification {
 
   title     String
   message   String
-  type      String // visit, discount, system, etc.
+  type      String
   isRead    Boolean @default(false)
-  data      Json? // Additional data
-  actionUrl String? // URL to navigate to
+  data      Json?
+  actionUrl String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -593,7 +591,7 @@ model StoreNotification {
 
   title     String
   message   String
-  type      String // new_visit, low_stock, review, etc.
+  type      String
   isRead    Boolean @default(false)
   data      Json?
   actionUrl String?
@@ -608,7 +606,7 @@ model StoreNotification {
 
 /**
  * =========================
- * ORDERS (Optional for future e-commerce)
+ * ORDERS
  * =========================
  */
 
@@ -617,16 +615,16 @@ model Order {
   userId  String
   storeId String
 
-  orderNumber   String  @unique
-  status        String  @default("pending") // pending, confirmed, processing, shipped, delivered, cancelled
-  paymentStatus String  @default("pending") // pending, paid, failed, refunded
+  orderNumber   String @unique
+  status        String @default("pending")
+  paymentStatus String @default("pending")
   paymentMethod String?
 
-  subtotal Int // in cents
-  tax      Int // in cents
-  shipping Int // in cents
-  discount Int // in cents
-  total    Int // in cents
+  subtotal Int
+  tax      Int
+  shipping Int
+  discount Int
+  total    Int
   currency String @default("EUR")
 
   shippingAddress Json?
@@ -656,8 +654,8 @@ model OrderItem {
   itemId  String
 
   quantity Int
-  price    Int // in cents at time of purchase
-  subtotal Int // quantity * price
+  price    Int
+  subtotal Int
 
   order Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
   item  StoreItem @relation(fields: [itemId], references: [id])
@@ -679,21 +677,17 @@ model StoreAnalytics {
   storeId String
   date    DateTime
 
-  // Visit Stats
   visitsScheduled Int @default(0)
   visitsCompleted Int @default(0)
   visitsCancelled Int @default(0)
 
-  // Customer Stats
   newCustomers       Int @default(0)
   returningCustomers Int @default(0)
 
-  // Sales Stats
   totalRevenue      Float @default(0)
   averageOrderValue Float @default(0)
   conversionRate    Float @default(0)
 
-  // Discount Stats
   discountsClaimed Int @default(0)
   discountsUsed    Int @default(0)
 
@@ -713,7 +707,7 @@ model StoreAnalytics {
  */
 
 model Account {
-  id                String  @id @default(cuid())
+  id                String @id @default(cuid())
   userId            String
   type              String
   provider          String
@@ -762,10 +756,10 @@ model AuditLog {
   userId  String?
   storeId String?
 
-  action    String // created, updated, deleted, etc.
-  entity    String // User, Store, Visit, etc.
+  action    String
+  entity    String
   entityId  String?
-  changes   Json? // Before/after changes
+  changes   Json?
   ipAddress String?
   userAgent String?
 
@@ -796,27 +790,25 @@ model StoreImageCategory {
   @@index([storeId])
 }
 
-
 model StoreCollection {
   id        String   @id @default(cuid())
   storeId   String
   title     String
   createdAt DateTime @default(now())
 
-  store     Store    @relation(fields: [storeId], references: [id])
-  images    CollectionImage[]
+  store  Store @relation(fields: [storeId], references: [id])
+  images CollectionImage[]
 }
 
 model CollectionImage {
-  id           String   @id @default(cuid())
+  id           String @id @default(cuid())
   collectionId String
   url          String
   description  String
   order        Int
 
-  collection   StoreCollection @relation(fields: [collectionId], references: [id])
+  collection StoreCollection @relation(fields: [collectionId], references: [id])
 }
-
 
 model StoreCategory {
   id        String   @id @default(cuid())
@@ -825,19 +817,17 @@ model StoreCategory {
   order     Int
   createdAt DateTime @default(now())
 
-  store     Store    @relation(fields: [storeId], references: [id])
-  images    StoreCategoryImage[]
+  store  Store @relation(fields: [storeId], references: [id])
+  images StoreCategoryImage[]
 }
 
 model StoreCategoryImage {
-  id          String   @id @default(cuid())
+  id          String      @id @default(cuid())
   categoryId  String
   imageUrl    String
   description String?
   order       Int
   status      ImageStatus @default(ACTIVE)
 
-  category    StoreCategory @relation(fields: [categoryId], references: [id])
+  category StoreCategory @relation(fields: [categoryId], references: [id])
 }
-
-
