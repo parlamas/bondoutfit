@@ -27,11 +27,14 @@ type StoreItem = {
 type Store = {
   id: string;
   name: string;
+  description: string | null;
+  website: string | null;
   email: string | null;
   phoneNumber: string | null;
   categories: string[];
   acceptedCurrencies: string[];
   openingHours: any | null;
+
 
   country: string;
   city: string;
@@ -96,11 +99,33 @@ export default async function StorePage({
         <div className="space-y-1">
           <h1 className="text-3xl font-semibold">{store.name}</h1>
 
-          {store.email && (
-            <div className="text-gray-700">
-              Email: {store.email}
-            </div>
-          )}
+{store.description && (
+  <p className="text-gray-700 mt-1">
+    {store.description}
+  </p>
+)}
+
+
+          {store.website && (
+  <div className="text-gray-700">
+    Website:{" "}
+    <a
+      href={store.website}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-blue-600 underline"
+    >
+      {store.website}
+    </a>
+  </div>
+)}
+
+{store.email && (
+  <div className="text-gray-700">
+    Email: {store.email}
+  </div>
+)}
+
 
           {store.phoneNumber && (
             <div className="text-gray-700">

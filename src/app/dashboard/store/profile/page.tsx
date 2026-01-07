@@ -353,6 +353,7 @@ const fetchCollections = async () => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         name: storeProfile.name,
+        email: storeProfile.email,
         description: storeProfile.description,
         website: storeProfile.website,
         phoneCountry: storeProfile.phoneCountry,
@@ -648,11 +649,14 @@ const fetchCollections = async () => {
                       <div className="flex items-center gap-2">
                         <Mail className="h-5 w-5 text-gray-400" />
                         <input
-                          type="email"
-                          value={storeProfile.email}
-                          disabled
-                          className="flex-1 border border-gray-300 bg-gray-50 rounded-lg px-4 py-2 text-gray-500"
-                        />
+  type="email"
+  value={storeProfile.email}
+  onChange={(e) =>
+    setStoreProfile({ ...storeProfile, email: e.target.value })
+  }
+  className="flex-1 border border-gray-300 rounded-lg px-4 py-2"
+/>
+
                       </div>
                     </div>
                   </div>
