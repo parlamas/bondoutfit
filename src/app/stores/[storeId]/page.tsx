@@ -175,20 +175,19 @@ export default function StorePage({
   return (
     <div key={day} className="flex justify-between">
       <span className="font-medium">{label}</span>
+      <span>
+        {typeof value === "string"
+          ? value
+          : Array.isArray(value)
+          ? value.join(" – ")
+          : value?.open && value?.close
+          ? `${value.open} – ${value.close}`
+          : "Closed"}
+      </span>
+    </div>
+  );
+})}
 
-        <span>
-          {typeof value === "string"
-            ? value
-            : Array.isArray(value)
-            ? value.join(" – ")
-            : value?.open && value?.close
-            ? `${value.open} – ${value.close}`
-            : "Closed"}
-        </span>
-      </div>
-    ))}
-  </div>
-)}
     </div>
   );
 }
