@@ -151,22 +151,10 @@ export default function StoreProfilePage() {
     }
 
     try {
-      // Try both possible endpoints
-      let response;
-      try {
-        // First try /api/store/upload-image
-        response = await fetch('/api/store/upload-image', {
-          method: 'POST',
-          body: formData,
-        });
-      } catch (err) {
-        console.log('First endpoint failed, trying alternative...');
-        // Fallback to /api/upload/store-image
-        response = await fetch('/api/upload/store-image', {
-          method: 'POST',
-          body: formData,
-        });
-      }
+      const response = await fetch('/api/upload/store-image', {
+  method: 'POST',
+  body: formData,
+});
 
       const result = await response.json();
       console.log('Upload response:', result);
