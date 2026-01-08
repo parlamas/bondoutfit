@@ -24,6 +24,7 @@ type StorePublicData = {
   imageUrl: string;
   type: string;
   description: string | null;
+  categoryId?: string | null;
 }[];
   street: string;
   streetNumber: string;
@@ -103,10 +104,8 @@ const storefrontImage = store.images.find(
 );
 
 const galleryImages = store.images.filter(
-  (img) => img.type === 'GALLERY'
+  (img) => img.type === 'GALLERY' && img.categoryId == null
 );
-
-
   
 
   return (
