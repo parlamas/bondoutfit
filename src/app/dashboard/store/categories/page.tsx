@@ -20,20 +20,21 @@ type StoreCategory = {
 
 export default function StoreCategoriesPage() {
   const updateDescription = (
-  imageId: string,
-  description: string
-) => {
-  setCategories(prev =>
-    prev.map(category => ({
-      ...category,
-      images: category.images.map(img =>
-        img.id === imageId
-          ? { ...img, description }
-          : img
-      ),
-    }))
-  );
-};
+    imageId: string,
+    description: string
+  ) => {
+    setCategories(prev =>
+      prev.map(category => ({
+        ...category,
+        images: category.images.map(img =>
+          img.id === imageId
+            ? { ...img, description }
+            : img
+        ),
+      }))
+    );
+  };
+
 
 
 const deleteImage = async (imageId: string) => {
@@ -78,6 +79,7 @@ const reorderImages = async (
   const [newTitle, setNewTitle] = useState('');
   const [loading, setLoading] = useState(true);
   const [saved, setSaved] = useState(false);
+  const [uploadDescriptions, setUploadDescriptions] = useState<Record<string, string>>({});
 
   const loadCategories = async () => {
     const res = await fetch('/api/store/categories');
@@ -109,6 +111,10 @@ const reorderImages = async (
   formData.append('file', file);
   formData.append('categoryId', categoryId);
 
+  if (uploadDescriptions[categoryId]) {
+    formData.append('description', uploadDescriptions[categoryId]);
+  }
+
   const res = await fetch('/api/upload/store-image', {
     method: 'POST',
     body: formData,
@@ -125,7 +131,14 @@ const reorderImages = async (
         : cat
     )
   );
+
+  setUploadDescriptions(prev => ({
+    ...prev,
+    [categoryId]: '',
+  }));
 };
+
+  
 
 const handleSave = async () => {
   await fetch('/api/store/categories/save', {
@@ -197,14 +210,28 @@ const handleSave = async () => {
 
 
           <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => {
-              if (e.target.files?.[0]) {
-                uploadImage(e.target.files[0], category.id);
-              }
-            }}
-          />
+  type="text"
+  value={uploadDescriptions[category.id] || ''}
+  onChange={(e) =>
+    setUploadDescriptions(prev => ({
+      ...prev,
+      [category.id]: e.target.value,
+    }))
+  }
+  placeholder="Description for new image (optional)"
+  className="w-full border rounded px-2 py-1 text-sm"
+/>
+
+<input
+  type="file"
+  accept="image/*"
+  onChange={(e) => {
+    if (e.target.files?.[0]) {
+      uploadImage(e.target.files[0], category.id);
+    }
+  }}
+/>
+
 
           {category.images.length > 0 && (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
