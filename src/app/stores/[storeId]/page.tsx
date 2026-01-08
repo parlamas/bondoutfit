@@ -11,7 +11,7 @@ type StoreCategory = {
 
 type CategoryImage = {
   id: string;
-  url: string;
+  imageUrl: string;
 };
 
 
@@ -75,8 +75,9 @@ export default function StorePage({
 
   const loadImages = async () => {
     const res = await fetch(
-  `/api/store/categories/${selectedCategoryId}/images`
+  `/api/public/store/${params.storeId}/categories/${selectedCategoryId}/images`
 );
+
 
 
     if (res.ok) {
@@ -120,11 +121,11 @@ setCategoryImages(data);
 
   {categoryImages.map((image) => (
     <img
-      key={image.id}
-      src={image.url}
-      alt=""
-      className="w-full h-auto rounded-md object-cover"
-    />
+  key={image.id}
+  src={image.imageUrl}
+  alt=""
+  className="w-full h-auto rounded-md object-cover"
+/>
   ))}
 </div>
 

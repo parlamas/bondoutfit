@@ -10,10 +10,10 @@ export async function GET(
   const images = await prisma.storeCategoryImage.findMany({
     where: {
       categoryId: params.categoryId,
+      status: 'ACTIVE',
       category: {
         storeId: params.storeId,
       },
-      status: 'ACTIVE',
     },
     select: {
       id: true,
@@ -24,11 +24,6 @@ export async function GET(
     },
   });
 
-  return NextResponse.json(
-    images.map((img) => ({
-      id: img.id,
-      url: img.imageUrl,
-    }))
-  );
+  return NextResponse.json(images);
 }
 
