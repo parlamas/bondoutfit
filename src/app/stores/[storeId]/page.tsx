@@ -24,10 +24,9 @@ type StorePublicData = {
   phoneNumber: string | null;
   email: string | null;
   website: string | null;
-  openingHours: Record<
-  string,
-  string | string[] | { open: string; close: string }
-> | null;
+  openingHours: {
+  [key: string]: string | string[] | { open: string; close: string };
+} | null;
 };
 
 
