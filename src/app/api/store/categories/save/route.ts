@@ -18,13 +18,14 @@ export async function POST(req: Request) {
     for (let i = 0; i < category.images.length; i++) {
       const image = category.images[i];
 
-      await prisma.storeCategoryImage.update({
-        where: { id: image.id },
-        data: {
-          order: i,
-          description: image.description,
-        },
-      });
+      await prisma.storeCategoryImage.updateMany({
+  where: { id: image.id },
+  data: {
+    order: i,
+    description: image.description,
+  },
+});
+
     }
   }
 
