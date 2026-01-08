@@ -145,7 +145,8 @@ const galleryImages = store.images.filter(
     </div>
   ))}
 
-  {categoryImages.map((image) => (
+{selectedCategoryId &&
+  categoryImages.map((image) => (
     <img
       key={image.id}
       src={image.imageUrl}
@@ -153,6 +154,7 @@ const galleryImages = store.images.filter(
       className="w-full h-48 rounded-md object-cover"
     />
   ))}
+
 
 </div>
 
