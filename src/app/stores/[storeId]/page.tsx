@@ -106,15 +106,16 @@ export default function StorePage({
           {store.email && <div>{store.email}</div>}
 
           {store.website && (
-            <a
-              href={store.website}
-              className="text-blue-600 underline"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {store.website}
-            </a>
-          )}
+  <a
+    href={store.website}
+    target="_blank"
+    rel="noopener noreferrer"
+    className="text-blue-600 hover:text-blue-800 transition-colors"
+  >
+    Visit website
+  </a>
+)}
+
         </div>
       </div>
 
