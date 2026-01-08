@@ -61,9 +61,6 @@ export default function StorePage({
       if (catRes.ok) {
         const data: StoreCategory[] = await catRes.json();
         setCategories(data);
-        if (data.length > 0) {
-          setSelectedCategoryId(data[0].id);
-        }
       }
 
       if (storeRes.ok) {
