@@ -105,6 +105,11 @@ const storefrontImage = store.images.find(
   (img) => img.type === 'STOREFRONT'
 );
 
+const galleryImages = store.images.filter(
+  (img) => img.type === 'GALLERY'
+);
+
+
   
 
   return (
@@ -122,24 +127,37 @@ const storefrontImage = store.images.find(
 
       <div className="flex flex-col md:flex-row gap-6">
         <div className="grid grid-cols-2 gap-4 max-w-md">
-  
-{storefrontImage && (
-  <img
-    src={storefrontImage.imageUrl}
-    alt="Storefront"
-    className="w-full h-48 rounded-md object-cover"
-  />
-)}
 
+  {storefrontImage && (
+    <img
+      src={storefrontImage.imageUrl}
+      alt="Storefront"
+      className="w-full h-48 rounded-md object-cover"
+    />
+  )}
+
+  {galleryImages.map((image) => (
+    <div key={image.id} className="space-y-1">
+      <img
+        src={image.imageUrl}
+        alt={image.description ?? ''}
+        className="w-full h-48 rounded-md object-cover"
+      />
+      {image.description && (
+        <p className="text-xs text-gray-600">{image.description}</p>
+      )}
+    </div>
+  ))}
 
   {categoryImages.map((image) => (
     <img
-  key={image.id}
-  src={image.imageUrl}
-  alt=""
-  className="w-full h-48 rounded-md object-cover"
-/>
+      key={image.id}
+      src={image.imageUrl}
+      alt=""
+      className="w-full h-48 rounded-md object-cover"
+    />
   ))}
+
 </div>
 
 

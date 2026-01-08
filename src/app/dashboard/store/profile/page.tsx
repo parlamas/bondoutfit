@@ -73,6 +73,7 @@ export default function StoreProfilePage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<UploadProgress[]>([]);
+  const [galleryDescription, setGalleryDescription] = useState('');
   const [activeTab, setActiveTab] = useState<'info' | 'images' | 'collections' | 'hours'>('info');
   const [collections, setCollections] = useState<Collection[]>([]);
   const [newCollectionTitle, setNewCollectionTitle] = useState('');
@@ -252,10 +253,18 @@ export default function StoreProfilePage() {
         continue;
       }
 
-      handleImageUpload(file, type);
+      handleImageUpload(
+  file,
+  type,
+  type === 'gallery' ? galleryDescription : undefined
+);
+
     }
 
     e.target.value = '';
+    if (type === 'gallery') {
+  setGalleryDescription('');
+}
   };
 
   const deleteImage = async (imageId: string, type: 'logo' | 'storefront' | 'gallery') => {
@@ -858,6 +867,13 @@ export default function StoreProfilePage() {
             <div className="bg-white rounded-xl shadow-lg p-6">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-bold text-gray-900">Gallery Images</h2>
+                <input
+  type="text"
+  value={galleryDescription}
+  onChange={(e) => setGalleryDescription(e.target.value)}
+  placeholder="Description for uploaded images (optional)"
+  className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-full max-w-md"
+/>
                 <input
                   type="file"
                   ref={galleryInputRef}
