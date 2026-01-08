@@ -24,28 +24,34 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  console.log('User email from session:', session.user.email);
+  console.log('Upload API called by:', session.user.email);
 
   try {
     const formData = await req.formData();
     const file = formData.get('file') as File;
     const type = formData.get('type') as 'logo' | 'storefront' | 'gallery';
     const description = formData.get('description') as string;
-    const categoryId = formData.get('categoryId') as string | null;
+
+    console.log('Upload request details:', { 
+      type, 
+      description, 
+      fileName: file?.name,
+      fileSize: file?.size,
+      fileType: file?.type 
+    });
 
     if (!file) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
     }
 
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      return NextResponse.json({ error: 'File must be an image' }, { status: 400 });
+    }
+
     // Convert file to buffer
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    console.log('Cloudinary config check:', {
-      hasCloudName: !!process.env.CLOUDINARY_CLOUD_NAME,
-      hasApiKey: !!process.env.CLOUDINARY_API_KEY,
-      hasApiSecret: !!process.env.CLOUDINARY_API_SECRET,
-      fileInfo: { name: file.name, size: file.size, type: file.type }
-    });
     
     // Upload to Cloudinary
     const uploadResult = await new Promise<UploadApiResponse>((resolve, reject) => {
@@ -55,14 +61,19 @@ export async function POST(req: NextRequest) {
           resource_type: 'image',
         },
         (error: UploadApiErrorResponse | undefined, result: UploadApiResponse | undefined) => {
-          if (error) reject(error);
-          else resolve(result!);
+          if (error) {
+            console.error('Cloudinary upload error:', error);
+            reject(error);
+          } else {
+            console.log('Cloudinary upload successful:', result?.secure_url);
+            resolve(result!);
+          }
         }
       );
       uploadStream.end(buffer);
     });
 
-    // Save to database
+    // Find store
     const store = await prisma.store.findFirst({
       where: { 
         OR: [
@@ -72,89 +83,104 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    console.log('Store found:', store ? { id: store.id, name: store.name } : 'No store found');
-
     if (!store) {
       return NextResponse.json({ error: 'Store not found' }, { status: 404 });
     }
 
-    const imageType =
-  type === "logo"
-    ? "LOGO"
-    : type === "storefront"
-    ? "STOREFRONT"
-    : "GALLERY";
+    console.log('Store found:', { id: store.id, name: store.name });
 
-let storeImage;
+    // Determine image type for database
+    const imageType = 
+      type === "logo" ? "LOGO" : 
+      type === "storefront" ? "STOREFRONT" : 
+      "GALLERY";
 
-if (imageType === "LOGO" || imageType === "STOREFRONT") {
-  const existing = await prisma.storeImage.findFirst({
-    where: {
-      storeId: store.id,
-      type: imageType,
-    },
-  });
+    console.log('Processing as image type:', imageType);
 
-  storeImage = existing
-    ? await prisma.storeImage.update({
-        where: { id: existing.id },
-        data: {
-          imageUrl: uploadResult.secure_url,
-          status: "ACTIVE",
-        },
-      })
-    : await prisma.storeImage.create({
-        data: {
+    if (imageType === "LOGO" || imageType === "STOREFRONT") {
+      // Handle logo and storefront images (single per store)
+      const existing = await prisma.storeImage.findFirst({
+        where: {
           storeId: store.id,
-          imageUrl: uploadResult.secure_url,
           type: imageType,
-          order: 0,
-          status: "ACTIVE",
         },
       });
 
-      } else {
-  if (!categoryId) {
-    return NextResponse.json(
-      { error: "categoryId required for category images" },
-      { status: 400 }
-    );
-  }
+      const storeImage = existing
+        ? await prisma.storeImage.update({
+            where: { id: existing.id },
+            data: {
+              imageUrl: uploadResult.secure_url,
+              status: "ACTIVE",
+              updatedAt: new Date(),
+            },
+          })
+        : await prisma.storeImage.create({
+            data: {
+              storeId: store.id,
+              imageUrl: uploadResult.secure_url,
+              type: imageType,
+              order: 0,
+              status: "ACTIVE",
+              title: imageType === "LOGO" ? "Store Logo" : "Storefront",
+              description: description || null,
+            },
+          });
 
-  const lastImage = await prisma.storeCategoryImage.findFirst({
-    where: { categoryId },
-    orderBy: { order: "desc" },
-  });
+      console.log('Logo/Storefront saved:', storeImage.id);
+      return NextResponse.json({
+        id: storeImage.id,
+        url: storeImage.imageUrl,
+      });
+    }
 
-  const categoryImage = await prisma.storeCategoryImage.create({
-    data: {
-      categoryId,
-      imageUrl: uploadResult.secure_url,
-      order: lastImage ? lastImage.order + 1 : 0,
-      status: "ACTIVE",
-    },
-  });
+    // Handle GALLERY images
+    if (imageType === "GALLERY") {
+      // For gallery images - create new entry
+      // First find the maximum order for this store's gallery images
+      const lastGalleryImage = await prisma.storeImage.findFirst({
+        where: {
+          storeId: store.id,
+          type: "GALLERY",
+        },
+        orderBy: { order: "desc" },
+      });
 
-  return NextResponse.json({
-  id: categoryImage.id,
-  imageUrl: categoryImage.imageUrl,
-  description: null,
-  order: categoryImage.order,
-});
-}
+      const nextOrder = lastGalleryImage ? lastGalleryImage.order + 1 : 0;
 
-return NextResponse.json({
-  id: storeImage.id,
-  imageUrl: storeImage.imageUrl,
-});
+      const storeImage = await prisma.storeImage.create({
+        data: {
+          storeId: store.id,
+          imageUrl: uploadResult.secure_url,
+          type: "GALLERY",
+          order: nextOrder,
+          status: "ACTIVE",
+          title: description || "Gallery Image",
+          description: description || null,
+          // Don't set categoryId or storeImageCategoryId for general gallery images
+        },
+      });
 
- 
+      console.log('Gallery image saved:', { 
+        id: storeImage.id, 
+        order: storeImage.order 
+      });
+
+      return NextResponse.json({
+        id: storeImage.id,
+        url: storeImage.imageUrl,
+        description: storeImage.description,
+        order: storeImage.order,
+      });
+    }
+
+    return NextResponse.json({ error: 'Invalid image type' }, { status: 400 });
+
   } catch (error) {
     console.error('Upload failed:', error);
     console.error('Error details:', {
       message: error instanceof Error ? error.message : String(error),
       stack: error instanceof Error ? error.stack : undefined,
-      name: error instanceof Error ? error.name : undefined
     });
     
     return NextResponse.json(
