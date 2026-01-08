@@ -72,19 +72,19 @@ export default function StorePage({
   }, [params.storeId]);
 
   useEffect(() => {
-  if (!selectedCategoryId) return;
+  if (!selectedCategoryId) {
+    setCategoryImages([]);
+    return;
+  }
 
   const loadImages = async () => {
     const res = await fetch(
-  `/api/public/store/${params.storeId}/categories/${selectedCategoryId}/images`
-);
-
-
+      `/api/public/store/${params.storeId}/categories/${selectedCategoryId}/images`
+    );
 
     if (res.ok) {
       const data = await res.json();
-console.log('CATEGORY IMAGES RESPONSE:', data);
-setCategoryImages(data);
+      setCategoryImages(data);
     } else {
       setCategoryImages([]);
     }
@@ -115,7 +115,7 @@ setCategoryImages(data);
       <div className="flex flex-col md:flex-row gap-6">
         <div className="grid grid-cols-2 gap-4 max-w-md">
   
-{categoryImages.length === 0 && store.storefrontUrl && (
+{!selectedCategoryId && store.storefrontUrl && (
   <img
     src={store.storefrontUrl}
     alt="Storefront"
