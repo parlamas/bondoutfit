@@ -75,8 +75,9 @@ export default function StorePage({
 
   const loadImages = async () => {
     const res = await fetch(
-      `/api/public/store/${params.storeId}/categories/${selectedCategoryId}/images`
-    );
+  `/api/store/categories/${selectedCategoryId}/images`
+);
+
 
     if (res.ok) {
       const data = await res.json();
