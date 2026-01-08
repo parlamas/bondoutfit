@@ -31,6 +31,8 @@ export async function POST(req: NextRequest) {
     const file = formData.get('file') as File;
     const type = formData.get('type') as 'logo' | 'storefront' | 'gallery';
     const description = formData.get('description') as string;
+    const categoryId = formData.get('categoryId') as string | null;
+
 
     console.log('Upload request details:', { 
       type, 
@@ -133,6 +135,34 @@ export async function POST(req: NextRequest) {
         url: storeImage.imageUrl,
       });
     }
+
+    // Handle CATEGORY images
+if (categoryId) {
+  const lastCategoryImage = await prisma.storeCategoryImage.findFirst({
+    where: { categoryId },
+    orderBy: { order: 'desc' },
+  });
+
+  const nextOrder = lastCategoryImage ? lastCategoryImage.order + 1 : 0;
+
+  const categoryImage = await prisma.storeCategoryImage.create({
+    data: {
+      categoryId,
+      imageUrl: uploadResult.secure_url,
+      order: nextOrder,
+      description: description || null,
+      status: 'ACTIVE',
+    },
+  });
+
+  return NextResponse.json({
+    id: categoryImage.id,
+    url: categoryImage.imageUrl,
+    description: categoryImage.description,
+    order: categoryImage.order,
+  });
+}
+
 
     // Handle GALLERY images
     if (imageType === "GALLERY") {
