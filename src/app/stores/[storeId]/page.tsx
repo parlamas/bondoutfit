@@ -156,10 +156,26 @@ export default function StorePage({
 </div>
 
 {showHours && store.openingHours && (
-  <div className="border rounded-md p-4 text-sm text-gray-700 space-y-1">
-    {Object.entries(store.openingHours).map(([day, value]) => (
-      <div key={day} className="flex justify-between">
-        <span className="font-medium capitalize">{day}</span>
+  <div className="border rounded-md p-4 text-sm text-gray-700 space-y-1 max-w-sm">
+    {Object.entries(store.openingHours).map(([day, value]) => {
+  const dayNames = [
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+  ];
+
+  const label = Number.isInteger(Number(day))
+    ? dayNames[Number(day)]
+    : day;
+
+  return (
+    <div key={day} className="flex justify-between">
+      <span className="font-medium">{label}</span>
+
         <span>
           {typeof value === "string"
             ? value
@@ -173,7 +189,6 @@ export default function StorePage({
     ))}
   </div>
 )}
-      
     </div>
   );
 }
