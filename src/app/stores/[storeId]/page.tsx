@@ -9,6 +9,12 @@ type StoreCategory = {
   title: string;
 };
 
+type CategoryImage = {
+  id: string;
+  url: string;
+};
+
+
 type StorePublicData = {
   name: string;
   description: string | null;
@@ -37,6 +43,7 @@ export default function StorePage({
   const [loading, setLoading] = useState(true);
   const [store, setStore] = useState<StorePublicData | null>(null);
   const [showHours, setShowHours] = useState(false);
+  const [categoryImages, setCategoryImages] = useState<CategoryImage[]>([]);
 
   useEffect(() => {
     const load = async () => {
@@ -63,8 +70,29 @@ export default function StorePage({
     load();
   }, [params.storeId]);
 
+  useEffect(() => {
+  if (!selectedCategoryId) return;
+
+  const loadImages = async () => {
+    const res = await fetch(
+      `/api/public/store/${params.storeId}/categories/${selectedCategoryId}/images`
+    );
+
+    if (res.ok) {
+      setCategoryImages(await res.json());
+    } else {
+      setCategoryImages([]);
+    }
+  };
+
+  loadImages();
+}, [selectedCategoryId, params.storeId]);
+
+
   if (loading) return <p className="p-6">Loading…</p>;
   if (!store) return null;
+
+  
 
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-6">
@@ -80,13 +108,16 @@ export default function StorePage({
       </div>
 
       <div className="flex flex-col md:flex-row gap-6">
-        <div className="max-w-xs">
-          <img
-            src="/storefront.jpg"
-            alt="Storefront"
-            className="w-full h-auto rounded-md"
-          />
-        </div>
+        <div className="grid grid-cols-2 gap-4 max-w-md">
+  {categoryImages.map((image) => (
+    <img
+      key={image.id}
+      src={image.url}
+      alt=""
+      className="w-full h-auto rounded-md object-cover"
+    />
+  ))}
+</div>
 
         <div className="text-sm text-gray-700 space-y-1">
           <div>
