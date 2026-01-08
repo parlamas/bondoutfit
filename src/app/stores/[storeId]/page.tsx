@@ -123,13 +123,14 @@ const storefrontImage = store.images.find(
       <div className="flex flex-col md:flex-row gap-6">
         <div className="grid grid-cols-2 gap-4 max-w-md">
   
-{selectedCategoryId === null && storefrontImage && (
+{storefrontImage && (
   <img
     src={storefrontImage.imageUrl}
     alt="Storefront"
     className="w-full h-48 rounded-md object-cover"
   />
 )}
+
 
   {categoryImages.map((image) => (
     <img
