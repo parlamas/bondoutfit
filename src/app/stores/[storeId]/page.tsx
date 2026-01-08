@@ -24,7 +24,7 @@ type StorePublicData = {
   phoneNumber: string | null;
   email: string | null;
   website: string | null;
-  openingHours: any;
+  openingHours: Record<string, string> | null;
 };
 
 
@@ -38,6 +38,8 @@ export default function StorePage({
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [store, setStore] = useState<StorePublicData | null>(null);
+  const [showHours, setShowHours] = useState(false);
+
 
 
   useEffect(() => {
@@ -126,8 +128,6 @@ export default function StorePage({
   </div>
 </div>
 
-
-
       {/* CATEGORY DROPDOWN */}
       <div className="flex items-center gap-4">
   <select
@@ -143,13 +143,28 @@ export default function StorePage({
         ))}
       </select>
         <button
-    type="button"
-    className="border px-3 py-2 rounded text-sm"
-  >
-    Opening Hours
-  </button>
+  type="button"
+  onClick={() => setShowHours(prev => !prev)}
+  className="border px-3 py-2 rounded text-sm hover:bg-gray-50"
+>
+  Opening Hours
+</button>
+
 </div>
 
+{showHours && store.openingHours && (
+  <div className="border rounded-md p-4 text-sm text-gray-700">
+    {Object.entries(store.openingHours as Record<string, string>).map(
+  ([day, hours]) => (
+    <div key={day} className="flex justify-between">
+      <span className="font-medium capitalize">{day}</span>
+      <span>{hours}</span>
+    </div>
+  )
+)}
+
+  </div>
+)}
 
       
     </div>
