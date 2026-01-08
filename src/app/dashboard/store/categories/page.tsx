@@ -122,15 +122,23 @@ const reorderImages = async (
 
   if (!res.ok) return;
 
-  const image = await res.json();
+  const result = await res.json();
 
-  setCategories(prev =>
-    prev.map(cat =>
-      cat.id === categoryId
-        ? { ...cat, images: [...cat.images, image] }
-        : cat
-    )
-  );
+const image = {
+  id: result.id,
+  imageUrl: result.url,
+  description: result.description ?? null,
+  order: result.order ?? 0,
+};
+
+setCategories(prev =>
+  prev.map(cat =>
+    cat.id === categoryId
+      ? { ...cat, images: [...cat.images, image] }
+      : cat
+  )
+);
+
 
   setUploadDescriptions(prev => ({
     ...prev,
