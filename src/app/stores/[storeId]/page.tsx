@@ -24,7 +24,10 @@ type StorePublicData = {
   phoneNumber: string | null;
   email: string | null;
   website: string | null;
-  openingHours: Record<string, string> | null;
+  openingHours: Record<
+  string,
+  string | string[] | { open: string; close: string }
+> | null;
 };
 
 
@@ -153,19 +156,23 @@ export default function StorePage({
 </div>
 
 {showHours && store.openingHours && (
-  <div className="border rounded-md p-4 text-sm text-gray-700">
-    {Object.entries(store.openingHours as Record<string, string>).map(
-  ([day, hours]) => (
-    <div key={day} className="flex justify-between">
-      <span className="font-medium capitalize">{day}</span>
-      <span>{hours}</span>
-    </div>
-  )
-)}
-
+  <div className="border rounded-md p-4 text-sm text-gray-700 space-y-1">
+    {Object.entries(store.openingHours).map(([day, value]) => (
+      <div key={day} className="flex justify-between">
+        <span className="font-medium capitalize">{day}</span>
+        <span>
+          {typeof value === "string"
+            ? value
+            : Array.isArray(value)
+            ? value.join(" – ")
+            : value?.open && value?.close
+            ? `${value.open} – ${value.close}`
+            : "Closed"}
+        </span>
+      </div>
+    ))}
   </div>
 )}
-
       
     </div>
   );
