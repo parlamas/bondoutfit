@@ -29,11 +29,10 @@ export async function GET() {
     where: { storeId: store.id },
     orderBy: { order: "asc" },
     include: {
-      images: {
-        where: { status: "ACTIVE" },
-        orderBy: { order: "asc" },
-      },
-    },
+  images: {
+    orderBy: { order: "asc" },
+  },
+},
   });
 
   return NextResponse.json(categories);
