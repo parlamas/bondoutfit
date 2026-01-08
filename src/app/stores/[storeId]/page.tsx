@@ -79,7 +79,9 @@ export default function StorePage({
     );
 
     if (res.ok) {
-      setCategoryImages(await res.json());
+      const data = await res.json();
+console.log('CATEGORY IMAGES RESPONSE:', data);
+setCategoryImages(data);
     } else {
       setCategoryImages([]);
     }
@@ -109,6 +111,12 @@ export default function StorePage({
 
       <div className="flex flex-col md:flex-row gap-6">
         <div className="grid grid-cols-2 gap-4 max-w-md">
+  {categoryImages.length === 0 && (
+    <pre className="text-xs text-gray-500">
+      {JSON.stringify(categoryImages, null, 2)}
+    </pre>
+  )}
+
   {categoryImages.map((image) => (
     <img
       key={image.id}
@@ -118,6 +126,7 @@ export default function StorePage({
     />
   ))}
 </div>
+
 
         <div className="text-sm text-gray-700 space-y-1">
           <div>
