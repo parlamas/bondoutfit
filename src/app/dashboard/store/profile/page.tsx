@@ -55,6 +55,7 @@ interface UploadProgress {
   fileName: string;
   progress: number;
   status: 'uploading' | 'success' | 'error';
+  error?: string;
 }
 
 interface Collection {
@@ -124,11 +125,9 @@ export default function StoreProfilePage() {
     }
   };
 
-
-const handleGalleryUpload = () => {
-  galleryInputRef.current?.click();
-};
-
+  const handleGalleryUpload = () => {
+    galleryInputRef.current?.click();
+  };
 
   const handleImageUpload = async (
     file: File,
@@ -141,7 +140,7 @@ const handleGalleryUpload = () => {
     setUploadProgress(prev => [...prev, {
       fileName,
       progress: 0,
-      status: 'uploading'
+      status: 'uploading' as const
     }]);
 
     const formData = new FormData();
@@ -152,12 +151,25 @@ const handleGalleryUpload = () => {
     }
 
     try {
-      const response = await fetch('/api/upload/store-image', {
-        method: 'POST',
-        body: formData,
-      });
+      // Try both possible endpoints
+      let response;
+      try {
+        // First try /api/store/upload-image
+        response = await fetch('/api/store/upload-image', {
+          method: 'POST',
+          body: formData,
+        });
+      } catch (err) {
+        console.log('First endpoint failed, trying alternative...');
+        // Fallback to /api/upload/store-image
+        response = await fetch('/api/upload/store-image', {
+          method: 'POST',
+          body: formData,
+        });
+      }
 
       const result = await response.json();
+      console.log('Upload response:', result);
 
       if (response.ok) {
         // Update upload progress
@@ -202,19 +214,27 @@ const handleGalleryUpload = () => {
       } else {
         setUploadProgress(prev => 
           prev.map(u => u.fileName === fileName 
-            ? { ...u, status: 'error' }
+            ? { ...u, status: 'error', error: result.error || 'Upload failed' }
             : u
           )
         );
+        setInlineMessage({ 
+          type: 'error', 
+          text: result.error || `Failed to upload ${type} image` 
+        });
       }
     } catch (error) {
       console.error('Upload failed:', error);
       setUploadProgress(prev => 
         prev.map(u => u.fileName === fileName 
-          ? { ...u, status: 'error' }
+          ? { ...u, status: 'error', error: 'Network error' }
           : u
         )
       );
+      setInlineMessage({ 
+        type: 'error', 
+        text: 'Network error. Please try again.' 
+      });
     }
   };
 
@@ -235,12 +255,12 @@ const handleGalleryUpload = () => {
 
     for (const file of files) {
       if (!file.type.startsWith('image/')) {
-        setInlineMessage({ type: 'error', text: 'Invalid file type.' });
+        setInlineMessage({ type: 'error', text: 'Invalid file type. Please upload an image.' });
         continue;
       }
 
       if (file.size > 5 * 1024 * 1024) {
-        setInlineMessage({ type: 'error', text: 'File too large.' });
+        setInlineMessage({ type: 'error', text: 'File too large. Maximum size is 5MB.' });
         continue;
       }
 
@@ -269,10 +289,13 @@ const handleGalleryUpload = () => {
             galleryImages: storeProfile.galleryImages.filter(img => img.id !== imageId)
           });
         }
-        setInlineMessage({ type: 'success', text: 'Image removed.' });
+        setInlineMessage({ type: 'success', text: 'Image removed successfully.' });
+      } else {
+        setInlineMessage({ type: 'error', text: 'Failed to remove image.' });
       }
     } catch (error) {
-      setInlineMessage({ type: 'error', text: 'Failed to remove image.' });
+      console.error('Delete image error:', error);
+      setInlineMessage({ type: 'error', text: 'Failed to remove image. Please try again.' });
     }
   };
 
@@ -298,12 +321,18 @@ const handleGalleryUpload = () => {
       });
 
       if (response.ok) {
-        setInlineMessage({ type: 'success', text: 'Saved.' });
+        setInlineMessage({ type: 'success', text: 'Profile saved successfully.' });
+        // Clear message after 3 seconds
+        setTimeout(() => setInlineMessage(null), 3000);
       } else {
-        setInlineMessage({ type: 'error', text: 'Save failed.' });
+        const error = await response.json();
+        setInlineMessage({ 
+          type: 'error', 
+          text: error.error || 'Failed to save profile.' 
+        });
       }
     } catch {
-      setInlineMessage({ type: 'error', text: 'Save failed.' });
+      setInlineMessage({ type: 'error', text: 'Network error. Please try again.' });
     } finally {
       setSaving(false);
     }
@@ -341,7 +370,10 @@ const handleGalleryUpload = () => {
   };
 
   const createNewCollection = async () => {
-    if (!newCollectionTitle.trim()) return;
+    if (!newCollectionTitle.trim()) {
+      setInlineMessage({ type: 'error', text: 'Please enter a collection title.' });
+      return;
+    }
 
     try {
       const response = await fetch('/api/store/collections', {
@@ -356,10 +388,14 @@ const handleGalleryUpload = () => {
         const newCollection = await response.json();
         setCollections(prev => [...prev, newCollection]);
         setNewCollectionTitle('');
-        setInlineMessage({ type: 'success', text: 'Collection created.' });
+        setInlineMessage({ type: 'success', text: 'Collection created successfully.' });
+        setTimeout(() => setInlineMessage(null), 3000);
+      } else {
+        const error = await response.json();
+        setInlineMessage({ type: 'error', text: error.error || 'Failed to create collection.' });
       }
     } catch (error) {
-      setInlineMessage({ type: 'error', text: 'Failed to create collection.' });
+      setInlineMessage({ type: 'error', text: 'Network error. Please try again.' });
     }
   };
 
@@ -384,7 +420,7 @@ const handleGalleryUpload = () => {
             <div className="flex items-center gap-4">
               <button
                 onClick={() => router.push('/dashboard/store')}
-                className="p-2 hover:bg-gray-100 rounded-lg"
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
               >
                 <ArrowLeft className="h-5 w-5 text-gray-600" />
               </button>
@@ -398,7 +434,7 @@ const handleGalleryUpload = () => {
               <button
                 onClick={saveProfile}
                 disabled={saving}
-                className="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-colors"
               >
                 <Save className="h-4 w-4" />
                 {saving ? 'Saving...' : 'Save Changes'}
@@ -410,28 +446,28 @@ const handleGalleryUpload = () => {
           <div className="flex gap-2 mt-6">
             <button
               onClick={() => setActiveTab('info')}
-              className={`px-4 py-2 rounded-lg font-medium ${activeTab === 'info' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'}`}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${activeTab === 'info' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'}`}
             >
               <User className="inline-block h-4 w-4 mr-2" />
               Store Info
             </button>
             <button
               onClick={() => setActiveTab('images')}
-              className={`px-4 py-2 rounded-lg font-medium ${activeTab === 'images' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'}`}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${activeTab === 'images' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'}`}
             >
               <ImageIcon className="inline-block h-4 w-4 mr-2" />
               Images & Gallery
             </button>
             <button
               onClick={() => setActiveTab('collections')}
-              className={`px-4 py-2 rounded-lg font-medium ${activeTab === 'collections' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'}`}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${activeTab === 'collections' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'}`}
             >
               <FolderPlus className="inline-block h-4 w-4 mr-2" />
               Collections
             </button>
             <button
               onClick={() => setActiveTab('hours')}
-              className={`px-4 py-2 rounded-lg font-medium ${activeTab === 'hours' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'}`}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${activeTab === 'hours' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'}`}
             >
               <Clock className="inline-block h-4 w-4 mr-2" />
               Opening Hours
@@ -443,7 +479,7 @@ const handleGalleryUpload = () => {
       <div className="container mx-auto px-4 py-8">
         {inlineMessage && (
           <div
-            className={`mb-4 rounded-lg px-4 py-3 text-sm ${
+            className={`mb-6 rounded-lg px-4 py-3 text-sm animate-fade-in ${
               inlineMessage.type === 'success'
                 ? 'bg-green-50 text-green-700 border border-green-200'
                 : 'bg-red-50 text-red-700 border border-red-200'
@@ -472,7 +508,8 @@ const handleGalleryUpload = () => {
                       type="text"
                       value={storeProfile.name}
                       onChange={(e) => setStoreProfile({ ...storeProfile, name: e.target.value })}
-                      className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                      required
                     />
                   </div>
 
@@ -484,7 +521,7 @@ const handleGalleryUpload = () => {
                       value={storeProfile.description || ''}
                       onChange={(e) => setStoreProfile({ ...storeProfile, description: e.target.value })}
                       rows={4}
-                      className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                       placeholder="Describe your store..."
                     />
                   </div>
@@ -500,7 +537,7 @@ const handleGalleryUpload = () => {
                         value={storeProfile.website || ''}
                         onChange={(e) => setStoreProfile({ ...storeProfile, website: e.target.value })}
                         placeholder="https://example.com"
-                        className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                       />
                     </div>
                   </div>
@@ -516,21 +553,21 @@ const handleGalleryUpload = () => {
                           value={storeProfile.phoneCountry || ''}
                           onChange={(e) => setStoreProfile({ ...storeProfile, phoneCountry: e.target.value })}
                           placeholder="Country"
-                          className="w-20 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          className="w-20 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                         />
                         <input
                           type="text"
                           value={storeProfile.phoneArea || ''}
                           onChange={(e) => setStoreProfile({ ...storeProfile, phoneArea: e.target.value })}
                           placeholder="Area"
-                          className="w-20 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          className="w-20 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                         />
                         <input
                           type="text"
                           value={storeProfile.phoneNumber}
                           onChange={(e) => setStoreProfile({ ...storeProfile, phoneNumber: e.target.value })}
                           placeholder="Number"
-                          className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                         />
                       </div>
                     </div>
@@ -545,7 +582,7 @@ const handleGalleryUpload = () => {
                           type="email"
                           value={storeProfile.email}
                           onChange={(e) => setStoreProfile({ ...storeProfile, email: e.target.value })}
-                          className="flex-1 border border-gray-300 rounded-lg px-4 py-2"
+                          className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                         />
                       </div>
                     </div>
@@ -564,7 +601,8 @@ const handleGalleryUpload = () => {
                               const newCategories = storeProfile.categories.filter((_, i) => i !== index);
                               setStoreProfile({ ...storeProfile, categories: newCategories });
                             }}
-                            className="text-blue-600 hover:text-blue-800"
+                            className="text-blue-600 hover:text-blue-800 transition-colors"
+                            type="button"
                           >
                             <X className="h-3 w-3" />
                           </button>
@@ -595,14 +633,14 @@ const handleGalleryUpload = () => {
                         value={storeProfile.street}
                         onChange={(e) => setStoreProfile({ ...storeProfile, street: e.target.value })}
                         placeholder="Street"
-                        className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                       />
                       <input
                         type="text"
                         value={storeProfile.streetNumber}
                         onChange={(e) => setStoreProfile({ ...storeProfile, streetNumber: e.target.value })}
                         placeholder="No."
-                        className="w-20 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-20 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                       />
                     </div>
                   </div>
@@ -616,7 +654,7 @@ const handleGalleryUpload = () => {
                       value={storeProfile.floor || ''}
                       onChange={(e) => setStoreProfile({ ...storeProfile, floor: e.target.value })}
                       placeholder="e.g., 3rd Floor, Unit 5"
-                      className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                     />
                   </div>
 
@@ -629,7 +667,7 @@ const handleGalleryUpload = () => {
                         type="text"
                         value={storeProfile.city}
                         onChange={(e) => setStoreProfile({ ...storeProfile, city: e.target.value })}
-                        className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                       />
                     </div>
 
@@ -641,7 +679,7 @@ const handleGalleryUpload = () => {
                         type="text"
                         value={storeProfile.state}
                         onChange={(e) => setStoreProfile({ ...storeProfile, state: e.target.value })}
-                        className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                       />
                     </div>
                   </div>
@@ -655,7 +693,7 @@ const handleGalleryUpload = () => {
                         type="text"
                         value={storeProfile.zip}
                         onChange={(e) => setStoreProfile({ ...storeProfile, zip: e.target.value })}
-                        className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                       />
                     </div>
 
@@ -667,7 +705,7 @@ const handleGalleryUpload = () => {
                         type="text"
                         value={storeProfile.country}
                         onChange={(e) => setStoreProfile({ ...storeProfile, country: e.target.value })}
-                        className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                       />
                     </div>
                   </div>
@@ -683,10 +721,15 @@ const handleGalleryUpload = () => {
             {uploadProgress.length > 0 && (
               <div className="bg-white rounded-xl shadow-lg p-6">
                 <h3 className="font-semibold text-gray-800 mb-4">Upload Progress</h3>
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {uploadProgress.map((upload) => (
                     <div key={upload.fileName} className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600">{upload.fileName}</span>
+                      <div className="flex-1">
+                        <span className="text-sm text-gray-600 truncate block">{upload.fileName}</span>
+                        {upload.error && (
+                          <span className="text-xs text-red-500">{upload.error}</span>
+                        )}
+                      </div>
                       <div className="flex items-center gap-2">
                         {upload.status === 'uploading' && (
                           <>
@@ -696,14 +739,24 @@ const handleGalleryUpload = () => {
                                 style={{ width: `${upload.progress}%` }}
                               />
                             </div>
-                            <span className="text-xs text-gray-500">{upload.progress}%</span>
+                            <span className="text-xs text-gray-500 w-8 text-right">{upload.progress}%</span>
                           </>
                         )}
                         {upload.status === 'success' && (
-                          <span className="text-green-600 text-sm">✓ Uploaded</span>
+                          <span className="text-green-600 text-sm flex items-center gap-1">
+                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                            Uploaded
+                          </span>
                         )}
                         {upload.status === 'error' && (
-                          <span className="text-red-600 text-sm">✗ Failed</span>
+                          <span className="text-red-600 text-sm flex items-center gap-1">
+                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                            </svg>
+                            Failed
+                          </span>
                         )}
                       </div>
                     </div>
@@ -725,14 +778,14 @@ const handleGalleryUpload = () => {
                 />
                 <button
                   onClick={handleLogoUpload}
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 flex items-center gap-2"
+                  className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 flex items-center gap-2 transition-colors"
                 >
                   <Upload className="h-4 w-4" />
                   {storeProfile.logo?.url ? 'Change Logo' : 'Upload Logo'}
                 </button>
               </div>
 
-              <div className="flex items-center justify-center p-8 border-2 border-dashed border-gray-300 rounded-xl">
+              <div className="flex items-center justify-center p-8 border-2 border-dashed border-gray-300 rounded-xl hover:border-gray-400 transition-colors">
                 {storeProfile.logo ? (
                   <div className="relative group">
                     <div className="relative w-48 h-48 overflow-hidden rounded-lg">
@@ -746,7 +799,8 @@ const handleGalleryUpload = () => {
                     </div>
                     <button
                       onClick={() => deleteImage(storeProfile.logo!.id, 'logo')}
-                      className="absolute top-2 right-2 p-2 bg-red-600 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="absolute top-2 right-2 p-2 bg-red-600 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-700"
+                      type="button"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -774,14 +828,14 @@ const handleGalleryUpload = () => {
                 />
                 <button
                   onClick={handleStorefrontUpload}
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 flex items-center gap-2"
+                  className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 flex items-center gap-2 transition-colors"
                 >
                   <Upload className="h-4 w-4" />
                   {storeProfile.storefront ? 'Change Image' : 'Upload Storefront'}
                 </button>
               </div>
 
-              <div className="flex items-center justify-center p-8 border-2 border-dashed border-gray-300 rounded-xl">
+              <div className="flex items-center justify-center p-8 border-2 border-dashed border-gray-300 rounded-xl hover:border-gray-400 transition-colors">
                 {storeProfile.storefront ? (
                   <div className="relative group w-full max-w-2xl">
                     <div className="relative w-full h-64 overflow-hidden rounded-lg">
@@ -794,7 +848,8 @@ const handleGalleryUpload = () => {
                     </div>
                     <button
                       onClick={() => deleteImage(storeProfile.storefront!.id, 'storefront')}
-                      className="absolute top-2 right-2 p-2 bg-red-600 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="absolute top-2 right-2 p-2 bg-red-600 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-700"
+                      type="button"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -824,9 +879,9 @@ const handleGalleryUpload = () => {
                   className="hidden"
                 />
                 <button
-  onClick={handleGalleryUpload}
-  className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 flex items-center gap-2"
->
+                  onClick={handleGalleryUpload}
+                  className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 flex items-center gap-2 transition-colors"
+                >
                   <Upload className="h-4 w-4" />
                   Upload Images
                 </button>
@@ -847,18 +902,19 @@ const handleGalleryUpload = () => {
                           src={image.url}
                           alt={image.description || 'Gallery image'}
                           fill
-                          className="object-cover"
+                          className="object-cover group-hover:scale-105 transition-transform duration-300"
                         />
                       </div>
                       <button
                         onClick={() => deleteImage(image.id, 'gallery')}
-                        className="absolute top-2 right-2 p-2 bg-red-600 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute top-2 right-2 p-2 bg-red-600 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-700"
+                        type="button"
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
                       {image.description && (
-                        <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2 text-sm truncate">
-                          {image.description}
+                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent text-white p-3">
+                          <p className="text-sm truncate">{image.description}</p>
                         </div>
                       )}
                     </div>
@@ -880,11 +936,12 @@ const handleGalleryUpload = () => {
                   value={newCollectionTitle}
                   onChange={(e) => setNewCollectionTitle(e.target.value)}
                   placeholder="New collection title"
-                  className="flex-1 border border-gray-300 rounded-lg px-4 py-2"
+                  className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  onKeyDown={(e) => e.key === 'Enter' && createNewCollection()}
                 />
                 <button
                   onClick={createNewCollection}
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 flex items-center gap-2"
+                  className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 flex items-center gap-2 transition-colors"
                 >
                   <FolderPlus className="h-4 w-4" />
                   Create Collection
@@ -914,7 +971,7 @@ const handleGalleryUpload = () => {
                       </span>
                       <button
                         onClick={() => router.push(`/dashboard/store/collections/${collection.id}`)}
-                        className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                        className="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors"
                       >
                         Manage →
                       </button>
@@ -939,7 +996,7 @@ const handleGalleryUpload = () => {
                 { day: 'Saturday', open: '10:00', close: '16:00', closed: false },
                 { day: 'Sunday', open: '', close: '', closed: true },
               ]).map((hours, index) => (
-                <div key={hours.day} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                <div key={hours.day} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                   <div className="flex items-center gap-4">
                     <span className="font-medium text-gray-800 w-24">{hours.day}</span>
                     {hours.closed ? (
@@ -950,24 +1007,24 @@ const handleGalleryUpload = () => {
                           type="time"
                           value={hours.open || ''}
                           onChange={(e) => handleOpeningHoursChange(index, 'open', e.target.value)}
-                          className="border border-gray-300 rounded-lg px-3 py-1"
+                          className="border border-gray-300 rounded-lg px-3 py-1 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                         />
                         <span className="text-gray-500">to</span>
                         <input
                           type="time"
                           value={hours.close || ''}
                           onChange={(e) => handleOpeningHoursChange(index, 'close', e.target.value)}
-                          className="border border-gray-300 rounded-lg px-3 py-1"
+                          className="border border-gray-300 rounded-lg px-3 py-1 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                         />
                       </div>
                     )}
                   </div>
-                  <label className="flex items-center gap-2">
+                  <label className="flex items-center gap-2 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={hours.closed}
                       onChange={(e) => handleOpeningHoursChange(index, 'closed', e.target.checked)}
-                      className="rounded border-gray-300"
+                      className="rounded border-gray-300 focus:ring-2 focus:ring-blue-500"
                     />
                     <span className="text-sm text-gray-600">Closed</span>
                   </label>
