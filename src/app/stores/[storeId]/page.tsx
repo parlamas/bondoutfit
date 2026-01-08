@@ -19,7 +19,12 @@ type StorePublicData = {
   name: string;
   description: string | null;
   categories: string[];
-  storefrontUrl: string | null;
+  images: {
+  id: string;
+  imageUrl: string;
+  type: string;
+  description: string | null;
+}[];
   street: string;
   streetNumber: string;
   floor: string | null;
@@ -96,6 +101,9 @@ export default function StorePage({
 
   if (loading) return <p className="p-6">Loading…</p>;
   if (!store) return null;
+const storefrontImage = store.images.find(
+  (img) => img.type === 'STOREFRONT'
+);
 
   
 
@@ -115,14 +123,13 @@ export default function StorePage({
       <div className="flex flex-col md:flex-row gap-6">
         <div className="grid grid-cols-2 gap-4 max-w-md">
   
-{!selectedCategoryId && store.storefrontUrl && (
+{selectedCategoryId === null && storefrontImage && (
   <img
-    src={store.storefrontUrl}
+    src={storefrontImage.imageUrl}
     alt="Storefront"
     className="w-full h-48 rounded-md object-cover"
   />
 )}
-
 
   {categoryImages.map((image) => (
     <img
