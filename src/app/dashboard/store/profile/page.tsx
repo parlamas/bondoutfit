@@ -124,6 +124,12 @@ export default function StoreProfilePage() {
     }
   };
 
+
+const handleGalleryUpload = () => {
+  galleryInputRef.current?.click();
+};
+
+
   const handleImageUpload = async (
     file: File,
     type: 'logo' | 'storefront' | 'gallery',
@@ -818,9 +824,9 @@ export default function StoreProfilePage() {
                   className="hidden"
                 />
                 <button
-                  onClick={() => galleryInputRef.current?.click()}
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 flex items-center gap-2"
-                >
+  onClick={handleGalleryUpload}
+  className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 flex items-center gap-2"
+>
                   <Upload className="h-4 w-4" />
                   Upload Images
                 </button>
