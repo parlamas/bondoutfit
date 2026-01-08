@@ -9,7 +9,7 @@ import Image from 'next/image';
 import {
   Upload, Camera, X, Edit, Trash2, Save,
   Building2, Image as ImageIcon, Globe, MapPin,
-  Phone, Mail, User, ArrowLeft, Clock
+  Phone, Mail, User, ArrowLeft, Clock, FolderPlus
 } from 'lucide-react';
 
 interface StoreProfile {
@@ -57,6 +57,14 @@ interface UploadProgress {
   status: 'uploading' | 'success' | 'error';
 }
 
+interface Collection {
+  id: string;
+  title: string;
+  description?: string;
+  images: any[];
+  order: number;
+}
+
 export default function StoreProfilePage() {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -65,53 +73,49 @@ export default function StoreProfilePage() {
   const [saving, setSaving] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<UploadProgress[]>([]);
   const [activeTab, setActiveTab] = useState<'info' | 'images' | 'collections' | 'hours'>('info');
-  const [collections, setCollections] = useState<any[]>([]);
+  const [collections, setCollections] = useState<Collection[]>([]);
   const [newCollectionTitle, setNewCollectionTitle] = useState('');
   const [collectionsLoading, setCollectionsLoading] = useState(false);
-  const [saveSuccess, setSaveSuccess] = useState(false);
   const [inlineMessage, setInlineMessage] = useState<{ type: 'error' | 'success'; text: string } | null>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
   const storefrontInputRef = useRef<HTMLInputElement>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-  if (status === 'unauthenticated') {
-    router.push('/auth/store/signin');
-  } else if (status === 'authenticated') {
-    fetchStoreProfile();
-    fetchCollections();
-  }
-}, [status, router]);
-
-const fetchCollections = async () => {
-  setCollectionsLoading(true);
-  try {
-    const res = await fetch('/api/store/collections');
-    if (res.ok) {
-      const data = await res.json();
-      setCollections(data);
+    if (status === 'unauthenticated') {
+      router.push('/auth/store/signin');
+    } else if (status === 'authenticated') {
+      fetchStoreProfile();
+      fetchCollections();
     }
-  } catch (e) {
-    console.error('Failed to load collections');
-  } finally {
-    setCollectionsLoading(false);
-  }
-};
+  }, [status, router]);
 
+  const fetchCollections = async () => {
+    setCollectionsLoading(true);
+    try {
+      const res = await fetch('/api/store/collections');
+      if (res.ok) {
+        const data = await res.json();
+        setCollections(data);
+      }
+    } catch (e) {
+      console.error('Failed to load collections');
+    } finally {
+      setCollectionsLoading(false);
+    }
+  };
 
-    const fetchStoreProfile = async () => {
-
+  const fetchStoreProfile = async () => {
     try {
       const response = await fetch('/api/store/profile');
       if (response.ok) {
         const data = await response.json();
-        // Ensure galleryImages is always an array
         setStoreProfile({
-  ...data,
-  galleryImages: data.galleryImages || [],
-  ...(data.logo && { logo: data.logo }),
-  ...(data.storefront && { storefront: data.storefront }),
-});
-
+          ...data,
+          galleryImages: data.galleryImages || [],
+          ...(data.logo && { logo: data.logo }),
+          ...(data.storefront && { storefront: data.storefront }),
+        });
       }
     } catch (error) {
       console.error('Failed to fetch store profile:', error);
@@ -162,27 +166,25 @@ const fetchCollections = async () => {
         if (storeProfile) {
           if (type === 'logo') {
             setStoreProfile({
-  ...storeProfile,
-  logo: { id: result.id, url: result.url },
-});
-
+              ...storeProfile,
+              logo: { id: result.id, url: result.url },
+            });
           } else if (type === 'storefront') {
             setStoreProfile({
-  ...storeProfile,
-  storefront: { id: result.id, url: result.url },
-});
-
+              ...storeProfile,
+              storefront: { id: result.id, url: result.url },
+            });
           } else {
             const newGalleryImage: GalleryImage = {
               id: result.id,
               url: result.url,
               description: description || '',
               type: 'gallery',
-              order: storeProfile?.galleryImages?.length || 0
+              order: storeProfile.galleryImages.length
             };
             setStoreProfile({
               ...storeProfile,
-                        galleryImages: [...(storeProfile.galleryImages || []), newGalleryImage]
+              galleryImages: [...storeProfile.galleryImages, newGalleryImage]
             });
           }
         }
@@ -218,32 +220,29 @@ const fetchCollections = async () => {
     storefrontInputRef.current?.click();
   };
 
-  
-
   const handleFileChange = (
-  e: React.ChangeEvent<HTMLInputElement>,
-  type: 'logo' | 'storefront' | 'gallery'
-) => {
-  const files = Array.from(e.target.files || []);
-  if (files.length === 0) return;
+    e: React.ChangeEvent<HTMLInputElement>,
+    type: 'logo' | 'storefront' | 'gallery'
+  ) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
 
-  for (const file of files) {
-    if (!file.type.startsWith('image/')) {
-      setInlineMessage({ type: 'error', text: 'Invalid file type.' });
-      continue;
+    for (const file of files) {
+      if (!file.type.startsWith('image/')) {
+        setInlineMessage({ type: 'error', text: 'Invalid file type.' });
+        continue;
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        setInlineMessage({ type: 'error', text: 'File too large.' });
+        continue;
+      }
+
+      handleImageUpload(file, type);
     }
 
-    if (file.size > 5 * 1024 * 1024) {
-      setInlineMessage({ type: 'error', text: 'File too large.' });
-      continue;
-    }
-
-    handleImageUpload(file, type);
-  }
-
-  e.target.value = '';
-};
-
+    e.target.value = '';
+  };
 
   const deleteImage = async (imageId: string, type: 'logo' | 'storefront' | 'gallery') => {
     if (!storeProfile) return;
@@ -254,60 +253,57 @@ const fetchCollections = async () => {
       });
 
       if (response.ok) {
-  if (type === 'logo') {
-    setStoreProfile({ ...storeProfile, logo: undefined });
-  } else if (type === 'storefront') {
-    setStoreProfile({ ...storeProfile, storefront: undefined });
-  } else {
-    setStoreProfile({
-      ...storeProfile,
-      galleryImages: storeProfile.galleryImages.filter(img => img.id !== imageId)
-    });
-  }
-
-  setInlineMessage({ type: 'success', text: 'Image removed.' });
-}
-
+        if (type === 'logo') {
+          setStoreProfile({ ...storeProfile, logo: undefined });
+        } else if (type === 'storefront') {
+          setStoreProfile({ ...storeProfile, storefront: undefined });
+        } else {
+          setStoreProfile({
+            ...storeProfile,
+            galleryImages: storeProfile.galleryImages.filter(img => img.id !== imageId)
+          });
+        }
+        setInlineMessage({ type: 'success', text: 'Image removed.' });
+      }
     } catch (error) {
-  setInlineMessage({ type: 'error', text: 'Failed to remove image.' });
-}
+      setInlineMessage({ type: 'error', text: 'Failed to remove image.' });
+    }
   };
 
   const saveProfile = async () => {
-  if (!storeProfile) return;
+    if (!storeProfile) return;
 
-  setSaving(true);
-  try {
-    const response = await fetch('/api/store/profile', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        name: storeProfile.name,
-        email: storeProfile.email,
-        description: storeProfile.description,
-        website: storeProfile.website,
-        phoneCountry: storeProfile.phoneCountry,
-        phoneArea: storeProfile.phoneArea,
-        phoneNumber: storeProfile.phoneNumber,
-        categories: storeProfile.categories,
-        openingHours: storeProfile.openingHours,
-      }),
-    });
+    setSaving(true);
+    try {
+      const response = await fetch('/api/store/profile', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: storeProfile.name,
+          email: storeProfile.email,
+          description: storeProfile.description,
+          website: storeProfile.website,
+          phoneCountry: storeProfile.phoneCountry,
+          phoneArea: storeProfile.phoneArea,
+          phoneNumber: storeProfile.phoneNumber,
+          categories: storeProfile.categories,
+          openingHours: storeProfile.openingHours,
+        }),
+      });
 
-    if (response.ok) {
-      setInlineMessage({ type: 'success', text: 'Saved.' });
-    } else {
+      if (response.ok) {
+        setInlineMessage({ type: 'success', text: 'Saved.' });
+      } else {
+        setInlineMessage({ type: 'error', text: 'Save failed.' });
+      }
+    } catch {
       setInlineMessage({ type: 'error', text: 'Save failed.' });
+    } finally {
+      setSaving(false);
     }
-  } catch {
-    setInlineMessage({ type: 'error', text: 'Save failed.' });
-  } finally {
-    setSaving(false);
-  }
-};
+  };
 
-
-    const handleOpeningHoursChange = (index: number, field: 'open' | 'close' | 'closed', value: string | boolean) => {
+  const handleOpeningHoursChange = (index: number, field: 'open' | 'close' | 'closed', value: string | boolean) => {
     if (!storeProfile) return;
     
     // Get the default hours array if openingHours doesn't exist
@@ -338,52 +334,28 @@ const fetchCollections = async () => {
     });
   };
 
-  const reorderCollectionImages = async (
-  collectionId: string,
-  imageId: string,
-  newOrder: number
-) => {
-  let reorderedImages: { id: string; order: number }[] = [];
+  const createNewCollection = async () => {
+    if (!newCollectionTitle.trim()) return;
 
-  setCollections(prev =>
-    prev.map(col => {
-      if (col.id !== collectionId) return col;
+    try {
+      const response = await fetch('/api/store/collections', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: newCollectionTitle,
+        }),
+      });
 
-      const images = [...col.images];
-      const fromIndex = images.findIndex((i: any) => i.id === imageId);
-      if (fromIndex === -1) return col;
-
-      const [moved] = images.splice(fromIndex, 1);
-      images.splice(newOrder, 0, moved);
-
-      const withOrder = images.map((img: any, index: number) => ({
-        ...img,
-        order: index,
-      }));
-
-      reorderedImages = withOrder.map(img => ({
-        id: img.id,
-        order: img.order,
-      }));
-
-      return {
-        ...col,
-        images: withOrder,
-      };
-    })
-  );
-
-  await fetch('/api/store/collections/images/reorder', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      collectionId,
-      images: reorderedImages,
-    }),
-  });
-};
-
-
+      if (response.ok) {
+        const newCollection = await response.json();
+        setCollections(prev => [...prev, newCollection]);
+        setNewCollectionTitle('');
+        setInlineMessage({ type: 'success', text: 'Collection created.' });
+      }
+    } catch (error) {
+      setInlineMessage({ type: 'error', text: 'Failed to create collection.' });
+    }
+  };
 
   if (status === 'loading' || loading) {
     return (
@@ -402,7 +374,7 @@ const fetchCollections = async () => {
       {/* Header */}
       <div className="bg-white border-b">
         <div className="container mx-auto px-4 py-6">
-                    <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <button
                 onClick={() => router.push('/dashboard/store')}
@@ -417,15 +389,6 @@ const fetchCollections = async () => {
             </div>
             
             <div className="flex items-center gap-4">
-              {saveSuccess && (
-                <div className="flex items-center gap-2 text-green-600 animate-fade-in">
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  <span className="font-medium">Changes saved!</span>
-                </div>
-              )}
-              
               <button
                 onClick={saveProfile}
                 disabled={saving}
@@ -453,19 +416,13 @@ const fetchCollections = async () => {
               <ImageIcon className="inline-block h-4 w-4 mr-2" />
               Images & Gallery
             </button>
-<button
-  onClick={() => setActiveTab('collections')}
-  className={`px-4 py-2 rounded-lg font-medium ${
-    activeTab === 'collections'
-      ? 'bg-blue-100 text-blue-700'
-      : 'text-gray-600 hover:bg-gray-100'
-  }`}
->
-  <ImageIcon className="inline-block h-4 w-4 mr-2" />
-  Collections
-</button>
-
-
+            <button
+              onClick={() => setActiveTab('collections')}
+              className={`px-4 py-2 rounded-lg font-medium ${activeTab === 'collections' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'}`}
+            >
+              <FolderPlus className="inline-block h-4 w-4 mr-2" />
+              Collections
+            </button>
             <button
               onClick={() => setActiveTab('hours')}
               className={`px-4 py-2 rounded-lg font-medium ${activeTab === 'hours' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'}`}
@@ -479,16 +436,16 @@ const fetchCollections = async () => {
 
       <div className="container mx-auto px-4 py-8">
         {inlineMessage && (
-  <div
-    className={`mb-4 rounded-lg px-4 py-3 text-sm ${
-      inlineMessage.type === 'success'
-        ? 'bg-green-50 text-green-700 border border-green-200'
-        : 'bg-red-50 text-red-700 border border-red-200'
-    }`}
-  >
-    {inlineMessage.text}
-  </div>
-)}
+          <div
+            className={`mb-4 rounded-lg px-4 py-3 text-sm ${
+              inlineMessage.type === 'success'
+                ? 'bg-green-50 text-green-700 border border-green-200'
+                : 'bg-red-50 text-red-700 border border-red-200'
+            }`}
+          >
+            {inlineMessage.text}
+          </div>
+        )}
 
         {activeTab === 'info' && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -579,14 +536,11 @@ const fetchCollections = async () => {
                       <div className="flex items-center gap-2">
                         <Mail className="h-5 w-5 text-gray-400" />
                         <input
-  type="email"
-  value={storeProfile.email}
-  onChange={(e) =>
-    setStoreProfile({ ...storeProfile, email: e.target.value })
-  }
-  className="flex-1 border border-gray-300 rounded-lg px-4 py-2"
-/>
-
+                          type="email"
+                          value={storeProfile.email}
+                          onChange={(e) => setStoreProfile({ ...storeProfile, email: e.target.value })}
+                          className="flex-1 border border-gray-300 rounded-lg px-4 py-2"
+                        />
                       </div>
                     </div>
                   </div>
@@ -610,7 +564,6 @@ const fetchCollections = async () => {
                           </button>
                         </div>
                       ))}
-                      
                     </div>
                   </div>
                 </div>
@@ -753,9 +706,6 @@ const fetchCollections = async () => {
               </div>
             )}
 
-            
-
-
             {/* Logo Upload */}
             <div className="bg-white rounded-xl shadow-lg p-6">
               <div className="flex items-center justify-between mb-6">
@@ -780,13 +730,13 @@ const fetchCollections = async () => {
                 {storeProfile.logo ? (
                   <div className="relative group">
                     <div className="relative w-48 h-48 overflow-hidden rounded-lg">
-                                        <Image
-                    src={storeProfile.logo.url}
-  alt="Store Logo"
-  fill
-  className="object-contain"
-  sizes="(max-width: 768px) 100vw, 192px"
-/>
+                      <Image
+                        src={storeProfile.logo.url}
+                        alt="Store Logo"
+                        fill
+                        className="object-contain"
+                        sizes="(max-width: 768px) 100vw, 192px"
+                      />
                     </div>
                     <button
                       onClick={() => deleteImage(storeProfile.logo!.id, 'logo')}
@@ -843,7 +793,7 @@ const fetchCollections = async () => {
                       <Trash2 className="h-4 w-4" />
                     </button>
                   </div>
-                                ) : (
+                ) : (
                   <div className="text-center">
                     <Building2 className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                     <p className="text-gray-600">No storefront image uploaded yet</p>
@@ -854,6 +804,119 @@ const fetchCollections = async () => {
                 )}
               </div>
             </div>
+
+            {/* Gallery Images */}
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold text-gray-900">Gallery Images</h2>
+                <input
+                  type="file"
+                  ref={galleryInputRef}
+                  onChange={(e) => handleFileChange(e, 'gallery')}
+                  accept="image/*"
+                  multiple
+                  className="hidden"
+                />
+                <button
+                  onClick={() => galleryInputRef.current?.click()}
+                  className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 flex items-center gap-2"
+                >
+                  <Upload className="h-4 w-4" />
+                  Upload Images
+                </button>
+              </div>
+
+              {storeProfile.galleryImages.length === 0 ? (
+                <div className="text-center py-12 text-gray-500">
+                  <ImageIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <p>No gallery images uploaded yet</p>
+                  <p className="text-sm text-gray-500 mt-1">Upload images to showcase your store</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {storeProfile.galleryImages.map((image) => (
+                    <div key={image.id} className="relative group">
+                      <div className="relative w-full h-48 overflow-hidden rounded-lg">
+                        <Image
+                          src={image.url}
+                          alt={image.description || 'Gallery image'}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                      <button
+                        onClick={() => deleteImage(image.id, 'gallery')}
+                        className="absolute top-2 right-2 p-2 bg-red-600 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                      {image.description && (
+                        <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2 text-sm truncate">
+                          {image.description}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'collections' && (
+          <div className="bg-white rounded-xl shadow-lg p-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-6">Collections</h2>
+            
+            <div className="mb-8">
+              <div className="flex items-center gap-4">
+                <input
+                  type="text"
+                  value={newCollectionTitle}
+                  onChange={(e) => setNewCollectionTitle(e.target.value)}
+                  placeholder="New collection title"
+                  className="flex-1 border border-gray-300 rounded-lg px-4 py-2"
+                />
+                <button
+                  onClick={createNewCollection}
+                  className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 flex items-center gap-2"
+                >
+                  <FolderPlus className="h-4 w-4" />
+                  Create Collection
+                </button>
+              </div>
+            </div>
+
+            {collectionsLoading ? (
+              <div className="flex justify-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+              </div>
+            ) : collections.length === 0 ? (
+              <div className="text-center py-12 text-gray-500">
+                <FolderPlus className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <p>No collections yet</p>
+                <p className="text-sm text-gray-500 mt-1">Create collections to organize your products</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {collections.map((collection) => (
+                  <div key={collection.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                    <h3 className="font-semibold text-gray-800 mb-2">{collection.title}</h3>
+                    <p className="text-sm text-gray-600 mb-3">{collection.description || 'No description'}</p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-500">
+                        {collection.images?.length || 0} items
+                      </span>
+                      <button
+                        onClick={() => router.push(`/dashboard/store/collections/${collection.id}`)}
+                        className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                      >
+                        Manage →
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
@@ -877,23 +940,24 @@ const fetchCollections = async () => {
                       <span className="text-red-600 font-medium">Closed</span>
                     ) : (
                       <div className="flex items-center gap-2">
-                                                <input
-  type="time"
-  value={hours.open || ''}
-  onChange={(e) => handleOpeningHoursChange(index, 'open', e.target.value)}
-  className="border border-gray-300 rounded-lg px-3 py-1"
-/>
-<input
-  type="time"
-  value={hours.close || ''}
-  onChange={(e) => handleOpeningHoursChange(index, 'close', e.target.value)}
-  className="border border-gray-300 rounded-lg px-3 py-1"
-/>
+                        <input
+                          type="time"
+                          value={hours.open || ''}
+                          onChange={(e) => handleOpeningHoursChange(index, 'open', e.target.value)}
+                          className="border border-gray-300 rounded-lg px-3 py-1"
+                        />
+                        <span className="text-gray-500">to</span>
+                        <input
+                          type="time"
+                          value={hours.close || ''}
+                          onChange={(e) => handleOpeningHoursChange(index, 'close', e.target.value)}
+                          className="border border-gray-300 rounded-lg px-3 py-1"
+                        />
                       </div>
                     )}
                   </div>
                   <label className="flex items-center gap-2">
-                                        <input
+                    <input
                       type="checkbox"
                       checked={hours.closed}
                       onChange={(e) => handleOpeningHoursChange(index, 'closed', e.target.checked)}
@@ -903,9 +967,6 @@ const fetchCollections = async () => {
                   </label>
                 </div>
               ))}
-              <div className="pt-4">
-                                
-              </div>
             </div>
           </div>
         )}
