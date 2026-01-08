@@ -133,7 +133,9 @@ const galleryImages = store.images.filter(
     />
   )}
 
-  {galleryImages.map((image) => (
+  {galleryImages
+  .filter((img) => selectedCategoryId === 'none')
+  .map((image) => (
     <div key={image.id} className="space-y-1">
       <img
         src={image.imageUrl}
@@ -146,7 +148,7 @@ const galleryImages = store.images.filter(
     </div>
   ))}
 
-{selectedCategoryId &&
+{selectedCategoryId !== 'none' &&
   categoryImages.map((image) => (
     <img
       key={image.id}
@@ -156,9 +158,7 @@ const galleryImages = store.images.filter(
     />
   ))}
 
-
 </div>
-
 
         <div className="text-sm text-gray-700 space-y-1">
           <div>
@@ -193,11 +193,8 @@ const galleryImages = store.images.filter(
 
       {/* CATEGORY DROPDOWN */}
       <div className="flex items-center gap-4">
+        
         <select
-  
-  onChange={(e) => {
-    const value = e.target.value;
-    <select
   value={selectedCategoryId}
   onChange={(e) => setSelectedCategoryId(e.target.value)}
   className="border rounded px-3 py-2"
@@ -210,16 +207,6 @@ const galleryImages = store.images.filter(
   ))}
 </select>
 
-  }}
-  className="border rounded px-3 py-2"
->
-  <option value="none">No category</option>
-          {categories.map((category) => (
-            <option key={category.id} value={category.id}>
-              {category.title}
-            </option>
-          ))}
-        </select>
 
         <button
           type="button"
