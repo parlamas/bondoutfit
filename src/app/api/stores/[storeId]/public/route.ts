@@ -45,6 +45,7 @@ export async function GET(
     imageUrl: true,
     type: true,
     description: true,
+    categoryId: true,
   },
 },
 

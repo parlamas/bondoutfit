@@ -163,47 +163,39 @@ if (categoryId) {
   });
 }
 
+// Handle GALLERY images (uncategorized only)
+if (imageType === "GALLERY" && !categoryId) {
+  const lastGalleryImage = await prisma.storeImage.findFirst({
+    where: {
+      storeId: store.id,
+      type: "GALLERY",
+    },
+    orderBy: { order: "desc" },
+  });
 
-    // Handle GALLERY images
-    if (imageType === "GALLERY") {
-      // For gallery images - create new entry
-      // First find the maximum order for this store's gallery images
-      const lastGalleryImage = await prisma.storeImage.findFirst({
-        where: {
-          storeId: store.id,
-          type: "GALLERY",
-        },
-        orderBy: { order: "desc" },
-      });
+  const nextOrder = lastGalleryImage ? lastGalleryImage.order + 1 : 0;
 
-      const nextOrder = lastGalleryImage ? lastGalleryImage.order + 1 : 0;
+  const storeImage = await prisma.storeImage.create({
+    data: {
+      storeId: store.id,
+      imageUrl: uploadResult.secure_url,
+      type: "GALLERY",
+      order: nextOrder,
+      status: "ACTIVE",
+      title: description || "Gallery Image",
+      description: description || null,
+    },
+  });
 
-      const storeImage = await prisma.storeImage.create({
-        data: {
-          storeId: store.id,
-          imageUrl: uploadResult.secure_url,
-          type: "GALLERY",
-          order: nextOrder,
-          status: "ACTIVE",
-          title: description || "Gallery Image",
-          description: description || null,
-          // Don't set categoryId or storeImageCategoryId for general gallery images
-        },
-      });
+  return NextResponse.json({
+    id: storeImage.id,
+    url: storeImage.imageUrl,
+    description: storeImage.description,
+    order: storeImage.order,
+  });
+}
 
-      console.log('Gallery image saved:', { 
-        id: storeImage.id, 
-        order: storeImage.order 
-      });
-
-      return NextResponse.json({
-        id: storeImage.id,
-        url: storeImage.imageUrl,
-        description: storeImage.description,
-        order: storeImage.order,
-      });
-    }
-
+    
     return NextResponse.json({ error: 'Invalid image type' }, { status: 400 });
 
   } catch (error) {
