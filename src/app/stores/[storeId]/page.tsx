@@ -46,7 +46,7 @@ export default function StorePage({
   params: { storeId: string };
 }) {
   const [categories, setCategories] = useState<StoreCategory[]>([]);
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string>('none');
   const [loading, setLoading] = useState(true);
   const [store, setStore] = useState<StorePublicData | null>(null);
   const [showHours, setShowHours] = useState(false);
@@ -75,10 +75,11 @@ export default function StorePage({
   }, [params.storeId]);
 
   useEffect(() => {
-  if (!selectedCategoryId) {
-    setCategoryImages([]);
-    return;
-  }
+  if (selectedCategoryId === 'none') {
+  setCategoryImages([]);
+  return;
+}
+
 
   const loadImages = async () => {
     const res = await fetch(
@@ -193,10 +194,22 @@ const galleryImages = store.images.filter(
       {/* CATEGORY DROPDOWN */}
       <div className="flex items-center gap-4">
         <select
-  value={selectedCategoryId ?? 'none'}
+  
   onChange={(e) => {
     const value = e.target.value;
-    setSelectedCategoryId(value === 'none' ? null : value);
+    <select
+  value={selectedCategoryId}
+  onChange={(e) => setSelectedCategoryId(e.target.value)}
+  className="border rounded px-3 py-2"
+>
+  <option value="none">No category</option>
+  {categories.map((category) => (
+    <option key={category.id} value={category.id}>
+      {category.title}
+    </option>
+  ))}
+</select>
+
   }}
   className="border rounded px-3 py-2"
 >
