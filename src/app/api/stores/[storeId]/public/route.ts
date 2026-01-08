@@ -31,6 +31,14 @@ export async function GET(
       images: {
   where: {
     status: "ACTIVE",
+    OR: [
+      { type: "LOGO" },
+      { type: "STOREFRONT" },
+      {
+        type: "GALLERY",
+        categoryId: null,
+      },
+    ],
   },
   select: {
     id: true,
@@ -39,6 +47,7 @@ export async function GET(
     description: true,
   },
 },
+
 
       items: {
   where: {
