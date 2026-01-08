@@ -19,6 +19,7 @@ type StorePublicData = {
   name: string;
   description: string | null;
   categories: string[];
+  storefrontUrl: string | null;
   street: string;
   streetNumber: string;
   floor: string | null;
@@ -113,18 +114,22 @@ setCategoryImages(data);
 
       <div className="flex flex-col md:flex-row gap-6">
         <div className="grid grid-cols-2 gap-4 max-w-md">
-  {categoryImages.length === 0 && (
-    <pre className="text-xs text-gray-500">
-      {JSON.stringify(categoryImages, null, 2)}
-    </pre>
-  )}
+  
+{categoryImages.length === 0 && store.storefrontUrl && (
+  <img
+    src={store.storefrontUrl}
+    alt="Storefront"
+    className="w-full h-48 rounded-md object-cover"
+  />
+)}
+
 
   {categoryImages.map((image) => (
     <img
   key={image.id}
   src={image.imageUrl}
   alt=""
-  className="w-full h-auto rounded-md object-cover"
+  className="w-full h-48 rounded-md object-cover"
 />
   ))}
 </div>
@@ -164,10 +169,14 @@ setCategoryImages(data);
       {/* CATEGORY DROPDOWN */}
       <div className="flex items-center gap-4">
         <select
-          value={selectedCategoryId ?? ''}
-          onChange={(e) => setSelectedCategoryId(e.target.value)}
-          className="border rounded px-3 py-2"
-        >
+  value={selectedCategoryId ?? 'none'}
+  onChange={(e) => {
+    const value = e.target.value;
+    setSelectedCategoryId(value === 'none' ? null : value);
+  }}
+  className="border rounded px-3 py-2"
+>
+  <option value="none">No category</option>
           {categories.map((category) => (
             <option key={category.id} value={category.id}>
               {category.title}
