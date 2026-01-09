@@ -56,6 +56,8 @@ const reorderImages = async (
   from: number,
   to: number
 ) => {
+  console.log('Reordering image in category', categoryId, 'from', from, 'to', to);
+  
   const category = categories.find(c => c.id === categoryId);
   if (!category) return;
 
@@ -63,16 +65,43 @@ const reorderImages = async (
   const [moved] = images.splice(from, 1);
   images.splice(to, 0, moved);
 
-  await fetch('/api/store/categories/images/reorder', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      images: images.map((img, i) => ({
-        id: img.id,
-        order: i,
-      })),
-    }),
-  });
+  console.log('New image order:', images.map(img => img.id));
+  
+  // Update local state
+  setCategories(prev =>
+    prev.map(cat =>
+      cat.id === categoryId
+        ? { ...cat, images }
+        : cat
+    )
+  );
+
+  try {
+    const res = await fetch('/api/store/categories/images/reorder', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        images: images.map((img, i) => ({
+          id: img.id,
+          order: i,
+        })),
+      }),
+    });
+    
+    console.log('Image reorder API response status:', res.status);
+    
+    if (!res.ok) {
+      const error = await res.text();
+      console.error('Image reorder API Error:', error);
+      // Revert on error
+      loadCategories();
+    } else {
+      console.log('Image reorder successful');
+    }
+  } catch (error) {
+    console.error('Image reorder Network Error:', error);
+    loadCategories();
+  }
 };
 
 const reorderCategory = async (from: number, to: number) => {
