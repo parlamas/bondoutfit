@@ -65,6 +65,13 @@ enum DayOfWeek {
   SATURDAY
 }
 
+enum DiscountStatus {
+  DRAFT
+  POSTED
+  DISMOUNTED
+  DELETED
+}
+
 /**
  * =========================
  * USER
@@ -481,6 +488,7 @@ model Discount {
   svdOnly              Boolean @default(false)
   isPublic             Boolean @default(true)
   isStackable          Boolean @default(false)
+  status               DiscountStatus @default(DRAFT)  // ADD THIS LINE
 
   // Relations
   store  Store               @relation(fields: [storeId], references: [id], onDelete: Cascade)
