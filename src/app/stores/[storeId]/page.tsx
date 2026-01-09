@@ -83,7 +83,7 @@ export default function StorePage({
 
     const loadImages = async () => {
       const res = await fetch(
-        `/api/public/store/${params.storeId}/categories/${selectedCategoryId}/images`
+              `/api/public/store/${params.storeId}/categories/${selectedCategoryId}/images?t=${Date.now()}`
       );
 
       if (res.ok) {
@@ -127,6 +127,11 @@ const galleryImages = store.images.filter(
 <div className="col-span-2 text-xs text-red-500">
   selectedCategoryId: "{selectedCategoryId}", 
   categoryImages count: {categoryImages.length}
+</div>
+
+{/* Debug all store images */}
+<div className="col-span-2 text-xs text-blue-500">
+  All store images: {JSON.stringify(store?.images)}
 </div>
 
   {storefrontImage && (
