@@ -74,28 +74,26 @@ export default function StorePage({
     load();
   }, [params.storeId]);
 
-  useEffect(() => {
-  if (selectedCategoryId === 'none') {
-  setCategoryImages([]);
-  return;
-}
+    useEffect(() => {
+    setCategoryImages([]);
 
-
-  const loadImages = async () => {
-    const res = await fetch(
-      `/api/public/store/${params.storeId}/categories/${selectedCategoryId}/images`
-    );
-
-    if (res.ok) {
-      const data = await res.json();
-      setCategoryImages(data);
-    } else {
-      setCategoryImages([]);
+    if (selectedCategoryId === 'none') {
+      return;
     }
-  };
 
-  loadImages();
-}, [selectedCategoryId, params.storeId]);
+    const loadImages = async () => {
+      const res = await fetch(
+        `/api/public/store/${params.storeId}/categories/${selectedCategoryId}/images`
+      );
+
+      if (res.ok) {
+        const data = await res.json();
+        setCategoryImages(data);
+      }
+    };
+
+    loadImages();
+  }, [selectedCategoryId, params.storeId]);
 
 
   if (loading) return <p className="p-6">Loading…</p>;
@@ -155,7 +153,7 @@ const galleryImages = store.images.filter(
 {selectedCategoryId !== 'none' &&
   categoryImages.map((image) => (
     <img
-      key={image.id}
+      key={`${selectedCategoryId}-${image.id}`}
       src={image.imageUrl}
       alt=""
       className="w-full h-48 rounded-md object-cover"
