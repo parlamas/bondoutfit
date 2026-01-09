@@ -31,13 +31,10 @@ export async function GET(
       images: {
   where: {
     status: "ACTIVE",
-    OR: [
+          OR: [
       { type: "LOGO" },
       { type: "STOREFRONT" },
-      {
-        type: "GALLERY",
-        categoryId: null,
-      },
+      { type: "GALLERY" },
     ],
   },
   select: {
