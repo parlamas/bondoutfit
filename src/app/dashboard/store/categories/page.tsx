@@ -76,24 +76,43 @@ const reorderImages = async (
 };
 
 const reorderCategory = async (from: number, to: number) => {
+  console.log('Reordering category from', from, 'to', to);
+  
   if (to < 0 || to >= categories.length) return;
 
   const newCategories = [...categories];
   const [moved] = newCategories.splice(from, 1);
   newCategories.splice(to, 0, moved);
 
+  console.log('New order:', newCategories.map(c => c.title));
+  
   setCategories(newCategories);
 
-  await fetch('/api/store/categories/reorder', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      categories: newCategories.map((cat, i) => ({
-        id: cat.id,
-        order: i,
-      })),
-    }),
-  });
+  try {
+    const res = await fetch('/api/store/categories/reorder', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        categories: newCategories.map((cat, i) => ({
+          id: cat.id,
+          order: i,
+        })),
+      }),
+    });
+    
+    console.log('API response status:', res.status);
+    
+    if (!res.ok) {
+      const error = await res.text();
+      console.error('API Error:', error);
+      loadCategories();
+    } else {
+      console.log('Reorder successful');
+    }
+  } catch (error) {
+    console.error('Network Error:', error);
+    loadCategories();
+  }
 };
 
   const [categories, setCategories] = useState<StoreCategory[]>([]);
