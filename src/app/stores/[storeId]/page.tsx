@@ -142,7 +142,7 @@ const galleryImages = store.images.filter(
       className="w-full h-48 rounded-md object-cover"
     />
     {image.description && (
-      <div className="absolute inset-x-0 bottom-0 bg-black/60 text-white text-xs p-2 rounded-b-md opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+             <div className="absolute inset-x-0 bottom-0 bg-black/60 text-white text-xs p-2 rounded-b-md">
         {image.description}
       </div>
     )}
@@ -158,7 +158,7 @@ const galleryImages = store.images.filter(
         className="w-full h-48 rounded-md object-cover"
       />
       {image.description && (
-        <div className="absolute inset-x-0 bottom-0 bg-black/60 text-white text-xs p-2 rounded-b-md opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <div className="absolute inset-x-0 bottom-0 bg-black/60 text-white text-xs p-2 rounded-b-md">
           {image.description}
         </div>
       )}
