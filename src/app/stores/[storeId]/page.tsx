@@ -125,6 +125,12 @@ const galleryImages = store.images.filter(
       <div className="flex flex-col md:flex-row gap-6">
         <div className="grid grid-cols-2 gap-4 max-w-md">
 
+          {/* Debug - remove after fixing */}
+<div className="col-span-2 text-xs text-red-500">
+  selectedCategoryId: "{selectedCategoryId}", 
+  categoryImages count: {categoryImages.length}
+</div>
+
   {storefrontImage && (
     <img
       src={storefrontImage.imageUrl}
@@ -133,20 +139,18 @@ const galleryImages = store.images.filter(
     />
   )}
 
-  {galleryImages
-  .filter((img) => selectedCategoryId === 'none')
-  .map((image) => (
-    <div key={image.id} className="space-y-1">
-      <img
-        src={image.imageUrl}
-        alt={image.description ?? ''}
-        className="w-full h-48 rounded-md object-cover"
-      />
-      {image.description && (
-        <p className="text-xs text-gray-600">{image.description}</p>
-      )}
-    </div>
-  ))}
+  {galleryImages.map((image) => (
+  <div key={image.id} className="space-y-1">
+    <img
+      src={image.imageUrl}
+      alt={image.description ?? ''}
+      className="w-full h-48 rounded-md object-cover"
+    />
+    {image.description && (
+      <p className="text-xs text-gray-600">{image.description}</p>
+    )}
+  </div>
+))}
 
 {selectedCategoryId !== 'none' &&
   categoryImages.map((image) => (
