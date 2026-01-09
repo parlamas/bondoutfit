@@ -75,6 +75,27 @@ const reorderImages = async (
   });
 };
 
+const reorderCategory = async (from: number, to: number) => {
+  if (to < 0 || to >= categories.length) return;
+
+  const newCategories = [...categories];
+  const [moved] = newCategories.splice(from, 1);
+  newCategories.splice(to, 0, moved);
+
+  setCategories(newCategories);
+
+  await fetch('/api/store/categories/reorder', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      categories: newCategories.map((cat, i) => ({
+        id: cat.id,
+        order: i,
+      })),
+    }),
+  });
+};
+
   const [categories, setCategories] = useState<StoreCategory[]>([]);
   const [newTitle, setNewTitle] = useState('');
   const [loading, setLoading] = useState(true);
@@ -199,23 +220,38 @@ const handleSave = async () => {
       </div>
 
       {/* CATEGORIES */}
-      {categories.map((category) => (
+            {categories.map((category, index) => (
         <div key={category.id} className="border rounded p-4 space-y-4">
-        <div className="flex items-center justify-between">
-  <h2 className="text-xl font-semibold">{category.title}</h2>
-  <button
-    onClick={async () => {
-      await fetch(`/api/store/categories/${category.id}`, {
-        method: 'DELETE',
-      });
-      loadCategories();
-    }}
-    className="text-red-600 text-sm underline"
-  >
-    Delete
-  </button>
-</div>
-
+                <div className="flex items-center justify-between">
+          <h2 className="text-xl font-semibold">{category.title}</h2>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => reorderCategory(index, index - 1)}
+              disabled={index === 0}
+              className="disabled:opacity-30"
+            >
+              ↑
+            </button>
+            <button
+              onClick={() => reorderCategory(index, index + 1)}
+              disabled={index === categories.length - 1}
+              className="disabled:opacity-30"
+            >
+              ↓
+            </button>
+            <button
+              onClick={async () => {
+                await fetch(`/api/store/categories/${category.id}`, {
+                  method: 'DELETE',
+                });
+                loadCategories();
+              }}
+              className="text-red-600 text-sm underline"
+            >
+              Delete
+            </button>
+          </div>
+        </div>
 
           <input
   type="text"
