@@ -1,11 +1,11 @@
-//src/app/api/store/discounts/[id]/route.ts
+//src/app/api/store/discounts/[id]/status/route.ts
 
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-export async function DELETE(
+export async function PATCH(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
@@ -14,6 +14,16 @@ export async function DELETE(
 
     if (!session || (session.user as any).role !== "STORE_MANAGER") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const body = await req.json();
+    const { status } = body;
+
+    if (!status || !["DRAFT", "POSTED", "DISMOUNTED", "DELETED"].includes(status)) {
+      return NextResponse.json(
+        { error: "Invalid status" },
+        { status: 400 }
+      );
     }
 
     // Verify discount belongs to manager's store
@@ -33,19 +43,18 @@ export async function DELETE(
       );
     }
 
-    // Soft delete by setting status to DELETED
     const updatedDiscount = await prisma.discount.update({
       where: { id: params.id },
-      data: { status: "DELETED" },
+      data: { status },
     });
 
     return NextResponse.json({
       success: true,
-      message: "Discount deleted successfully",
+      message: `Discount status updated to ${status}`,
       discount: updatedDiscount,
     });
   } catch (error: any) {
-    console.error("Discount delete error:", error);
+    console.error("Discount status update error:", error);
     return NextResponse.json(
       { error: "Internal server error", details: error.message },
       { status: 500 }
