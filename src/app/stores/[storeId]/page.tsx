@@ -123,16 +123,7 @@ const galleryImages = store.images.filter(
       <div className="flex flex-col md:flex-row gap-6">
         <div className="grid grid-cols-2 gap-4 max-w-md">
 
-          {/* Debug - remove after fixing */}
-<div className="col-span-2 text-xs text-red-500">
-  selectedCategoryId: "{selectedCategoryId}", 
-  categoryImages count: {categoryImages.length}
-</div>
-
-{/* Debug all store images */}
-<div className="col-span-2 text-xs text-blue-500">
-  All store images: {JSON.stringify(store?.images)}
-</div>
+          
 
   {storefrontImage && (
     <img
