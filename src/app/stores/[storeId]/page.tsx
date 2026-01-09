@@ -135,28 +135,32 @@ const galleryImages = store.images.filter(
   )}
 
   {galleryImages.map((image) => (
-  <div key={image.id} className="space-y-1">
+    <div key={image.id} className="relative group">
     <img
       src={image.imageUrl}
       alt={image.description ?? ''}
       className="w-full h-48 rounded-md object-cover"
     />
     {image.description && (
-      <p className="text-xs text-gray-600">{image.description}</p>
+      <div className="absolute inset-x-0 bottom-0 bg-black/60 text-white text-xs p-2 rounded-b-md opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        {image.description}
+      </div>
     )}
   </div>
 ))}
 
 {selectedCategoryId !== 'none' &&
   categoryImages.map((image) => (
-    <div key={`${selectedCategoryId}-${image.id}`} className="space-y-1">
+        <div key={`${selectedCategoryId}-${image.id}`} className="relative group">
       <img
         src={image.imageUrl}
         alt={image.description || ''}
         className="w-full h-48 rounded-md object-cover"
       />
       {image.description && (
-        <p className="text-xs text-gray-600">{image.description}</p>
+        <div className="absolute inset-x-0 bottom-0 bg-black/60 text-white text-xs p-2 rounded-b-md opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          {image.description}
+        </div>
       )}
     </div>
   ))}
