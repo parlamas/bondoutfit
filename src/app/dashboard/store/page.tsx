@@ -422,7 +422,7 @@ export default function StoreDashboard() {
                 </button>
 
                 <button
-                  onClick={() => router.push('/dashboard/store/discounts')}
+                                    onClick={() => router.push('/dashboard/store/discounts/list')}
                   className="w-full text-left px-4 py-3 bg-green-50 hover:bg-green-100 rounded-lg transition flex items-center gap-3"
                 >
                   <Tag className="h-5 w-5 text-green-600" />
