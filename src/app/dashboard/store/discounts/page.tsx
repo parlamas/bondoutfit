@@ -108,7 +108,7 @@ export default function CreateDiscountPage() {
 
     if (res.ok) {
       // Success - redirect to discounts list
-      router.push("/dashboard/store/discounts");
+            router.push("/dashboard/store");
     } else {
       // Show field-specific errors inline
       if (data.field && data.error) {
