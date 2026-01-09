@@ -18,9 +18,10 @@ export async function GET(
           storeId: params.storeId,
         },
       },
-      select: {
+            select: {
         id: true,
         imageUrl: true,
+        description: true,
       },
       orderBy: {
         order: 'asc',
@@ -38,6 +39,7 @@ export async function GET(
       select: {
         id: true,
         imageUrl: true,
+        description: true,
       },
       orderBy: {
         order: 'asc',

@@ -12,6 +12,7 @@ type StoreCategory = {
 type CategoryImage = {
   id: string;
   imageUrl: string;
+  description?: string;
 };
 
 
@@ -148,12 +149,16 @@ const galleryImages = store.images.filter(
 
 {selectedCategoryId !== 'none' &&
   categoryImages.map((image) => (
-    <img
-      key={`${selectedCategoryId}-${image.id}`}
-      src={image.imageUrl}
-      alt=""
-      className="w-full h-48 rounded-md object-cover"
-    />
+    <div key={`${selectedCategoryId}-${image.id}`} className="space-y-1">
+      <img
+        src={image.imageUrl}
+        alt={image.description || ''}
+        className="w-full h-48 rounded-md object-cover"
+      />
+      {image.description && (
+        <p className="text-xs text-gray-600">{image.description}</p>
+      )}
+    </div>
   ))}
 
 </div>
