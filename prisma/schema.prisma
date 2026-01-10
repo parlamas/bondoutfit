@@ -421,6 +421,16 @@ model Visit {
   checkedInAt DateTime?
   status      VisitStatus @default(SCHEDULED)
 
+  // Automation Tracking
+  completedAt      DateTime?
+  cancelledAt      DateTime?
+  missedAt        DateTime?
+  lastScanAt      DateTime?  // Last time QR code was scanned
+  
+  // Cancellation Info
+  cancelledBy     String?    // 'CUSTOMER' or 'STORE'
+  cancellationReason String?
+
   // Discount Tracking
   discountUnlocked Boolean @default(false)
   discountUsed     Boolean @default(false)
@@ -447,6 +457,7 @@ model Visit {
   @@index([scheduledDate])
   @@index([status])
   @@index([storeId, scheduledDate])
+  @@index([status, scheduledDate, scheduledTime]) // For automation checks
 }
 
 /**
