@@ -64,7 +64,7 @@ export default function StorePage({
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>('none');
   const [loading, setLoading] = useState(true);
   const [store, setStore] = useState<StorePublicData | null>(null);
-  const [showHours, setShowHours] = useState(false);
+  const [showHours, setShowHours] = useState(true); // Changed to true to always show
   const [categoryImages, setCategoryImages] = useState<CategoryImage[]>([]);
   const [discounts, setDiscounts] = useState<Discount[]>([]);
   const [showDiscounts, setShowDiscounts] = useState(true);
@@ -169,7 +169,7 @@ export default function StorePage({
     <div className="max-w-6xl mx-auto p-6 space-y-6">
       <h1 className="text-3xl font-bold">{store.name}</h1>
 
-      {/* SCHEDULED VISIT DISCOUNTS SECTION - Add this for SVD */}
+      {/* SCHEDULED VISIT DISCOUNTS SECTION */}
       {svdDiscounts.length > 0 && showDiscounts && (
         <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
           <div className="flex justify-between items-center mb-3">
@@ -316,8 +316,9 @@ export default function StorePage({
         )}
       </div>
 
-      {/* Rest of your existing store page code remains the same */}
+      {/* MAIN CONTENT AREA */}
       <div className="flex flex-col md:flex-row gap-6">
+        {/* IMAGES SECTION */}
         <div className="grid grid-cols-2 gap-4 max-w-md">
           {storefrontImage && (
             <img
@@ -359,13 +360,115 @@ export default function StorePage({
             ))}
         </div>
 
-        <div className="text-sm text-gray-700 space-y-1">
-          {/* ... rest of address and contact info ... */}
+        {/* CONTACT & CATEGORIES SECTION - RESTORED */}
+        <div className="flex-1 space-y-6">
+          {/* CATEGORY DROPDOWN - RESTORED (Always Visible) */}
+          <div>
+            <h3 className="font-medium text-gray-900 mb-2">Browse Categories</h3>
+            <select
+              value={selectedCategoryId}
+              onChange={(e) => setSelectedCategoryId(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="none">Select a category</option>
+              {categories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.title}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* CONTACT INFORMATION - RESTORED (Always Visible) */}
+          <div className="border border-gray-200 rounded-lg p-4">
+            <h3 className="font-medium text-gray-900 mb-3">Contact Information</h3>
+            
+            <div className="space-y-3 text-sm text-gray-700">
+              {/* Full Address with Floor - RESTORED */}
+              <div>
+                <div className="font-medium text-gray-600">Address</div>
+                <div className="text-gray-900">
+                  {store.street} {store.streetNumber}
+                  {store.floor && `, Floor ${store.floor}`}
+                  <br />
+                  {store.zip} {store.city}, {store.country}
+                </div>
+              </div>
+
+              {/* Full Phone Number - RESTORED */}
+              {store.phoneNumber && (
+                <div>
+                  <div className="font-medium text-gray-600">Phone</div>
+                  <div className="text-gray-900">
+                    {store.phoneCountry} {store.phoneArea} {store.phoneNumber}
+                  </div>
+                </div>
+              )}
+
+              {/* Email - RESTORED */}
+              {store.email && (
+                <div>
+                  <div className="font-medium text-gray-600">Email</div>
+                  <a 
+                    href={`mailto:${store.email}`}
+                    className="text-blue-600 hover:text-blue-800 transition-colors"
+                  >
+                    {store.email}
+                  </a>
+                </div>
+              )}
+
+              {/* Website - RESTORED */}
+              {store.website && (
+                <div>
+                  <div className="font-medium text-gray-600">Website</div>
+                  <a
+                    href={store.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:text-blue-800 transition-colors"
+                  >
+                    {store.website}
+                  </a>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* OPENING HOURS - RESTORED (Always Visible) */}
+          {store.openingHours && (
+            <div className="border border-gray-200 rounded-lg p-4">
+              <h3 className="font-medium text-gray-900 mb-3">Opening Hours</h3>
+              <div className="text-sm text-gray-700 space-y-2">
+                {Object.entries(store.openingHours).map(([day, value]) => {
+                  const dayNames = [
+                    'Sunday', 'Monday', 'Tuesday', 'Wednesday', 
+                    'Thursday', 'Friday', 'Saturday'
+                  ];
+                  const label = Number.isInteger(Number(day)) 
+                    ? dayNames[Number(day)] 
+                    : day;
+                  
+                  return (
+                    <div key={day} className="flex justify-between items-center">
+                      <span className="font-medium text-gray-800">{label}</span>
+                      <span className="text-gray-900">
+                        {typeof value === 'string'
+                          ? value
+                          : Array.isArray(value)
+                          ? value.join(' – ')
+                          : value?.open && value?.close
+                          ? `${value.open} – ${value.close}`
+                          : 'Closed'}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
       </div>
-
-      {/* CATEGORY DROPDOWN and OPENING HOURS remain the same */}
-      {/* ... */}
     </div>
   );
 }
