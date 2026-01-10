@@ -3,6 +3,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
 type StoreCategory = {
   id: string;
@@ -64,10 +66,20 @@ export default function StorePage({
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>('none');
   const [loading, setLoading] = useState(true);
   const [store, setStore] = useState<StorePublicData | null>(null);
-  const [showHours, setShowHours] = useState(true); // Changed to true to always show
+  const [showHours, setShowHours] = useState(true);
   const [categoryImages, setCategoryImages] = useState<CategoryImage[]>([]);
   const [discounts, setDiscounts] = useState<Discount[]>([]);
   const [showDiscounts, setShowDiscounts] = useState(true);
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  const [showBookingForm, setShowBookingForm] = useState(false);
+  const [visitSubmitted, setVisitSubmitted] = useState(false);
+  const [bookingData, setBookingData] = useState({
+    date: '',
+    time: '',
+    numberOfVisitors: 1,
+  });
+  const [loadingBooking, setLoadingBooking] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -148,6 +160,52 @@ export default function StorePage({
       return `€${discount.discountAmount}`;
     }
     return 'Special Offer';
+  };
+
+  const handleBookVisitClick = () => {
+    if (status === 'unauthenticated') {
+      router.push('/auth/customer/signin');
+      return;
+    }
+    setShowBookingForm(true);
+  };
+
+  const handleBookingChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setBookingData(prev => ({
+      ...prev,
+      [name]: name === 'numberOfVisitors' ? parseInt(value) : value,
+    }));
+  };
+
+  const handleBookingSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoadingBooking(true);
+
+    try {
+      const res = await fetch('/api/visits', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          storeId: params.storeId,
+          scheduledDate: bookingData.date,
+          scheduledTime: bookingData.time,
+          numberOfPeople: bookingData.numberOfVisitors,
+        }),
+      });
+
+      if (res.ok) {
+        const visit = await res.json();
+        setVisitSubmitted(true);
+        setShowBookingForm(false);
+        // Redirect to visit details page
+        router.push(`/visits/${visit.id}`);
+      }
+    } catch (error) {
+      console.error('Error booking visit:', error);
+    } finally {
+      setLoadingBooking(false);
+    }
   };
 
   if (loading) return <p className="p-6">Loading…</p>;
@@ -307,13 +365,23 @@ export default function StorePage({
         </button>
       )}
 
-      <div className="text-gray-600">
-        <div className="font-medium">
-          {store.categories?.length ? store.categories.join(', ') : null}
+      {/* STORE INFO AND BOOK VISIT BUTTON */}
+      <div className="flex items-center justify-between">
+        <div className="text-gray-600">
+          <div className="font-medium">
+            {store.categories?.length ? store.categories.join(', ') : null}
+          </div>
+          {store.description && (
+            <p className="mt-1">{store.description}</p>
+          )}
         </div>
-        {store.description && (
-          <p className="mt-1">{store.description}</p>
-        )}
+        
+        <button
+          onClick={handleBookVisitClick}
+          className="bg-green-600 hover:bg-green-700 text-white px-6 py-2.5 rounded-lg font-medium transition-colors"
+        >
+          Book Visit
+        </button>
       </div>
 
       {/* MAIN CONTENT AREA */}
@@ -360,9 +428,9 @@ export default function StorePage({
             ))}
         </div>
 
-        {/* CONTACT & CATEGORIES SECTION - RESTORED */}
+        {/* CONTACT & CATEGORIES SECTION */}
         <div className="flex-1 space-y-6">
-          {/* CATEGORY DROPDOWN - RESTORED (Always Visible) */}
+          {/* CATEGORY DROPDOWN */}
           <div>
             <h3 className="font-medium text-gray-900 mb-2">Browse Categories</h3>
             <select
@@ -370,7 +438,7 @@ export default function StorePage({
               onChange={(e) => setSelectedCategoryId(e.target.value)}
               className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
-              <option value="none">Select a category</option>
+              <option value="none">No category (Show all images)</option>
               {categories.map((category) => (
                 <option key={category.id} value={category.id}>
                   {category.title}
@@ -379,12 +447,12 @@ export default function StorePage({
             </select>
           </div>
 
-          {/* CONTACT INFORMATION - RESTORED (Always Visible) */}
+          {/* CONTACT INFORMATION */}
           <div className="border border-gray-200 rounded-lg p-4">
             <h3 className="font-medium text-gray-900 mb-3">Contact Information</h3>
             
             <div className="space-y-3 text-sm text-gray-700">
-              {/* Full Address with Floor - RESTORED */}
+              {/* Full Address with Floor */}
               <div>
                 <div className="font-medium text-gray-600">Address</div>
                 <div className="text-gray-900">
@@ -395,7 +463,7 @@ export default function StorePage({
                 </div>
               </div>
 
-              {/* Full Phone Number - RESTORED */}
+              {/* Full Phone Number */}
               {store.phoneNumber && (
                 <div>
                   <div className="font-medium text-gray-600">Phone</div>
@@ -405,7 +473,7 @@ export default function StorePage({
                 </div>
               )}
 
-              {/* Email - RESTORED */}
+              {/* Email */}
               {store.email && (
                 <div>
                   <div className="font-medium text-gray-600">Email</div>
@@ -418,7 +486,7 @@ export default function StorePage({
                 </div>
               )}
 
-              {/* Website - RESTORED */}
+              {/* Website */}
               {store.website && (
                 <div>
                   <div className="font-medium text-gray-600">Website</div>
@@ -435,7 +503,7 @@ export default function StorePage({
             </div>
           </div>
 
-          {/* OPENING HOURS - RESTORED (Always Visible) */}
+          {/* OPENING HOURS */}
           {store.openingHours && (
             <div className="border border-gray-200 rounded-lg p-4">
               <h3 className="font-medium text-gray-900 mb-3">Opening Hours</h3>
@@ -469,6 +537,102 @@ export default function StorePage({
           )}
         </div>
       </div>
+
+      {/* BOOKING FORM MODAL */}
+      {showBookingForm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl p-6 max-w-md w-full">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-semibold">Book a Visit</h3>
+              <button
+                onClick={() => setShowBookingForm(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                ✕
+              </button>
+            </div>
+            
+            <form onSubmit={handleBookingSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Date *
+                </label>
+                <input
+                  type="date"
+                  name="date"
+                  value={bookingData.date}
+                  onChange={handleBookingChange}
+                  required
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Time *
+                </label>
+                <input
+                  type="time"
+                  name="time"
+                  value={bookingData.time}
+                  onChange={handleBookingChange}
+                  required
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Number of Visitors *
+                </label>
+                <select
+                  name="numberOfVisitors"
+                  value={bookingData.numberOfVisitors}
+                  onChange={handleBookingChange}
+                  required
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(num => (
+                    <option key={num} value={num}>
+                      {num} {num === 1 ? 'person' : 'people'}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              
+              <div className="flex justify-end gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowBookingForm(false)}
+                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={loadingBooking}
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {loadingBooking ? 'Submitting...' : 'Submit Visit'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* VISIT SUBMITTED MESSAGE */}
+      {visitSubmitted && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl p-6 max-w-md w-full text-center">
+            <div className="text-green-600 text-4xl mb-4">✓</div>
+            <h3 className="text-xl font-semibold mb-2">Visit Submitted</h3>
+            <p className="text-gray-600 mb-4">
+              Your visit has been scheduled successfully. You are being redirected to your visit details.
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

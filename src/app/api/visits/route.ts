@@ -1,6 +1,6 @@
 // src/app/api/visits/route.ts
 
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -65,4 +65,75 @@ export async function GET() {
         : null,
     }))
   );
+}
+
+export async function POST(req: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions);
+    
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const body = await req.json();
+    const { storeId, scheduledDate, scheduledTime, numberOfPeople } = body;
+
+    // Validate required fields
+    if (!storeId || !scheduledDate || !scheduledTime) {
+      return NextResponse.json(
+        { error: "Missing required fields" },
+        { status: 400 }
+      );
+    }
+
+    // Check if store exists
+    const store = await prisma.store.findUnique({
+      where: { id: storeId },
+    });
+
+    if (!store) {
+      return NextResponse.json(
+        { error: "Store not found" },
+        { status: 404 }
+      );
+    }
+
+    // Create the visit
+    const visit = await prisma.visit.create({
+      data: {
+        userId: (session.user as any).id,
+        storeId,
+        scheduledDate: new Date(scheduledDate),
+        scheduledTime,
+        numberOfPeople: numberOfPeople || 1,
+        status: "SCHEDULED",
+      },
+      include: {
+        store: {
+          select: {
+            name: true,
+            street: true,
+            streetNumber: true,
+            city: true,
+            country: true,
+          },
+        },
+      },
+    });
+
+    return NextResponse.json({
+      id: visit.id,
+      scheduledDate: visit.scheduledDate.toISOString(),
+      scheduledTime: visit.scheduledTime,
+      numberOfPeople: visit.numberOfPeople,
+      status: visit.status,
+      store: visit.store,
+    });
+  } catch (error) {
+    console.error("Error creating visit:", error);
+    return NextResponse.json(
+      { error: "Failed to create visit" },
+      { status: 500 }
+    );
+  }
 }
