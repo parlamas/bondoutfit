@@ -438,7 +438,7 @@ export default function StorePage({
               onChange={(e) => setSelectedCategoryId(e.target.value)}
               className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
-              <option value="none">No category (Show all images)</option>
+              <option value="none">No category (no category images shown)</option>
               {categories.map((category) => (
                 <option key={category.id} value={category.id}>
                   {category.title}
