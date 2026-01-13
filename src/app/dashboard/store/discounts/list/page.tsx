@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Pencil, Trash2, Eye, Calendar, Tag, Filter } from "lucide-react";
+import { TrendingUp, TrendingDown, DollarSign, Users, Clock } from 'lucide-react';
 
 type Discount = {
   id: string;
@@ -173,6 +174,49 @@ export default function DiscountsListPage() {
     });
   }
 
+    // Calculate analytics data
+  function calculateAnalytics() {
+    const now = new Date();
+    const activeDiscounts = discounts.filter(d => 
+      d.status === "POSTED" && 
+      new Date(d.validFrom) <= now && 
+      new Date(d.validTo) >= now
+    );
+
+    const expiringSoon = discounts.filter(d => {
+      if (d.status !== "POSTED") return false;
+      const validTo = new Date(d.validTo);
+      const sevenDaysFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+      return validTo >= now && validTo <= sevenDaysFromNow;
+    });
+
+    const totalUses = discounts.reduce((sum, d) => sum + (d.currentUses || 0), 0);
+    const avgUsesPerDiscount = discounts.length > 0 ? totalUses / discounts.length : 0;
+
+    // Calculate estimated revenue impact
+    const estimatedRevenue = discounts.reduce((sum, d) => {
+      let discountValue = 0;
+      if (d.discountPercent) {
+        // Assume average order value of €50
+        discountValue = (d.discountPercent / 100) * 50 * (d.currentUses || 0);
+      } else if (d.discountAmount) {
+        discountValue = d.discountAmount * (d.currentUses || 0);
+      }
+      return sum + discountValue;
+    }, 0);
+
+    return {
+      activeCount: activeDiscounts.length,
+      expiringSoonCount: expiringSoon.length,
+      totalUses,
+      avgUsesPerDiscount: Math.round(avgUsesPerDiscount * 10) / 10,
+      estimatedRevenue: Math.round(estimatedRevenue),
+      redemptionRate: discounts.length > 0 ? 
+        (discounts.filter(d => (d.currentUses || 0) > 0).length / discounts.length * 100).toFixed(1) : 
+        "0.0"
+    };
+  }
+
   const filteredDiscounts = discounts.filter(discount => {
     if (filterStatus === "ALL") return discount.status !== "DELETED";
     return discount.status === filterStatus;
@@ -232,6 +276,65 @@ export default function DiscountsListPage() {
           + Create New Discount
         </button>
       </div>
+
+            {/* Analytics Dashboard */}
+      <div className="mb-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-white border border-gray-200 rounded-xl p-5">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600">Active Discounts</p>
+              <p className="text-2xl font-bold text-gray-900">{calculateAnalytics().activeCount}</p>
+              <p className="text-xs text-gray-500 mt-1">Currently running</p>
+            </div>
+            <div className="p-3 bg-blue-50 rounded-lg">
+              <Tag className="w-6 h-6 text-blue-600" />
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white border border-gray-200 rounded-xl p-5">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600">Total Redemptions</p>
+              <p className="text-2xl font-bold text-gray-900">{calculateAnalytics().totalUses}</p>
+              <p className="text-xs text-gray-500 mt-1">
+                {calculateAnalytics().avgUsesPerDiscount} avg per discount
+              </p>
+            </div>
+            <div className="p-3 bg-green-50 rounded-lg">
+              <Users className="w-6 h-6 text-green-600" />
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white border border-gray-200 rounded-xl p-5">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600">Expiring Soon</p>
+              <p className="text-2xl font-bold text-gray-900">{calculateAnalytics().expiringSoonCount}</p>
+              <p className="text-xs text-gray-500 mt-1">Within 7 days</p>
+            </div>
+            <div className="p-3 bg-yellow-50 rounded-lg">
+              <Clock className="w-6 h-6 text-yellow-600" />
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white border border-gray-200 rounded-xl p-5">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600">Redemption Rate</p>
+              <p className="text-2xl font-bold text-gray-900">{calculateAnalytics().redemptionRate}%</p>
+              <p className="text-xs text-gray-500 mt-1">Of discounts used</p>
+            </div>
+            <div className="p-3 bg-purple-50 rounded-lg">
+              <TrendingUp className="w-6 h-6 text-purple-600" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Status Filter */}
 
       {/* Status Filter */}
       <div className="mb-6 bg-white border border-gray-200 rounded-lg p-4">
@@ -402,6 +505,46 @@ export default function DiscountsListPage() {
           ))}
         </div>
       )}
+            {/* Expiring Discounts Alert */}
+      {calculateAnalytics().expiringSoonCount > 0 && (
+        <div className="mt-8 bg-yellow-50 border border-yellow-200 rounded-xl p-5">
+          <div className="flex items-center gap-3 mb-4">
+            <Clock className="w-5 h-5 text-yellow-600" />
+            <h3 className="font-semibold text-yellow-800">
+              {calculateAnalytics().expiringSoonCount} Discount{calculateAnalytics().expiringSoonCount === 1 ? '' : 's'} Expiring Soon
+            </h3>
+          </div>
+          <p className="text-yellow-700 text-sm mb-4">
+            These discounts will expire in the next 7 days. Consider extending them or creating new ones.
+          </p>
+          <div className="grid gap-3">
+            {discounts
+              .filter(d => {
+                if (d.status !== "POSTED") return false;
+                const validTo = new Date(d.validTo);
+                const sevenDaysFromNow = new Date(new Date().getTime() + 7 * 24 * 60 * 60 * 1000);
+                return validTo >= new Date() && validTo <= sevenDaysFromNow;
+              })
+              .map(discount => (
+                <div key={discount.id} className="flex items-center justify-between bg-white border border-yellow-100 rounded-lg p-3">
+                  <div>
+                    <p className="font-medium text-gray-900">{discount.title}</p>
+                    <p className="text-sm text-gray-600">
+                      Expires: {formatDate(discount.validTo)} • Code: {discount.code || 'No code'}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => handleEdit(discount.id)}
+                    className="px-3 py-1 bg-yellow-100 text-yellow-700 text-sm font-medium rounded-lg hover:bg-yellow-200 transition-colors"
+                  >
+                    Extend
+                  </button>
+                </div>
+              ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+    
