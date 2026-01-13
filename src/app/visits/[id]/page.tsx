@@ -334,7 +334,7 @@ export default function VisitDetailsPage() {
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
                 <p className="text-sm text-gray-500 mt-1">
-                  Store hours: {visit.store.openingHours || '9:00 - 18:00'}
+                  Please check store hours directly with the store
                 </p>
               </div>
 
@@ -539,15 +539,7 @@ export default function VisitDetailsPage() {
                 </div>
               </div>
               
-              {visit.store.openingHours && (
-                <div className="flex items-start gap-3 pt-3 border-t border-gray-100">
-                  <Clock className="w-5 h-5 text-gray-400 mt-0.5" />
-                  <div>
-                    <div className="font-medium">Opening Hours</div>
-                    <div className="text-gray-600 mt-1">{visit.store.openingHours}</div>
-                  </div>
-                </div>
-              )}
+              
             </div>
           </div>
 

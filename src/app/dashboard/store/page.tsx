@@ -2,488 +2,429 @@
 
 'use client';
 
+import { useState, useEffect, useRef } from 'react';
+import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState, useRef } from 'react';
+import { CheckCircle, XCircle, User, Calendar, Clock, Users, Store, Camera } from 'lucide-react';
+import QRScanner from '../../../app/components/qr-scanner';
 
-import { 
-  Building2, Calendar, Tag, Package, Image, BarChart, 
-  Users, Clock, Settings, Bell, TrendingUp, Edit,
-  X, Plus
-} from 'lucide-react';
-
-interface StoreData {
+type VisitDetails = {
   id: string;
-  name: string;
-  email?: string;
-  phoneCountry?: string;
-  phoneArea?: string;
-  phoneNumber: string;
-  country: string;
-  city: string;
-  state: string;
-  zip: string;
-  street: string;
-  streetNumber: string;
-  floor?: string;
-  categories: string[];
-  acceptedCurrencies: string[]; // Array of currency codes
-}
+  customerName: string;
+  customerEmail: string;
+  storeName: string;
+  scheduledDate: string;
+  scheduledTime: string;
+  numberOfPeople: number;
+  checkedInAt?: string;
+  discountUnlocked: boolean;
+  discountCode?: string;
+};
 
 export default function StoreDashboard() {
+  const { data: session, status } = useSession();
   const router = useRouter();
-  const [storeData, setStoreData] = useState<StoreData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [editingCurrencies, setEditingCurrencies] = useState(false);
-  const [tempCurrencies, setTempCurrencies] = useState<string[]>([]);
-  const [saving, setSaving] = useState(false);
-  const [newCurrency, setNewCurrency] = useState('');
-  const [currencyError, setCurrencyError] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
-  const successTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
+  const [scanning, setScanning] = useState(false);
+  const [scanResult, setScanResult] = useState<any>(null);
+  const [visitDetails, setVisitDetails] = useState<VisitDetails | null>(null);
+  const [checkingIn, setCheckingIn] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [recentCheckIns, setRecentCheckIns] = useState<any[]>([]);
+  const scannerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    fetchStoreData();
-  }, []);
-
-  useEffect(() => {
-  return () => {
-    if (successTimeoutRef.current) {
-      clearTimeout(successTimeoutRef.current);
+  if (status === 'unauthenticated') {
+    router.push('/auth/store/signin');
+    return;
+  }
+  
+  // Check if user has STORE_MANAGER role
+  if (status === 'authenticated' && session?.user?.role !== 'STORE_MANAGER') {
+    // Customer trying to access store dashboard - redirect them
+    if (session?.user?.role === 'CUSTOMER') {
+      router.push('/dashboard/customer');
+      return;
+    } else {
+      router.push('/auth/store/signin');
+      return;
     }
-  };
-}, []);
+  }
+  
+  // Only load data if user is a store manager
+  if (status === 'authenticated' && session?.user?.role === 'STORE_MANAGER') {
+    loadRecentCheckIns();
+  }
+}, [status, session, router]);
 
-
-
-  const fetchStoreData = async () => {
+  async function loadRecentCheckIns() {
     try {
-      const response = await fetch('/api/store/profile');
-      if (response.ok) {
-        const data = await response.json();
-        setStoreData(data);
-        setTempCurrencies(data.acceptedCurrencies || []);
+      const res = await fetch('/api/store/check-ins');
+      if (res.ok) {
+        const data = await res.json();
+        setRecentCheckIns(data.checkIns || []);
       }
     } catch (error) {
-      console.error('Failed to fetch store data:', error);
-    } finally {
-      setLoading(false);
+      console.error('Failed to load check-ins:', error);
     }
-  };
-
-  const saveCurrencies = async () => {
-    if (!storeData) return;
-    setSuccessMessage('');
-    setSaving(true);
-    try {
-      const response = await fetch('/api/store/profile', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ acceptedCurrencies: tempCurrencies }),
-      });
-
-      if (response.ok) {
-  const updatedData = await response.json();
-  setStoreData(updatedData);
-  setEditingCurrencies(false);
-  setCurrencyError('');
-
-  if (successTimeoutRef.current) {
-    clearTimeout(successTimeoutRef.current);
   }
 
-  setSuccessMessage('Currencies saved');
-  successTimeoutRef.current = setTimeout(() => {
-    setSuccessMessage('');
-  }, 3000);
+  function handleScan(result: any) {
+    if (result && !scanning) {
+      setScanning(true);
+      setScanResult(result);
+      
+      try {
+        const data = JSON.parse(result);
+        if (data.visitId) {
+          verifyVisit(data.visitId);
+        } else {
+          setError('Invalid QR code - no visit ID found');
+          setScanning(false);
+        }
+      } catch (error) {
+        setError('Failed to parse QR code data');
+        setScanning(false);
+      }
+    }
+  }
+
+  async function verifyVisit(visitId: string) {
+    try {
+      const res = await fetch(`/api/visits/${visitId}/verify`);
+      if (res.ok) {
+        const data = await res.json();
+        setVisitDetails(data.visit);
+        setError(null);
+      } else {
+        const errorData = await res.json();
+        setError(errorData.error || 'Failed to verify visit');
+        setVisitDetails(null);
+      }
+    } catch (error) {
+      setError('Network error - please try again');
+      setVisitDetails(null);
+    } finally {
+      setScanning(false);
+    }
+  }
+
+  async function handleCheckIn() {
+    if (!visitDetails) return;
+
+    setCheckingIn(true);
+    setError(null);
+
+    try {
+      const res = await fetch(`/api/visits/${visitDetails.id}/check-in`, {
+        method: 'POST',
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        // Update local state
+        setVisitDetails(prev => prev ? {
+          ...prev,
+          checkedInAt: new Date().toISOString(),
+          discountUnlocked: data.visit.discountUnlocked || false,
+          discountCode: data.visit.discountCode,
+        } : null);
+        
+        // Reload recent check-ins
+        loadRecentCheckIns();
+        
+        // Reset after 5 seconds
+        setTimeout(() => {
+          setVisitDetails(null);
+          setScanResult(null);
+        }, 5000);
+      } else {
+        setError(data.error || 'Failed to check in');
+      }
+    } catch (error) {
+      setError('Network error - please try again');
+    } finally {
+      setCheckingIn(false);
+    }
+  }
+
+  function resetScanner() {
+    setScanning(false);
+    setScanResult(null);
+    setVisitDetails(null);
+    setError(null);
+  }
+
+  function simulateScan() {
+    const testData = JSON.stringify({
+      visitId: "cmkcshyfv0001u4ggdpjxtidm",
+      storeId: "Belles Femmes",
+      date: "2026-01-14",
+      time: "17:00"
+    });
+    handleScan(testData);
+  }
+
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Check if user is not a store manager (after loading)
+if (status === 'authenticated' && session?.user?.role !== 'STORE_MANAGER') {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+        <p className="mt-4 text-gray-600">Redirecting...</p>
+      </div>
+    </div>
+  );
 }
 
-
-    } catch (error) {
-      console.error('Failed to save currencies:', error);
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const addCurrency = () => {
-    const currency = newCurrency.trim().toUpperCase();
-    
-    if (!currency) {
-      setCurrencyError('Please enter a currency code');
-      return;
-    }
-    
-    if (currency.length !== 3) {
-      setCurrencyError('Currency code must be exactly 3 letters');
-      return;
-    }
-    
-    if (!/^[A-Z]{3}$/.test(currency)) {
-      setCurrencyError('Currency code must contain only letters (A-Z)');
-      return;
-    }
-    
-    if (tempCurrencies.includes(currency)) {
-      setCurrencyError('This currency is already added');
-      return;
-    }
-    
-    setTempCurrencies([...tempCurrencies, currency]);
-    setNewCurrency('');
-    setCurrencyError('');
-  };
-
-  const removeCurrency = (currency: string) => {
-    setTempCurrencies(tempCurrencies.filter(c => c !== currency));
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      addCurrency();
-    }
-  };
-
-  if (loading) { return ( <div className="min-h-screen bg-gray-50 flex items-center justify-center"> <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div> </div> ); }
-
-  if (!storeData) {
+if (!session) {
   return null;
 }
 
-
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b">
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex justify-between items-center">
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="container mx-auto px-4">
+        <div className="max-w-6xl mx-auto">
+          {/* Header */}
+          <div className="flex justify-between items-center mb-8">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">{storeData.name} Dashboard</h1>
-              <p className="text-gray-600 mt-1">Manage your store, visits, and discounts</p>
+              <h1 className="text-3xl font-bold text-gray-900">Store Dashboard</h1>
+              <p className="text-gray-600 mt-2">Welcome, {session.user?.name}</p>
             </div>
-            <div className="text-sm text-gray-600 text-right">
-  <div>Welcome</div>
-  {storeData.email && (
-    <div className="text-xs text-gray-500">
-      {storeData.email}
-    </div>
-  )}
-</div>
-
+            <button
+              onClick={() => router.push('/dashboard/store/visits')}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            >
+              View All Visits
+            </button>
           </div>
-        </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Left Column - QR Scanner */}
+            <div className="lg:col-span-2 space-y-8">
+              <div className="bg-white rounded-xl shadow p-6">
+                <h2 className="text-xl font-bold text-gray-900 mb-4">QR Code Scanner</h2>
+                
+                {!scanResult ? (
+  <div className="space-y-4">
+    <QRScanner 
+      onScan={handleScan}
+      onError={(error) => {
+        console.error('Scanner error:', error);
+        setError('Scanner error: ' + String(error));
+      }}
+      className="w-full"
+    />
+    
+    <div className="flex items-center justify-center gap-4">
+      <div className="flex-1 h-px bg-gray-300"></div>
+      <span className="text-sm text-gray-500">or</span>
+      <div className="flex-1 h-px bg-gray-300"></div>
+    </div>
+    
+    <div className="text-center">
+      <button
+        onClick={simulateScan}
+        className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
+      >
+        Test with Simulated QR Code
+      </button>
+      <p className="text-xs text-gray-500 mt-2">
+        Use this to test without a physical QR code
+      </p>
+    </div>
+  </div>
+
+) : (
+  <div className="text-center">
+    <div className="mb-4">
+      <div className="inline-block p-3 bg-green-100 rounded-full">
+        <CheckCircle className="w-12 h-12 text-green-600" />
       </div>
-
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column - Store Info & Stats */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* Store Info Card */}
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                  <Building2 className="h-6 w-6" />
-                  Store Information
-                </h2>
-                <button
-                  onClick={() => router.push('/dashboard/store/profile')}
-                  className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-                >
-                  Edit Profile
-                </button>
-              </div>
-
-              {/* Accepted Currencies Section */}
-              <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="font-semibold text-gray-800">
-  Accepted Currencies
-</h3>
-                  <button
-                    onClick={() => {
-                      setEditingCurrencies(!editingCurrencies);
-                      setNewCurrency('');
-                      setCurrencyError('');
-                      if (!editingCurrencies) {
-                        setTempCurrencies(storeData.acceptedCurrencies || []);
-                      }
-                    }}
-                    className="text-sm text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1"
-                  >
-                    <Edit className="h-4 w-4" />
-                    {editingCurrencies ? 'Cancel' : 'Edit'}
-                  </button>
-                </div>
-
-                {successMessage && (
-  <p className="text-green-600 text-sm mt-2">
-    {successMessage}
-  </p>
+      <p className="mt-2 text-green-600 font-medium">QR Code Scanned!</p>
+    </div>
+    
+    <button
+      onClick={resetScanner}
+      className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+    >
+      Scan Another Code
+    </button>
+  </div>
 )}
 
-
-                {editingCurrencies ? (
-                  <div className="space-y-4">
-                    {/* Currency Input */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Add Currency (3-letter ISO code)
-                      </label>
-                      <div className="flex gap-2">
-                        <input
-                          type="text"
-                          value={newCurrency}
-                          onChange={(e) => {
-                            const value = e.target.value.toUpperCase().replace(/[^A-Z]/g, '');
-                            setNewCurrency(value);
-                            if (currencyError) setCurrencyError('');
-                          }}
-                          onKeyDown={handleKeyDown}
-                          placeholder="e.g., USD, EUR, GBP"
-                          className="flex-1 border border-gray-300 rounded-lg px-3 py-2"
-                          maxLength={3}
-                        />
-                        <button
-                          onClick={addCurrency}
-                          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2"
-                        >
-                          <Plus className="h-4 w-4" />
-                          Add
-                        </button>
-                      </div>
-                      {currencyError && (
-                        <p className="text-red-600 text-sm mt-1">{currencyError}</p>
-                      )}
-                      <p className="text-gray-500 text-xs mt-1">
-                        Enter a 3-letter ISO currency code (e.g., USD for US Dollar)
-                      </p>
+                {error && (
+                  <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                    <div className="flex items-center gap-2 text-red-700">
+                      <XCircle className="w-5 h-5" />
+                      <span className="font-medium">Error:</span>
+                      <span>{error}</span>
                     </div>
-
-                    {/* Selected Currencies */}
-                    <div className="mt-4">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Selected Currencies ({tempCurrencies.length})
-                      </label>
-                      {tempCurrencies.length > 0 ? (
-                        <div className="flex flex-wrap gap-2">
-                          {tempCurrencies.map((currency) => (
-                            <div
-  key={currency}
-  className="bg-blue-100 text-blue-800 px-3 py-2 rounded-lg flex items-center gap-2"
->
-  <span className="font-medium">{currency}</span>
-  <button
-    onClick={() => removeCurrency(currency)}
-    className="text-blue-600 hover:text-blue-800 ml-2"
-  >
-    <X className="h-4 w-4" />
-  </button>
-</div>
-
-                          ))}
-                        </div>
-                      ) : (
-                        <p className="text-gray-500 italic py-2">No currencies selected</p>
-                      )}
-                    </div>
-
-                    {/* Save/Cancel Buttons */}
-                    <div className="flex gap-3 pt-4">
-                      <button
-                        onClick={saveCurrencies}
-                        disabled={saving}
-                        className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {saving ? 'Saving...' : 'Save Currencies'}
-                      </button>
-                      <button
-                        onClick={() => {
-                          setTempCurrencies(storeData.acceptedCurrencies || []);
-                          setEditingCurrencies(false);
-                          setCurrencyError('');
-                        }}
-                        className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-300"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex flex-wrap gap-2">
-                    {storeData.acceptedCurrencies?.length > 0 ? (
-                      storeData.acceptedCurrencies.map((currency) => (
-                        <span
-  key={currency}
-  className="bg-green-100 text-green-800 px-3 py-2 rounded-lg text-sm font-medium"
->
-  {currency}
-</span>
-
-                      ))
-                    ) : (
-                      <p className="text-gray-500 italic py-2">No currencies set yet</p>
-                    )}
                   </div>
                 )}
               </div>
 
-              {/* Store Categories */}
-              <div className="mb-4">
-                <h3 className="font-semibold text-gray-800 mb-2">Store Type</h3>
-                <div className="flex flex-wrap gap-2">
-                  {storeData.categories?.map((category) => (
-                    <span
-                      key={category}
-                      className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm"
-                    >
-                      {category}
-                    </span>
-                  ))}
-                </div>
-              </div>
+              {/* Visit Details */}
+              {visitDetails && (
+                <div className="bg-white rounded-xl shadow p-6">
+                  <h2 className="text-xl font-bold text-gray-900 mb-4">Visit Details</h2>
+                  
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3">
+                      <User className="w-5 h-5 text-gray-400" />
+                      <div>
+                        <div className="text-sm text-gray-600">Customer</div>
+                        <div className="font-medium">{visitDetails.customerName}</div>
+                        <div className="text-sm text-gray-500">{visitDetails.customerEmail}</div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-3">
+                      <Store className="w-5 h-5 text-gray-400" />
+                      <div>
+                        <div className="text-sm text-gray-600">Store</div>
+                        <div className="font-medium">{visitDetails.storeName}</div>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="flex items-center gap-3">
+                        <Calendar className="w-5 h-5 text-gray-400" />
+                        <div>
+                          <div className="text-sm text-gray-600">Date</div>
+                          <div className="font-medium">
+                            {new Date(visitDetails.scheduledDate).toLocaleDateString()}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-3">
+                        <Clock className="w-5 h-5 text-gray-400" />
+                        <div>
+                          <div className="text-sm text-gray-600">Time</div>
+                          <div className="font-medium">{visitDetails.scheduledTime}</div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-3">
+                      <Users className="w-5 h-5 text-gray-400" />
+                      <div>
+                        <div className="text-sm text-gray-600">Number of People</div>
+                        <div className="font-medium">{visitDetails.numberOfPeople}</div>
+                      </div>
+                    </div>
+                  </div>
 
-              {/* Contact Info */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                <div>
-                  <p className="text-gray-600">Address</p>
-                  <p className="text-gray-900 font-medium">
-                    {storeData.street} {storeData.streetNumber}
-                    {storeData.floor && `, Floor ${storeData.floor}`}<br />
-                    {storeData.city}, {storeData.state} {storeData.zip}<br />
-                    {storeData.country}
-                  </p>
+                  {/* Check-in Button */}
+                  <div className="mt-6 pt-6 border-t border-gray-100">
+                    {visitDetails.checkedInAt ? (
+                      <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                        <div className="flex items-center gap-2 text-green-700">
+                          <CheckCircle className="w-5 h-5" />
+                          <span className="font-medium">Checked In!</span>
+                          <span>
+                            at {new Date(visitDetails.checkedInAt).toLocaleTimeString()}
+                          </span>
+                        </div>
+                        
+                        {visitDetails.discountUnlocked && visitDetails.discountCode && (
+                          <div className="mt-3 p-3 bg-white border border-green-300 rounded-lg">
+                            <div className="font-medium text-green-800 mb-1">Discount Code:</div>
+                            <div className="font-mono text-lg text-center p-2 bg-gray-50 rounded">
+                              {visitDetails.discountCode}
+                            </div>
+                            <p className="text-sm text-green-600 mt-2 text-center">
+                              Customer has unlocked a discount
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <button
+                        onClick={handleCheckIn}
+                        disabled={checkingIn}
+                        className="w-full py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {checkingIn ? (
+                          <span className="flex items-center justify-center gap-2">
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                            Checking In...
+                          </span>
+                        ) : (
+                          'Check In Customer'
+                        )}
+                      </button>
+                    )}
+                  </div>
                 </div>
-                <div>
-                  <p className="text-gray-600">Contact</p>
-                  <p className="text-gray-900 font-medium">
-                    {storeData.phoneCountry} {storeData.phoneArea} {storeData.phoneNumber}<br />
-                    {storeData.email}
-                  </p>
-                </div>
-              </div>
+              )}
             </div>
 
-            {/* Quick Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="bg-white rounded-xl shadow p-4">
-                <div className="flex items-center justify-between">
-                  <Calendar className="h-8 w-8 text-blue-600" />
-                  <span className="text-2xl font-bold text-gray-900">12</span>
-                </div>
-                <h3 className="text-sm font-semibold text-gray-700 mt-2">Scheduled Visits</h3>
-                <p className="text-xs text-gray-500">Next 7 days</p>
+            {/* Right Column - Recent Check-ins */}
+            <div className="space-y-8">
+              <div className="bg-white rounded-xl shadow p-6">
+                <h2 className="text-xl font-bold text-gray-900 mb-4">Recent Check-ins</h2>
+                
+                {recentCheckIns.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    <p>No recent check-ins</p>
+                    <p className="text-sm mt-1">Scan a QR code to check in customers</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {recentCheckIns.slice(0, 5).map((checkIn) => (
+                      <div key={checkIn.id} className="border border-gray-200 rounded-lg p-4">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <div className="font-medium text-gray-900">{checkIn.customerName}</div>
+                            <div className="text-sm text-gray-500 mt-1">
+                              {new Date(checkIn.checkedInAt).toLocaleTimeString([], { 
+                                hour: '2-digit', 
+                                minute: '2-digit' 
+                              })}
+                            </div>
+                          </div>
+                          <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
+                            Checked In
+                          </span>
+                        </div>
+                        {checkIn.discountUnlocked && (
+                          <div className="mt-2 text-xs text-blue-600">
+                            ✓ Discount unlocked
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
-              <div className="bg-white rounded-xl shadow p-4">
-                <div className="flex items-center justify-between">
-                  <Tag className="h-8 w-8 text-green-600" />
-                  <span className="text-2xl font-bold text-gray-900">5</span>
-                </div>
-                <h3 className="text-sm font-semibold text-gray-700 mt-2">Active Discounts</h3>
-                <p className="text-xs text-gray-500">Currently running</p>
-              </div>
-
-              <div className="bg-white rounded-xl shadow p-4">
-                <div className="flex items-center justify-between">
-                  <Users className="h-8 w-8 text-purple-600" />
-                  <span className="text-2xl font-bold text-gray-900">48</span>
-                </div>
-                <h3 className="text-sm font-semibold text-gray-700 mt-2">Total Customers</h3>
-                <p className="text-xs text-gray-500">All time</p>
-              </div>
-
-              <div className="bg-white rounded-xl shadow p-4">
-                <div className="flex items-center justify-between">
-                  <TrendingUp className="h-8 w-8 text-orange-600" />
-                  <span className="text-2xl font-bold text-gray-900">68%</span>
-                </div>
-                <h3 className="text-sm font-semibold text-gray-700 mt-2">Conversion Rate</h3>
-                <p className="text-xs text-gray-500">Visit to purchase</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Column - Quick Actions */}
-          <div className="space-y-8">
-            {/* Management Cards */}
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Store Management</h3>
-              <div className="space-y-3">
-                <button
-                  onClick={() => router.push('/dashboard/store/visits')}
-                  className="w-full text-left px-4 py-3 bg-blue-50 hover:bg-blue-100 rounded-lg transition flex items-center gap-3"
-                >
-                  <Calendar className="h-5 w-5 text-blue-600" />
+              <div className="bg-white rounded-xl shadow p-6">
+                <h2 className="text-xl font-bold text-gray-900 mb-4">Quick Stats</h2>
+                <div className="space-y-4">
                   <div>
-                    <span className="font-medium text-blue-800">Visit Schedule</span>
-                    <p className="text-sm text-blue-600">Manage appointments</p>
+                    <div className="text-sm text-gray-600">Today's Check-ins</div>
+                    <div className="text-2xl font-bold text-gray-900">
+                      {recentCheckIns.filter(ci => 
+                        new Date(ci.checkedInAt).toDateString() === new Date().toDateString()
+                      ).length}
+                    </div>
                   </div>
-                </button>
-
-                <button
-                                    onClick={() => router.push('/dashboard/store/discounts/list')}
-                  className="w-full text-left px-4 py-3 bg-green-50 hover:bg-green-100 rounded-lg transition flex items-center gap-3"
-                >
-                  <Tag className="h-5 w-5 text-green-600" />
                   <div>
-                    <span className="font-medium text-green-800">Discounts</span>
-                    <p className="text-sm text-green-600">Create promotions</p>
-                  </div>
-                </button>
-
-                <button
-                  onClick={() => router.push('/dashboard/store/items')}
-                  className="w-full text-left px-4 py-3 bg-purple-50 hover:bg-purple-100 rounded-lg transition flex items-center gap-3"
-                >
-                  <Package className="h-5 w-5 text-purple-600" />
-                  <div>
-                    <span className="font-medium text-purple-800">Store Items</span>
-                    <p className="text-sm text-purple-600">Manage products</p>
-                  </div>
-                </button>
-
-                <button
-  onClick={() => router.push('/dashboard/store/categories')}
-  className="w-full text-left px-4 py-3 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition flex items-center gap-3"
->
-  <Tag className="h-5 w-5 text-indigo-600" />
-  <div>
-    <span className="font-medium text-indigo-800">Categories</span>
-    <p className="text-sm text-indigo-600">Organize gallery sections</p>
-  </div>
-</button>
-
-
-                <button
-                  onClick={() => router.push('/dashboard/store/images')}
-                  className="w-full text-left px-4 py-3 bg-amber-50 hover:bg-amber-100 rounded-lg transition flex items-center gap-3"
-                >
-                  <Image className="h-5 w-5 text-amber-600" />
-                  <div>
-                    <span className="font-medium text-amber-800">Store Images</span>
-                    <p className="text-sm text-amber-600">Upload photos</p>
-                  </div>
-                </button>
-              </div>
-            </div>
-
-            {/* Recent Activity */}
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
-              <div className="space-y-3 text-sm">
-                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                  <Bell className="h-4 w-4 text-green-600" />
-                  <div>
-                    <p className="font-medium">New visit scheduled</p>
-                    <p className="text-gray-500">Tomorrow at 2:30 PM</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                  <Clock className="h-4 w-4 text-blue-600" />
-                  <div>
-                    <p className="font-medium">Discount redeemed</p>
-                    <p className="text-gray-500">15% off clothing purchase</p>
+                    <div className="text-sm text-gray-600">Total Scheduled</div>
+                    <div className="text-2xl font-bold text-gray-900">0</div>
                   </div>
                 </div>
               </div>

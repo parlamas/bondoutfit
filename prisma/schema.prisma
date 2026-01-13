@@ -431,6 +431,11 @@ model Visit {
   cancelledBy     String?    // 'CUSTOMER' or 'STORE'
   cancellationReason String?
 
+    // Rescheduling Info
+  rescheduledAt   DateTime?
+  rescheduledBy   String?
+  rescheduleNotes String?
+
   // Discount Tracking
   discountUnlocked Boolean @default(false)
   discountUsed     Boolean @default(false)

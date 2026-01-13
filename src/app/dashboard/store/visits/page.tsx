@@ -5,8 +5,8 @@
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { Calendar, Clock, Users, CheckCircle, XCircle, Clock as ClockIcon, Scan } from 'lucide-react';
 import QRScanner from '@/app/components/qr-scanner';
+import { Calendar, Calendar as CalendarIcon, X, Clock, CheckCircle, XCircle, Users, Scan } from 'lucide-react';
 
 type Visit = {
   id: string;
@@ -34,6 +34,11 @@ export default function StoreVisitsPage() {
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
   const [scanMessage, setScanMessage] = useState<{ type: 'success' | 'error' | 'info', text: string } | null>(null);
   const [manualVisitId, setManualVisitId] = useState('');
+  const [rescheduleVisit, setRescheduleVisit] = useState<Visit | null>(null);
+  const [newDate, setNewDate] = useState('');
+  const [newTime, setNewTime] = useState('');
+  const [rescheduleNotes, setRescheduleNotes] = useState('');
+  const [rescheduling, setRescheduling] = useState(false);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -159,6 +164,42 @@ export default function StoreVisitsPage() {
     }
   }
 
+    async function handleReschedule() {
+    if (!rescheduleVisit) return;
+
+    setRescheduling(true);
+    try {
+      const res = await fetch(`/api/store/visits/${rescheduleVisit.id}/reschedule`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          newDate,
+          newTime,
+          notes: rescheduleNotes,
+          rescheduledBy: session?.user?.name || 'Store Manager'
+        }),
+      });
+
+      if (res.ok) {
+        await loadVisits();
+        setRescheduleVisit(null);
+        setNewDate('');
+        setNewTime('');
+        setRescheduleNotes('');
+        setScanMessage({ type: 'success', text: 'Visit rescheduled successfully' });
+        setTimeout(() => setScanMessage(null), 3000);
+      } else {
+        const error = await res.json();
+        setScanMessage({ type: 'error', text: error.error || 'Failed to reschedule visit' });
+      }
+    } catch (error) {
+      console.error('Failed to reschedule visit', error);
+      setScanMessage({ type: 'error', text: 'Failed to reschedule visit' });
+    } finally {
+      setRescheduling(false);
+    }
+  }
+
   function getStatusColor(status: string) {
     switch (status) {
       case 'SCHEDULED': return 'bg-blue-100 text-blue-800';
@@ -169,13 +210,13 @@ export default function StoreVisitsPage() {
     }
   }
 
-  function getStatusIcon(status: string) {
+    function getStatusIcon(status: string) {
     switch (status) {
-      case 'SCHEDULED': return <ClockIcon className="w-4 h-4" />;
+      case 'SCHEDULED': return <Clock className="w-4 h-4" />;
       case 'COMPLETED': return <CheckCircle className="w-4 h-4" />;
       case 'MISSED': return <XCircle className="w-4 h-4" />;
       case 'CANCELLED': return <XCircle className="w-4 h-4" />;
-      default: return <ClockIcon className="w-4 h-4" />;
+      default: return <Clock className="w-4 h-4" />;
     }
   }
 
@@ -265,7 +306,7 @@ export default function StoreVisitsPage() {
                   <div className="flex items-center gap-2">
                     {scanMessage.type === 'success' && <CheckCircle className="w-4 h-4" />}
                     {scanMessage.type === 'error' && <XCircle className="w-4 h-4" />}
-                    {scanMessage.type === 'info' && <ClockIcon className="w-4 h-4" />}
+                    {scanMessage.type === 'info' && <Clock className="w-4 h-4" />}
                     {scanMessage.text}
                   </div>
                 </div>
@@ -554,6 +595,19 @@ export default function StoreVisitsPage() {
                     </button>
                   )}
 
+                                    {visit.status === 'SCHEDULED' && (
+                    <button
+                      onClick={() => {
+                        setRescheduleVisit(visit);
+                        setNewDate(visit.scheduledDate);
+                        setNewTime(visit.scheduledTime);
+                      }}
+                      className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 w-full transition-colors"
+                    >
+                      Reschedule
+                    </button>
+                  )}
+
                   {/* Quick test button (only in development) */}
                   {process.env.NODE_ENV === 'development' && visit.status === 'SCHEDULED' && (
                     <button
@@ -573,6 +627,100 @@ export default function StoreVisitsPage() {
               )}
             </div>
           ))}
+                </div>
+            )}
+      
+      {/* Reschedule Modal */}
+      {rescheduleVisit && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl max-w-md w-full p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-bold text-gray-900">Reschedule Visit</h3>
+              <button
+                onClick={() => {
+                  setRescheduleVisit(null);
+                  setNewDate('');
+                  setNewTime('');
+                  setRescheduleNotes('');
+                }}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <p className="text-gray-700 mb-2">
+                  Rescheduling visit for <span className="font-semibold">{rescheduleVisit.user.name}</span>
+                </p>
+                <p className="text-sm text-gray-500">
+                  Current schedule: {formatDate(rescheduleVisit.scheduledDate)} at {rescheduleVisit.scheduledTime}
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  New Date
+                </label>
+                <input
+                  type="date"
+                  value={newDate}
+                  onChange={(e) => setNewDate(e.target.value)}
+                  min={new Date().toISOString().split('T')[0]}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  New Time
+                </label>
+                <input
+                  type="time"
+                  value={newTime}
+                  onChange={(e) => setNewTime(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Notes (Optional)
+                </label>
+                <textarea
+                  value={rescheduleNotes}
+                  onChange={(e) => setRescheduleNotes(e.target.value)}
+                  placeholder="Reason for rescheduling..."
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent h-24"
+                />
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <button
+                  onClick={() => {
+                    setRescheduleVisit(null);
+                    setNewDate('');
+                    setNewTime('');
+                    setRescheduleNotes('');
+                  }}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                  disabled={rescheduling}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleReschedule}
+                  disabled={rescheduling || !newDate || !newTime}
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {rescheduling ? 'Rescheduling...' : 'Reschedule Visit'}
+                </button>
+                            </div>
+            </div>
+          </div>
         </div>
       )}
     </div>
