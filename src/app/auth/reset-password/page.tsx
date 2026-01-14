@@ -161,7 +161,7 @@ function ResetPasswordContent() {
           <p className="text-sm text-gray-600">
             Remember your password?{" "}
                         <Link
-              href={type === "store-manager" ? "/auth/store/signin" : "/auth/customer/signin"}
+                            href={type === "store" ? "/auth/store/signin" : "/auth/customer/signin"}
               className="font-medium text-blue-600 hover:text-blue-500"
             >
               Sign in here

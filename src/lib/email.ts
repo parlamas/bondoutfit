@@ -17,7 +17,7 @@ export async function sendPasswordResetEmail(
 ) {
 
   const resetUrl = `${process.env.NEXTAUTH_URL}/auth/reset-password?token=${token}&type=${
-    role === "STORE_MANAGER" || role === "ADMIN" ? "store-manager" : "customer"
+        role === "STORE_MANAGER" || role === "ADMIN" ? "store" : "customer"
 }`;
 
   
