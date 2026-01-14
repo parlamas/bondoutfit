@@ -12,11 +12,6 @@ export default function ResetPasswordContent() {
   const type = searchParams.get("type") ?? "customer";
   const router = useRouter();
   const token = searchParams.get("token");
-  console.log('ResetPasswordContent debug:', {
-    token: token,
-    type: type,
-    fullURL: typeof window !== 'undefined' ? window.location.href : 'server'
-  });
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);

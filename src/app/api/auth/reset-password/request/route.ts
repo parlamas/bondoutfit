@@ -37,13 +37,6 @@ export async function POST(request: NextRequest) {
     
     // MANUALLY create correct link (bypass broken email.ts cache)
     const resetUrl = `${process.env.NEXTAUTH_URL}/auth/reset-password?token=${resetToken}&type=${type}`;
-
-    console.log('Reset email debug:', {
-  email: email,
-  type: type,
-  role: role,
-  resetUrl: resetUrl
-});
     
     // Send email with manually created link
     await transporter.sendMail({
