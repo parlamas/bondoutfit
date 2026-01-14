@@ -32,8 +32,9 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Send email
-    await sendPasswordResetEmail(email, resetToken, type);
+        // Convert type parameter to role for email function
+    const role = type === "store" ? "STORE_MANAGER" : "CUSTOMER";
+    await sendPasswordResetEmail(email, resetToken, role);
 
     return NextResponse.json(
       { message: "Password reset email sent." },
