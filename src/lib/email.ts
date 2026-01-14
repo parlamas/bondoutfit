@@ -50,4 +50,4 @@ export async function sendVerificationEmail(email: string, token: string) {
       <p>This link expires in 24 hours.</p>
     `,
   });
-}
+}// Force email function update 
