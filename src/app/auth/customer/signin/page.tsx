@@ -28,15 +28,17 @@ export default function CustomerSignInPage() {
 });
 
 
-      if (result?.error) {
-        if (result.error === 'EmailNotVerified') {
-          setError('Please verify your email before signing in.');
-        } else {
-          setError('Invalid email or password');
-        }
-      } else {
-        router.push('/dashboard/customer');
-      }
+            if (result?.error) {
+  if (result.error === 'EmailNotVerified') {
+    setError('Please verify your email before signing in.');
+  } else if (result.error === 'InvalidRole') {
+    setError('This email is registered as a store account. Please use store sign in.');
+  } else {
+    setError('Invalid email or password');
+  }
+} else {
+  router.push('/dashboard/customer');
+}
     } catch (err) {
       setError('An error occurred. Please try again.');
     } finally {

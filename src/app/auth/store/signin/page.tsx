@@ -33,7 +33,13 @@ const handleSubmit = async (e: React.FormEvent) => {
 
 
 if (result?.error) {
-  setError('Invalid email or password');
+  if (result.error === 'EmailNotVerified') {
+    setError('Please verify your email before signing in.');
+  } else if (result.error === 'InvalidRole') {
+    setError('This email is registered as a customer account. Please use customer sign in.');
+  } else {
+    setError('Invalid email or password');
+  }
 } else {
   router.push('/dashboard/store');
 }
