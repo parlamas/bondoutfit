@@ -48,9 +48,10 @@ function ResetPasswordContent() {
 
       const data = await res.json();
 
-      if (res.ok) {
+            if (res.ok) {
         setMessage({ type: "success", text: "Password reset successful! Redirecting..." });
-        setTimeout(() => router.push("/auth/signin"), 2000);
+        // Redirect based on user type or to customer signin as default
+        setTimeout(() => router.push("/auth/customer/signin"), 2000);
       } else {
         setMessage({ type: "error", text: data.error || "Failed to reset password" });
       }
@@ -154,11 +155,11 @@ function ResetPasswordContent() {
           </div>
         </form>
 
-        <div className="text-center">
+                        <div className="text-center">
           <p className="text-sm text-gray-600">
             Remember your password?{" "}
             <Link
-              href="/auth/signin"
+              href="/auth/customer/signin"
               className="font-medium text-blue-600 hover:text-blue-500"
             >
               Sign in here
