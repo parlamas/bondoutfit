@@ -84,9 +84,9 @@ export default function ForgotPasswordClient() {
           Remember your password?{" "}
                     <Link
             href={emailType === "store-manager" ? "/auth/store/signin" : "/auth/customer/signin"}
-            className="text-blue-600 hover:underline"
+            className="text-blue-600 hover:underline font-medium"
           >
-            Sign in
+            {emailType === "store-manager" ? "Store Sign in" : "Customer Sign in"}
           </Link>
         </p>
 
