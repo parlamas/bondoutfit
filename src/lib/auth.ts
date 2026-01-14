@@ -15,49 +15,74 @@ export const authOptions: NextAuthOptions = {
     Credentials({
       name: "credentials",
       credentials: {
-  email: { label: "Email", type: "email" },
-  password: { label: "Password", type: "password" },
-  expectedRole: { label: "Role", type: "text" },
-},
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
+        expectedRole: { label: "Role", type: "text" },
+      },
 
       async authorize(credentials) {
-  if (
-    !credentials?.email ||
-    !credentials?.password ||
-    !credentials?.expectedRole
-  ) {
-    return null;
-  }
+        console.log('=== AUTH DEBUG START ===');
+        console.log('Credentials received:', {
+          email: credentials?.email,
+          hasPassword: !!credentials?.password,
+          expectedRole: credentials?.expectedRole
+        });
 
-  const user = await prisma.user.findUnique({
-    where: { email: credentials.email },
-  });
+        if (!credentials?.email || !credentials?.password || !credentials?.expectedRole) {
+          console.log('Missing credentials');
+          return null;
+        }
 
-  if (!user || !user.password) {
-    return null;
-  }
+        const user = await prisma.user.findUnique({
+          where: { email: credentials.email },
+        });
 
-  if (user.emailVerified === null) {
-    throw new Error("EmailNotVerified");
-  }
+        console.log('Database user found:', {
+          exists: !!user,
+          email: user?.email,
+          role: user?.role,
+          hasPassword: !!user?.password,
+          emailVerified: user?.emailVerified,
+          passwordLength: user?.password?.length
+        });
 
-  if (user.role !== credentials.expectedRole) {
-    throw new Error("InvalidRole");
-  }
+        if (!user || !user.password) {
+          console.log('User not found or no password');
+          return null;
+        }
 
-  const valid = await compare(credentials.password, user.password);
-  if (!valid) {
-    return null;
-  }
+        if (user.emailVerified === null) {
+          console.log('Email not verified');
+          throw new Error("EmailNotVerified");
+        }
 
-  return {
-    id: user.id,
-    email: user.email,
-    name: user.name,
-    role: user.role,
-  };
-}
+        console.log('Checking role:', {
+          userRole: user.role,
+          expectedRole: credentials.expectedRole
+        });
 
+        if (user.role !== credentials.expectedRole) {
+          console.log('ROLE MISMATCH - throwing InvalidRole');
+          throw new Error("InvalidRole");
+        }
+
+        console.log('Comparing password...');
+        const valid = await compare(credentials.password, user.password);
+        console.log('Password valid:', valid);
+
+        if (!valid) {
+          console.log('Password invalid');
+          return null;
+        }
+
+        console.log('=== AUTH DEBUG END - SUCCESS ===');
+        return {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          role: user.role,
+        };
+      }
     }),
   ],
 
@@ -77,13 +102,12 @@ export const authOptions: NextAuthOptions = {
       }
       return session;
     },
-
   },
 
   pages: {
-  signIn: "/auth/customer/signin",
-  error: "/auth/customer/signin",
-},
+    signIn: "/auth/customer/signin",
+    error: "/auth/customer/signin",
+  },
   session: {
     strategy: "jwt",
     maxAge: 30 * 24 * 60 * 60, // 30 days
