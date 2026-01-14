@@ -14,6 +14,7 @@ export default function ForgotPasswordClient() {
 
   const searchParams = useSearchParams();
   const type = searchParams.get("type") ?? "customer";
+  const emailType = type === "store" ? "store-manager" : type;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,7 +24,7 @@ export default function ForgotPasswordClient() {
       await fetch("/api/auth/reset-password/request", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, type: emailType }),
       });
 
       // Always show success (security)
@@ -81,8 +82,8 @@ export default function ForgotPasswordClient() {
 
                 <p className="text-sm text-center text-gray-600">
           Remember your password?{" "}
-          <Link
-            href={type === "store" ? "/auth/store/signin" : "/auth/customer/signin"}
+                    <Link
+            href={emailType === "store-manager" ? "/auth/store/signin" : "/auth/customer/signin"}
             className="text-blue-600 hover:underline"
           >
             Sign in
