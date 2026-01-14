@@ -50,7 +50,7 @@ export default function ResetPasswordContent() {
         setMessage({ type: "success", text: "Password reset successful! Redirecting..." });
         
         // Redirect based on user type
-        setTimeout(() => router.push(type === "store" ? "/auth/store/signin" : "/auth/customer/signin"), 2000);
+        setTimeout(() => router.push(type === "store-manager" ? "/auth/store/signin" : "/auth/customer/signin"), 2000);
       } else {
         setMessage({ type: "error", text: data.error || "Failed to reset password" });
       }
@@ -158,7 +158,7 @@ export default function ResetPasswordContent() {
           <p className="text-sm text-gray-600">
             Remember your password?{" "}
             <Link
-              href={type === "store" ? "/auth/store/signin" : "/auth/customer/signin"}
+              href={type === "store-manager" ? "/auth/store/signin" : "/auth/customer/signin"}
               className="font-medium text-blue-600 hover:text-blue-500"
             >
               Sign in here
