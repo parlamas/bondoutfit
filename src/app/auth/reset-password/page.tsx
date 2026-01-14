@@ -53,7 +53,7 @@ function ResetPasswordContent() {
         setMessage({ type: "success", text: "Password reset successful! Redirecting..." });
         
                 // Redirect based on user type
-        setTimeout(() => router.push(type === "store-manager" ? "/auth/store/signin" : "/auth/customer/signin"), 2000);
+        setTimeout(() => router.push(type === "store" ? "/auth/store/signin" : "/auth/customer/signin"), 2000);
       } else {
         setMessage({ type: "error", text: data.error || "Failed to reset password" });
       }
