@@ -7,7 +7,7 @@ import { randomBytes } from "crypto";
 
 export async function POST(request: NextRequest) {
   try {
-    const { email } = await request.json();
+    const { email, type = 'customer' } = await request.json();
 
     const user = await prisma.user.findUnique({
       where: { email },
@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Send email
-    await sendPasswordResetEmail(email, resetToken, user.role);
+    await sendPasswordResetEmail(email, resetToken, type);
 
     return NextResponse.json(
       { message: "Password reset email sent." },

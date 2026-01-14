@@ -17,6 +17,7 @@ export default function ResetPasswordPage() {
 
 function ResetPasswordContent() {
   const searchParams = useSearchParams();
+  const type = searchParams.get("type") ?? "customer";
   const router = useRouter();
   const token = searchParams.get("token");
   const [password, setPassword] = useState("");
@@ -50,8 +51,9 @@ function ResetPasswordContent() {
 
             if (res.ok) {
         setMessage({ type: "success", text: "Password reset successful! Redirecting..." });
-        // Redirect based on user type or to customer signin as default
-        setTimeout(() => router.push("/auth/customer/signin"), 2000);
+        
+                // Redirect based on user type
+        setTimeout(() => router.push(type === "store-manager" ? "/auth/store/signin" : "/auth/customer/signin"), 2000);
       } else {
         setMessage({ type: "error", text: data.error || "Failed to reset password" });
       }
@@ -158,8 +160,8 @@ function ResetPasswordContent() {
                         <div className="text-center">
           <p className="text-sm text-gray-600">
             Remember your password?{" "}
-            <Link
-              href="/auth/customer/signin"
+                        <Link
+              href={type === "store-manager" ? "/auth/store/signin" : "/auth/customer/signin"}
               className="font-medium text-blue-600 hover:text-blue-500"
             >
               Sign in here
