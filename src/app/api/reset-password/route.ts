@@ -2,12 +2,12 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { hash } from 'bcryptjs';
+import { hashPassword } from '@/lib/auth';
 
 export async function POST(request: NextRequest) {
   try {
     const { email, newPassword } = await request.json();
-    
+
     if (!email || !newPassword) {
       return NextResponse.json(
         { error: 'Email and newPassword required' },
@@ -15,13 +15,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const hashedPassword = await hash(newPassword, 12);
-    
+    const hashedPassword = await hashPassword(newPassword);
+
     const user = await prisma.user.update({
       where: { email },
       data: { password: hashedPassword },
-      select: { 
-        email: true, 
+      select: {
+        email: true,
         role: true,
         name: true
       }

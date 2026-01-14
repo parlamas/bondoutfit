@@ -56,8 +56,13 @@ if (result?.error) {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+                <div>
+          <div className="mb-4 p-3 bg-gray-100 border border-gray-300 rounded-md">
+            <p className="text-sm text-gray-800 text-center font-medium">
+              STORE MANAGER ACCOUNT - For business and store management
+            </p>
+          </div>
+          <h2 className="mt-2 text-center text-3xl font-extrabold text-gray-900">
             Store Manager Sign In
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
