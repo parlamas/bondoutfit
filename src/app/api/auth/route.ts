@@ -1,4 +1,5 @@
-// Direct NextAuth handler for /api/auth/*
+//src/api/auth/route.ts
+
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { compare } from "bcryptjs";

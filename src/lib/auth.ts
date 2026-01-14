@@ -21,7 +21,11 @@ export const authOptions: NextAuthOptions = {
       },
 
       async authorize(credentials) {
-        console.log('=== AUTH DEBUG START ===');
+  console.log('=== AUTH DEBUG START ===');
+  console.log('=== PASSWORD RESET DEBUG ===');
+  console.log('Full credentials object:', credentials);
+  console.log('Email:', credentials?.email);
+  console.log('Expected role from form:', credentials?.expectedRole);
         console.log('Credentials received:', {
           email: credentials?.email,
           hasPassword: !!credentials?.password,
@@ -105,9 +109,9 @@ export const authOptions: NextAuthOptions = {
   },
 
   pages: {
-    signIn: "/auth/customer/signin",
-    error: "/auth/customer/signin",
-  },
+  signIn: "/auth/customer/signin", // Default
+  error: "/auth/error",
+},
   session: {
     strategy: "jwt",
     maxAge: 30 * 24 * 60 * 60, // 30 days

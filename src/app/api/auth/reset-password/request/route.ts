@@ -2,7 +2,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { sendPasswordResetEmail } from "@/lib/email";
+import { transporter } from "@/lib/email";
 import { randomBytes } from "crypto";
 
 export async function POST(request: NextRequest) {
@@ -32,9 +32,33 @@ export async function POST(request: NextRequest) {
       },
     });
 
-        // Convert type parameter to role for email function
+    // Convert type parameter to role
     const role = type === "store" ? "STORE_MANAGER" : "CUSTOMER";
-    await sendPasswordResetEmail(email, resetToken, role);
+    
+    // MANUALLY create correct link (bypass broken email.ts cache)
+    const resetUrl = `${process.env.NEXTAUTH_URL}/auth/reset-password?token=${resetToken}&type=${type}`;
+
+    console.log('Reset email debug:', {
+  email: email,
+  type: type,
+  role: role,
+  resetUrl: resetUrl
+});
+    
+    // Send email with manually created link
+    await transporter.sendMail({
+      from: '"BondOutfit SVD" <noreply@bondoutfit.com>',
+      to: email,
+      subject: 'Reset your BondOutfit password',
+      html: `
+        <h2>Password Reset Request</h2>
+        <p>You requested a password reset for your BondOutfit account.</p>
+        <p>Click the link below to reset your password:</p>
+        <a href="${resetUrl}">Reset Password</a>
+        <p>This link expires in 1 hour.</p>
+        <p>If you didn't request this, please ignore this email.</p>
+      `,
+    });
 
     return NextResponse.json(
       { message: "Password reset email sent." },
