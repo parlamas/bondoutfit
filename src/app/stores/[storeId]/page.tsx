@@ -84,6 +84,7 @@ export default function StorePage({
     numberOfVisitors: 1,
   });
   const [loadingBooking, setLoadingBooking] = useState(false);
+  const [selectedDiscountId, setSelectedDiscountId] = useState<string>('');
 
   useEffect(() => {
     const load = async () => {
@@ -174,6 +175,15 @@ export default function StorePage({
     setShowBookingForm(true);
   };
 
+    const handleDiscountBooking = (discount: Discount) => {
+    if (status === 'unauthenticated') {
+      router.push('/auth/customer/signin');
+      return;
+    }
+    setSelectedDiscountId(discount.id);
+    setShowBookingForm(true);
+  };
+
   const handleBookingChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setBookingData(prev => ({
@@ -190,11 +200,12 @@ export default function StorePage({
       const res = await fetch('/api/visits', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+                body: JSON.stringify({
           storeId: params.storeId,
           scheduledDate: bookingData.date,
           scheduledTime: bookingData.time,
           numberOfPeople: bookingData.numberOfVisitors,
+          discountId: selectedDiscountId,
         }),
       });
 
@@ -287,7 +298,7 @@ export default function StorePage({
                       <span>€{discount.minPurchase}</span>
                     </div>
                   )}
-                  {discount.code && (
+                                              {discount.code && (
                     <div className="mt-2 pt-2 border-t">
                       <span className="font-semibold">Use Code:</span>
                       <span className="ml-2 bg-gray-100 px-2 py-1 rounded font-mono">
@@ -296,6 +307,13 @@ export default function StorePage({
                     </div>
                   )}
                 </div>
+
+                <button
+  onClick={() => handleDiscountBooking(discount)}
+  className="w-full mt-4 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+>
+  Schedule Visit to Claim
+</button>
               </div>
             ))}
           </div>
@@ -352,15 +370,21 @@ export default function StorePage({
                       <span>€{discount.minPurchase}</span>
                     </div>
                   )}
-                  {discount.code && (
-                    <div className="mt-2 pt-2 border-t">
-                      <span className="font-semibold">Use Code:</span>
-                      <span className="ml-2 bg-gray-100 px-2 py-1 rounded font-mono">
-                        {discount.code}
-                      </span>
-                    </div>
-                  )}
-                </div>
+                                  {discount.code && (
+                  <div className="mt-2 pt-2 border-t">
+                    <span className="font-semibold">Use Code:</span>
+                    <span className="ml-2 bg-gray-100 px-2 py-1 rounded font-mono">
+                      {discount.code}
+                    </span>
+                  </div>
+                )}
+              </div>
+              <button
+                onClick={() => handleDiscountBooking(discount)}
+                className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+              >
+                Schedule Visit to Claim
+              </button>
               </div>
             ))}
           </div>
@@ -376,25 +400,6 @@ export default function StorePage({
           Show Offers & Discounts ({discounts.length} available)
         </button>
       )}
-
-      {/* STORE INFO AND BOOK VISIT BUTTON */}
-      <div className="flex items-center justify-between">
-        <div className="text-gray-600">
-          <div className="font-medium">
-            {store.categories?.length ? store.categories.join(', ') : null}
-          </div>
-          {store.description && (
-            <p className="mt-1">{store.description}</p>
-          )}
-        </div>
-        
-        <button
-          onClick={handleBookVisitClick}
-          className="bg-green-600 hover:bg-green-700 text-white px-6 py-2.5 rounded-lg font-medium transition-colors"
-        >
-          Book Visit
-        </button>
-      </div>
 
       {/* MAIN CONTENT AREA */}
       <div className="flex flex-col md:flex-row gap-6">
@@ -566,7 +571,10 @@ export default function StorePage({
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-xl font-semibold">Book a Visit</h3>
               <button
-                onClick={() => setShowBookingForm(false)}
+                                onClick={() => {
+                  setShowBookingForm(false);
+                  setSelectedDiscountId('');
+                }}
                 className="text-gray-500 hover:text-gray-700"
               >
                 ✕
