@@ -208,6 +208,13 @@ if (!session) {
             >
               View All Visits
             </button>
+
+             <button
+    onClick={() => router.push('/dashboard/store/discounts/list')}
+    className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+  >
+    View All Discounts
+  </button>
           </div>
 
           {/* Store Setup Section */}
