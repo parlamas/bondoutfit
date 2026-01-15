@@ -33,6 +33,7 @@ type Discount = {
 };
 
 type StorePublicData = {
+  id: string;
   name: string;
   description: string | null;
   categories: string[];
@@ -47,15 +48,17 @@ type StorePublicData = {
   streetNumber: string;
   floor: string | null;
   city: string;
+  state: string;
   zip: string;
   country: string;
-  phoneCountry: string | null;
-  phoneArea: string | null;
-  phoneNumber: string | null;
+  phoneCountry: string;
+  phoneArea: string;
+  phoneNumber: string;
   email: string | null;
   website: string | null;
   openingHours: { [key: string]: any } | null;
-  acceptedCurrencies?: string[];
+  acceptedCurrencies: string[];
+  items: any[];
 };
 
 export default function StorePage({
@@ -509,15 +512,15 @@ export default function StorePage({
                   </a>
                 </div>
               )}
-              {/* Accepted Currencies - Temporarily commented out for debugging */}
-{/* {store.acceptedCurrencies && Array.isArray(store.acceptedCurrencies) && store.acceptedCurrencies.length > 0 && (
+              {/* Accepted Currencies */}
+{store.acceptedCurrencies && Array.isArray(store.acceptedCurrencies) && store.acceptedCurrencies.length > 0 && (
   <div>
     <div className="font-medium text-gray-600">Accepted Currencies</div>
     <div className="text-gray-900">
       {store.acceptedCurrencies.join(', ')}
     </div>
   </div>
-)} */}
+)}
             </div>
           </div>
 
