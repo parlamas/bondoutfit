@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "test-email": "tsx scripts/test-smtp.ts"
   },
   "dependencies": {
     "@auth/prisma-adapter": "1.3.0",
@@ -19,6 +20,7 @@
     "bcryptjs": "^3.0.3",
     "cloudinary": "^2.8.0",
     "date-fns": "^4.1.0",
+    "dotenv": "^17.2.3",
     "html5-qrcode": "^2.3.8",
     "lucide-react": "^0.562.0",
     "next": "^14.2.35",
@@ -30,6 +32,7 @@
     "react-icons": "^5.5.0",
     "react-qr-code": "^2.0.18",
     "react-qr-scanner": "^1.0.0-alpha.11",
+    "twilio": "^5.11.2",
     "zod": "^4.2.1"
   },
   "devDependencies": {
@@ -46,6 +49,7 @@
     "prisma": "^6.19.1",
     "tailwindcss": "^3.4.17",
     "ts-node": "^10.9.2",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   }
 }

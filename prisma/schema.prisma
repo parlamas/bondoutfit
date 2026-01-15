@@ -72,6 +72,21 @@ enum DiscountStatus {
   DELETED
 }
 
+enum NotificationChannel {
+  EMAIL
+  SMS
+  PUSH
+  IN_APP
+}
+
+enum NotificationType {
+  VISIT_REMINDER
+  VISIT_CONFIRMATION
+  DISCOUNT_AVAILABLE
+  NEW_MESSAGE
+  SYSTEM_ALERT
+}
+
 /**
  * =========================
  * USER
@@ -115,6 +130,7 @@ model User {
   reviews       Review[]
   orders        Order[]
   auditLogs     AuditLog[]
+  notificationPreferences UserNotificationPreference? // ADD THIS LINE
 
   // Tokens
   verificationToken         String?   @unique
@@ -205,6 +221,7 @@ model Store {
   auditLogs       AuditLog[]
   collections     StoreCollection[]
   storeCategories StoreCategory[]
+  storeNotificationPreference StoreNotificationPreference? // ADD THIS LINE
 
   // Analytics
   totalVisits    Int   @default(0)
@@ -426,6 +443,10 @@ model Visit {
   cancelledAt      DateTime?
   missedAt        DateTime?
   lastScanAt      DateTime?  // Last time QR code was scanned
+
+  // Notification tracking
+  reminderSentAt     DateTime?
+  confirmationSentAt DateTime?
   
   // Cancellation Info
   cancelledBy     String?    // 'CUSTOMER' or 'STORE'
@@ -854,4 +875,46 @@ model StoreCategoryImage {
   status      ImageStatus @default(ACTIVE)
 
   category StoreCategory @relation(fields: [categoryId], references: [id])
+}
+
+model UserNotificationPreference {
+  id      String @id @default(cuid())
+  userId  String @unique
+  
+  // Channel preferences
+  emailEnabled Boolean @default(true)
+  smsEnabled   Boolean @default(false)
+  pushEnabled  Boolean @default(true)
+  inAppEnabled Boolean @default(true)
+  
+  // Type preferences
+  visitReminders     Boolean @default(true)
+  visitConfirmations Boolean @default(true)
+  discountAlerts     Boolean @default(true)
+  marketingEmails    Boolean @default(false)
+  
+  // Timing preferences (in hours before event)
+  reminderLeadTime   Int @default(24)
+  confirmationLeadTime Int @default(1)
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model StoreNotificationPreference {
+  id      String @id @default(cuid())
+  storeId String @unique
+  
+  // Channel preferences
+  emailEnabled Boolean @default(true)
+  smsEnabled   Boolean @default(false)
+  pushEnabled  Boolean @default(true)
+  
+  // Type preferences
+  newVisitBookings     Boolean @default(true)
+  visitCancellations   Boolean @default(true)
+  visitReminders       Boolean @default(true)
+  lowStockAlerts       Boolean @default(true)
+  systemAlerts         Boolean @default(true)
+  
+  store Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
 }
