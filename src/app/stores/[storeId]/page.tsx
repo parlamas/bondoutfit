@@ -55,7 +55,7 @@ type StorePublicData = {
   email: string | null;
   website: string | null;
   openingHours: { [key: string]: any } | null;
-  acceptedCurrencies: string[];
+  acceptedCurrencies?: string[];
 };
 
 export default function StorePage({
@@ -212,10 +212,13 @@ export default function StorePage({
   if (loading) return <p className="p-6">Loading…</p>;
   if (!store) return null;
 
-  useEffect(() => {
-  console.log('Store data in component:', store);
-  console.log('Store email in component:', store?.email);
-}, [store]);
+    useEffect(() => {
+    console.log('Store data in component:', store);
+    console.log('Store email in component:', store?.email);
+    console.log('Accepted currencies:', store?.acceptedCurrencies);
+    console.log('Type of acceptedCurrencies:', typeof store?.acceptedCurrencies);
+    console.log('Is array?', Array.isArray(store?.acceptedCurrencies));
+  }, [store]);
 
   const storefrontImage = store.images.find(
     (img) => img.type === 'STOREFRONT'
