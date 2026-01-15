@@ -55,7 +55,7 @@ type StorePublicData = {
   email: string | null;
   website: string | null;
   openingHours: { [key: string]: any } | null;
-  acceptedCurrencies: string[];
+  acceptedCurrencies?: string[];
 };
 
 export default function StorePage({
@@ -507,7 +507,7 @@ export default function StorePage({
                 </div>
               )}
               {/* Accepted Currencies */}
-{store.acceptedCurrencies && store.acceptedCurrencies.length > 0 && (
+{store.acceptedCurrencies && Array.isArray(store.acceptedCurrencies) && store.acceptedCurrencies.length > 0 && (
   <div>
     <div className="font-medium text-gray-600">Accepted Currencies</div>
     <div className="text-gray-900">
