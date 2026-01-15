@@ -211,6 +211,11 @@ export default function StorePage({
   if (loading) return <p className="p-6">Loading…</p>;
   if (!store) return null;
 
+  useEffect(() => {
+  console.log('Store data in component:', store);
+  console.log('Store email in component:', store?.email);
+}, [store]);
+
   const storefrontImage = store.images.find(
     (img) => img.type === 'STOREFRONT'
   );
