@@ -74,6 +74,9 @@ export async function GET(
     );
   }
 
+  console.log('Store from database:', store);
+  console.log('Store email from DB:', store?.email);
+
   return NextResponse.json(store);
 }
 

@@ -166,6 +166,7 @@ const occupation = normalizeText(body.occupation);
         await tx.store.create({
           data: {
             name: storeName!,
+            email, // ADD THIS LINE - copies manager's email to store
             phoneCountry,
             phoneArea,
             phoneNumber,
