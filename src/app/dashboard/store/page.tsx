@@ -210,6 +210,31 @@ if (!session) {
             </button>
           </div>
 
+          {/* Store Setup Section */}
+<div className="mb-8 bg-blue-50 p-6 rounded-lg">
+  <h2 className="text-xl font-semibold mb-4">Complete Your Store Setup</h2>
+  <p className="text-gray-600 mb-4">Set up your store profile, add products, and create discounts for customers.</p>
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <a href="/dashboard/store/profile" className="bg-white p-4 rounded-lg shadow hover:shadow-md transition text-center">
+      <div className="font-medium mb-1">Store Profile</div>
+      <div className="text-sm text-gray-600">Set up store details</div>
+    </a>
+    <a href="/dashboard/store/categories" className="bg-white p-4 rounded-lg shadow hover:shadow-md transition text-center">
+      <div className="font-medium mb-1">Categories</div>
+      <div className="text-sm text-gray-600">Create product categories</div>
+    </a>
+    <a href="/dashboard/store/items" className="bg-white p-4 rounded-lg shadow hover:shadow-md transition text-center">
+      <div className="font-medium mb-1">Items</div>
+      <div className="text-sm text-gray-600">Add your products</div>
+    </a>
+    <a href="/dashboard/store/discounts" className="bg-white p-4 rounded-lg shadow hover:shadow-md transition text-center">
+      <div className="font-medium mb-1">Discounts</div>
+      <div className="text-sm text-gray-600">Create discount codes</div>
+    </a>
+  </div>
+</div>
+
+
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Left Column - QR Scanner */}
             <div className="lg:col-span-2 space-y-8">
