@@ -89,42 +89,54 @@ export default function StorePage({
   const [selectedDiscountId, setSelectedDiscountId] = useState<string>('');
 
   useEffect(() => {
-    const load = async () => {
-      try {
-        const [catRes, storeRes, discountsRes] = await Promise.all([
-          fetch(`/api/public/store/${params.storeId}/categories`),
-          fetch(`/api/stores/${params.storeId}/public`),
-          fetch(`/api/public/store/${params.storeId}/discounts`),
-        ]);
+  const load = async () => {
+    try {
+      console.log('Loading store data for ID:', params.storeId);
+      
+      const [catRes, storeRes, discountsRes] = await Promise.all([
+        fetch(`/api/public/store/${params.storeId}/categories`),
+        fetch(`/api/stores/${params.storeId}/public`),
+        fetch(`/api/public/store/${params.storeId}/discounts`),
+      ]);
 
-        if (catRes.ok) {
-          const data: StoreCategory[] = await catRes.json();
-          setCategories(data);
-        }
+      console.log('Category response status:', catRes.status);
+      console.log('Store response status:', storeRes.status);
+      console.log('Discounts response status:', discountsRes.status);
 
-        if (storeRes.ok) {
-          setStore(await storeRes.json());
-        }
-
-        if (discountsRes.ok) {
-  const discountData = await discountsRes.json();
-  
-  // Debug log to see what discounts are being returned
-  console.log('Discounts from API:', discountData);
-  console.log('Number of discounts:', discountData.length);
-  
-  // The API already filters for POSTED and active discounts
-  setDiscounts(discountData);
-}
-      } catch (error) {
-        console.error('Error loading data:', error);
-      } finally {
-        setLoading(false);
+      if (catRes.ok) {
+        const data: StoreCategory[] = await catRes.json();
+        console.log('Categories loaded:', data.length);
+        setCategories(data);
+      } else {
+        console.log('Categories failed to load');
       }
-    };
 
-    load();
-  }, [params.storeId]);
+      if (storeRes.ok) {
+        const storeData = await storeRes.json();
+        console.log('Store data loaded:', storeData);
+        console.log('Store name:', storeData?.name);
+        setStore(storeData);
+      } else {
+        console.log('Store failed to load');
+      }
+
+      if (discountsRes.ok) {
+        const discountData = await discountsRes.json();
+        console.log('Discounts loaded:', discountData.length);
+        console.log('Discount details:', discountData);
+        setDiscounts(discountData);
+      } else {
+        console.log('Discounts failed to load');
+      }
+    } catch (error) {
+      console.error('Error loading data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  load();
+}, [params.storeId]);
 
   useEffect(() => {
     setCategoryImages([]);
