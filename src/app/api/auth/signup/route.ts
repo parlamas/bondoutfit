@@ -57,14 +57,14 @@ const occupation = normalizeText(body.occupation);
     const floor = body.floor ?? null;
     const categories = (() => {
   if (Array.isArray(body.categories)) {
-    return body.categories.filter(Boolean).map(c => c.trim());
+    return body.categories.filter(Boolean).map((c: string) => c.trim());
   }
   
   if (typeof body.categories === 'string') {
     // Handle comma-separated string
     return body.categories
       .split(',')
-      .map(c => c.trim())
+      .map((c: string) => c.trim())
       .filter(Boolean);
   }
   
@@ -74,10 +74,10 @@ const occupation = normalizeText(body.occupation);
     if (catStr.includes(',')) {
       return catStr
         .split(',')
-        .map(c => c.trim())
+        .map((c: string) => c.trim())
         .filter(Boolean);
     } else {
-      return [catStr.trim()];
+      return [(catStr as string).trim()];
     }
   }
   
