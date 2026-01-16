@@ -1,4 +1,4 @@
-//src/app/page.tsx
+// src/app/page.tsx - COMPLETE CORRECTED VERSION
 
 'use client';
 
@@ -10,7 +10,7 @@ import MobileMenu from "./components/MobileMenu";
 
 function StoreSelector() {
   const [stores, setStores] = useState<
-    { id: string; name: string; country: string; city: string }[]
+    { id: string; storeName: string; country: string; city: string }[] // FIXED: Changed 'name' to 'storeName'
   >([]);
   const [country, setCountry] = useState("");
   const [city, setCity] = useState("");
@@ -90,7 +90,7 @@ function StoreSelector() {
             >
               <option value="">Select store</option>
               {filteredStores.map(s => (
-                <option key={s.id} value={s.id}>{s.name}</option>
+                <option key={s.id} value={s.id}>{s.storeName}</option> // FIXED: Changed s.name to s.storeName
               ))}
             </select>
           </div>
@@ -161,11 +161,10 @@ export default function HomePage() {
   }, [role, router]);
 
   return (
-  <div className="min-h-screen bg-gray-50 pt-14 md:pt-0">
-    <MobileMenu />
-    {role !== "STORE_MANAGER" && <StoreSelector />}
-    <IntroSection />
-  </div>
-);
-
+    <div className="min-h-screen bg-gray-50 pt-14 md:pt-0">
+      <MobileMenu />
+      {role !== "STORE_MANAGER" && <StoreSelector />}
+      <IntroSection />
+    </div>
+  );
 }
