@@ -5,7 +5,7 @@
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter, useParams } from "next/navigation";
-import { ArrowLeft, Save, Tag } from "lucide-react";
+import { ArrowLeft, Save, Tag, AlertCircle, CheckCircle, XCircle } from "lucide-react";
 
 type DiscountFormData = {
   title: string;
@@ -26,6 +26,8 @@ type DiscountFormData = {
   isSingleUse: boolean;
   isStackable: boolean;
 };
+
+type MessageType = 'success' | 'error' | 'info' | null;
 
 export default function EditDiscountPage() {
   const { data: session, status } = useSession();
@@ -54,6 +56,8 @@ export default function EditDiscountPage() {
     isSingleUse: false,
     isStackable: false,
   });
+  
+  const [message, setMessage] = useState<{ type: MessageType; text: string } | null>(null);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -93,11 +97,14 @@ export default function EditDiscountPage() {
           isSingleUse: data.isSingleUse || false,
           isStackable: data.isStackable || false,
         });
+      } else {
+        setMessage({ type: 'error', text: 'Failed to load discount data. Please try again.' });
+        setTimeout(() => router.back(), 2000);
       }
     } catch (error) {
       console.error("Failed to load discount", error);
-      alert("Failed to load discount");
-      router.back();
+      setMessage({ type: 'error', text: 'Failed to load discount. Please check your connection.' });
+      setTimeout(() => router.back(), 2000);
     } finally {
       setLoading(false);
     }
@@ -106,6 +113,7 @@ export default function EditDiscountPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
+    setMessage(null);
 
     try {
       const res = await fetch(`/api/store/discounts/${discountId}`, {
@@ -115,15 +123,17 @@ export default function EditDiscountPage() {
       });
 
       if (res.ok) {
-        alert("Discount updated successfully!");
-        router.push("/dashboard/store/discounts/list");
+        setMessage({ type: 'success', text: 'Discount updated successfully! Redirecting...' });
+        setTimeout(() => {
+          router.push("/dashboard/store/discounts/list");
+        }, 1500);
       } else {
         const error = await res.json();
-        alert(`Failed to update: ${error.error || 'Unknown error'}`);
+        setMessage({ type: 'error', text: `Failed to update: ${error.error || 'Unknown error'}` });
       }
     } catch (error) {
       console.error("Failed to update discount", error);
-      alert("Failed to update discount");
+      setMessage({ type: 'error', text: 'Failed to update discount. Please try again.' });
     } finally {
       setSaving(false);
     }
@@ -157,6 +167,22 @@ export default function EditDiscountPage() {
         <h1 className="text-3xl font-bold text-gray-900 inline">Edit Discount</h1>
         <p className="text-gray-600 ml-4 mt-2 inline">Update your discount details</p>
       </div>
+
+      {/* Inline Message Display */}
+      {message && (
+        <div className={`mb-6 p-4 rounded-lg flex items-center gap-3 ${
+          message.type === 'success' 
+            ? 'bg-green-50 border border-green-200 text-green-800' 
+            : message.type === 'error' 
+            ? 'bg-red-50 border border-red-200 text-red-800' 
+            : 'bg-blue-50 border border-blue-200 text-blue-800'
+        }`}>
+          {message.type === 'success' && <CheckCircle className="w-5 h-5 flex-shrink-0" />}
+          {message.type === 'error' && <XCircle className="w-5 h-5 flex-shrink-0" />}
+          {message.type === 'info' && <AlertCircle className="w-5 h-5 flex-shrink-0" />}
+          <span className="inline">{message.text}</span>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-gray-200 p-6 space-y-6">
         {/* Basic Info */}
