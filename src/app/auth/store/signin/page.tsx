@@ -59,7 +59,7 @@ if (result?.error) {
                 <div>
           <div className="mb-4 p-3 bg-gray-100 border border-gray-300 rounded-md">
             <p className="text-sm text-gray-800 text-center font-medium">
-              STORE MANAGER ACCOUNT - For business and store management
+              STORE MANAGER ACCOUNT
             </p>
           </div>
           <h2 className="mt-2 text-center text-3xl font-extrabold text-gray-900">
