@@ -1,4 +1,4 @@
-// src/app/components/NavBar.tsx - COMPLETE UPDATED VERSION
+// src/app/components/NavBar.tsx - COMPLETE UPDATED VERSION WITH BOTH DASHBOARDS
 
 "use client";
 
@@ -71,10 +71,20 @@ export default function RoleBasedNavbar() {
             Store Dashboard
           </Link>
         )}
+        
+        {role === "CUSTOMER" && (
+          <Link
+            href="/dashboard/customer"
+            className="rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700"
+          >
+            My Visits
+          </Link>
+        )}
+        
         <button
           type="button"
           onClick={() => signOut({ callbackUrl: "/" })}
-          className="rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700"
+          className="rounded-md border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
         >
           Sign out
         </button>
