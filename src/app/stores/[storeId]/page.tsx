@@ -36,7 +36,7 @@ type Discount = {
 
 type StorePublicData = {
   id: string;
-  name: string;
+  storeName: string; // CHANGED FROM 'name' TO 'storeName'
   description: string | null;
   categories: string[];
   images: {
@@ -105,7 +105,7 @@ export default function StorePage({
       if (storeRes.ok) {
         const storeData = await storeRes.json();
         console.log('Store data received:', storeData);
-        console.log('Store name:', storeData.name);
+        console.log('Store name:', storeData.storeName);
         console.log('Store has name property?', 'name' in storeData);
         setStore(storeData);
       } else {
@@ -289,15 +289,8 @@ export default function StorePage({
 
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-6">
-      <div className="bg-yellow-100 border border-yellow-300 p-4 rounded-lg">
-  <h3 className="font-bold text-yellow-800">DEBUG INFO:</h3>
-  <p>Store ID: {params.storeId}</p>
-  <p>Store loaded: {store ? 'YES' : 'NO'}</p>
-  <p>Store name: {store?.name || 'NOT FOUND'}</p>
-  <p>Number of discounts: {discounts.length}</p>
-  <p>Loading: {loading ? 'YES' : 'NO'}</p>
-</div>
-      <h1 className="text-3xl font-bold">{store.name}</h1>
+      
+      <h1 className="text-3xl font-bold">{store.storeName}</h1>
 
       {/* SCHEDULED VISIT DISCOUNTS SECTION */}
       {svdDiscounts.length > 0 && showDiscounts && (
