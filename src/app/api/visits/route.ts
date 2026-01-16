@@ -30,7 +30,7 @@ export async function GET() {
           store: {
             select: {
               id: true,
-              name: true,
+              storeName: true,
               city: true,
               country: true,
             },
@@ -55,10 +55,10 @@ export async function GET() {
             discountAmount: v.discount.discountAmount,
           }
         : null,
-      store: v.discount
+      store: v.discount?.store
         ? {
             id: v.discount.store.id,
-            name: v.discount.store.name,
+            name: v.discount.store.storeName,
             city: v.discount.store.city,
             country: v.discount.store.country,
           }
@@ -76,9 +76,8 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { storeId, scheduledDate, scheduledTime, numberOfPeople } = body;
+    const { storeId, scheduledDate, scheduledTime, numberOfPeople, discountId } = body;
 
-    // Validate required fields
     if (!storeId || !scheduledDate || !scheduledTime) {
       return NextResponse.json(
         { error: "Missing required fields" },
@@ -86,9 +85,18 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Check if store exists
     const store = await prisma.store.findUnique({
       where: { id: storeId },
+      include: {
+        manager: {
+          select: {
+            email: true,
+            phoneNumber: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
+      },
     });
 
     if (!store) {
@@ -98,7 +106,23 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Create the visit
+    const customer = await prisma.user.findUnique({
+      where: { id: (session.user as any).id },
+      select: {
+        email: true,
+        phoneNumber: true,
+        firstName: true,
+        lastName: true,
+      },
+    });
+
+    if (!customer) {
+      return NextResponse.json(
+        { error: "Customer not found" },
+        { status: 404 }
+      );
+    }
+
     const visit = await prisma.visit.create({
       data: {
         userId: (session.user as any).id,
@@ -106,20 +130,108 @@ export async function POST(req: NextRequest) {
         scheduledDate: new Date(scheduledDate),
         scheduledTime,
         numberOfPeople: numberOfPeople || 1,
+        discountId: discountId || null,
         status: "SCHEDULED",
       },
       include: {
         store: {
           select: {
-            name: true,
+            storeName: true,
             street: true,
             streetNumber: true,
             city: true,
             country: true,
           },
         },
+        discount: {
+          select: {
+            title: true,
+            discountPercent: true,
+            discountAmount: true,
+          },
+        },
       },
     });
+
+    let qrCodeDataUrl = null;
+    try {
+      const QRCode = (await import('qrcode')).default;
+      qrCodeDataUrl = await QRCode.toDataURL(visit.id);
+      
+      await prisma.visit.update({
+        where: { id: visit.id },
+        data: { qrCodeData: qrCodeDataUrl },
+      });
+    } catch (qrError) {
+      console.error("Failed to generate QR code:", qrError);
+    }
+
+    if (process.env.RESEND_API_KEY && customer.email) {
+      try {
+        const { Resend } = await import('resend');
+        const resend = new Resend(process.env.RESEND_API_KEY);
+        
+        const customerName = customer.firstName + (customer.lastName ? ' ' + customer.lastName : '') || 'there';
+        
+        await resend.emails.send({
+          from: 'BondOutfit <notifications@bondoutfit.com>',
+          to: customer.email,
+          subject: `✅ Visit Confirmed: ${visit.store.storeName}`,
+          html: `
+            <h2>Your Visit is Confirmed</h2>
+            <p>Hi ${customerName},</p>
+            <p>Your visit to <strong>${visit.store.storeName}</strong> is scheduled for:</p>
+            <p><strong>${new Date(visit.scheduledDate).toLocaleDateString()} at ${visit.scheduledTime}</strong></p>
+            <p>Address: ${visit.store.street} ${visit.store.streetNumber}, ${visit.store.city}</p>
+            ${visit.discount ? `<p>Discount: ${visit.discount.title}</p>` : ''}
+            ${qrCodeDataUrl ? `
+              <p><strong>Your Check-in QR Code:</strong></p>
+              <img src="${qrCodeDataUrl}" alt="QR Code for check-in" style="width: 200px; height: 200px;"/>
+              <p>Show this QR code at the store to check in and redeem your discount.</p>
+            ` : ''}
+            <p>View visit details: https://www.bondoutfit.com/visits/${visit.id}</p>
+          `,
+        });
+        console.log(`✅ Email sent to customer: ${customer.email}`);
+      } catch (emailError) {
+        console.error("❌ Failed to send customer email:", emailError);
+      }
+    }
+
+    if (process.env.RESEND_API_KEY && store.manager?.email) {
+      try {
+        const { Resend } = await import('resend');
+        const resend = new Resend(process.env.RESEND_API_KEY);
+        
+        const customerName = customer.firstName + (customer.lastName ? ' ' + customer.lastName : '') || 'Customer';
+        const managerName = store.manager.firstName + (store.manager.lastName ? ' ' + store.manager.lastName : '') || 'Manager';
+        
+        await resend.emails.send({
+          from: 'BondOutfit <notifications@bondoutfit.com>',
+          to: store.manager.email,
+          subject: `📅 New Visit Scheduled: ${customerName}`,
+          html: `
+            <h2>New Visit Scheduled</h2>
+            <p>Hi ${managerName},</p>
+            <p>A customer has scheduled a visit to your store:</p>
+            <ul>
+              <li><strong>Customer:</strong> ${customerName}</li>
+              <li><strong>Date & Time:</strong> ${new Date(visit.scheduledDate).toLocaleDateString()} at ${visit.scheduledTime}</li>
+              <li><strong>Party Size:</strong> ${visit.numberOfPeople} person(s)</li>
+              ${visit.discount ? `<li><strong>Discount:</strong> ${visit.discount.title}</li>` : ''}
+            </ul>
+            ${qrCodeDataUrl ? `
+              <p><strong>Customer's Check-in QR Code:</strong></p>
+              <img src="${qrCodeDataUrl}" alt="QR Code for check-in" style="width: 200px; height: 200px;"/>
+            ` : ''}
+            <p>Visit ID: ${visit.id}</p>
+          `,
+        });
+        console.log(`✅ Email sent to store manager: ${store.manager.email}`);
+      } catch (emailError) {
+        console.error("❌ Failed to send manager email:", emailError);
+      }
+    }
 
     return NextResponse.json({
       id: visit.id,
@@ -128,9 +240,11 @@ export async function POST(req: NextRequest) {
       numberOfPeople: visit.numberOfPeople,
       status: visit.status,
       store: visit.store,
+      discount: visit.discount,
+      qrCodeGenerated: !!qrCodeDataUrl,
     });
   } catch (error) {
-    console.error("Error creating visit:", error);
+    console.error("❌ Error creating visit:", error);
     return NextResponse.json(
       { error: "Failed to create visit" },
       { status: 500 }

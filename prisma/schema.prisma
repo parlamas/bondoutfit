@@ -96,7 +96,8 @@ enum NotificationType {
 model User {
   id            String    @id @default(cuid())
   email         String    @unique
-  name          String
+  firstName     String
+  lastName      String?
   password      String?
   emailVerified DateTime?
   role          UserRole  @default(CUSTOMER)
@@ -161,7 +162,7 @@ model Store {
   managerId String @unique
 
   // Basic Info
-  name          String
+  storeName     String
   description   String?
   email         String? @unique
   website       String?
@@ -423,6 +424,7 @@ model Visit {
   userId     String
   storeId    String
   discountId String?
+  qrCodeData      String?  // ← ADD THIS LINE
 
   // Scheduling
   scheduledDate DateTime
