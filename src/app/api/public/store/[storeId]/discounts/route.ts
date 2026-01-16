@@ -60,26 +60,24 @@ export async function GET(
     });
     
     // SECOND: Apply filters manually to see what passes
-    const filteredDiscounts = allDiscounts.filter(discount => {
-      const isPosted = discount.status === 'POSTED';
-      const isActive = discount.isActive === true;
-      
-      // Date filtering
-      const now = new Date();
-      const validFromPass = !discount.validFrom || new Date(discount.validFrom) <= now;
-      const validToPass = !discount.validTo || new Date(discount.validTo) >= now;
-      
-      const passes = isPosted && isActive && validFromPass && validToPass;
-      
-      console.log(`\nFilter check for "${discount.title}":`);
-      console.log('  Is POSTED?', isPosted, `(${discount.status})`);
-      console.log('  Is active?', isActive, `(${discount.isActive})`);
-      console.log('  Valid from pass?', validFromPass, `(validFrom: ${discount.validFrom})`);
-      console.log('  Valid to pass?', validToPass, `(validTo: ${discount.validTo})`);
-      console.log('  PASSES ALL?', passes);
-      
-      return passes;
-    });
+const filteredDiscounts = allDiscounts.filter(discount => {
+  const isPosted = discount.status === 'POSTED';
+  const isActive = discount.isActive === true;
+  
+  // Date filtering - ONLY check expiration (validTo), not start date (validFrom)
+  const now = new Date();
+  const validToPass = !discount.validTo || new Date(discount.validTo) >= now;
+  
+  const passes = isPosted && isActive && validToPass;
+  
+  console.log(`\nFilter check for "${discount.title}":`);
+  console.log('  Is POSTED?', isPosted, `(${discount.status})`);
+  console.log('  Is active?', isActive, `(${discount.isActive})`);
+  console.log('  Valid to pass?', validToPass, `(validTo: ${discount.validTo})`);
+  console.log('  PASSES ALL?', passes);
+  
+  return passes;
+});
     
     console.log('\n=== FILTERED DISCOUNTS ===');
     console.log('Passing discounts:', filteredDiscounts.length);

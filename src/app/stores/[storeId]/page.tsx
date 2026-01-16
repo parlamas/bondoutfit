@@ -222,6 +222,11 @@ if (discountsRes.ok) {
     return 'Special Offer';
   };
 
+  const isFutureDiscount = (discount: Discount) => {
+  if (!discount.validFrom) return false;
+  return new Date(discount.validFrom) > new Date();
+};
+
   const handleBookVisitClick = () => {
     if (status === 'unauthenticated') {
       router.push('/auth/customer/signin');
@@ -326,8 +331,14 @@ if (discountsRes.ok) {
             {svdDiscounts.map((discount) => (
               <div 
   key={discount.id} 
-  className="bg-white border border-purple-300 rounded-lg p-4 shadow-sm flex flex-col h-full"
+  className="bg-white border border-purple-300 rounded-lg p-4 shadow-sm flex flex-col h-full relative"
 >
+  {/* Future Discount Badge */}
+  {isFutureDiscount(discount) && (
+    <div className="absolute top-2 right-2 bg-yellow-100 text-yellow-800 text-xs font-semibold px-2 py-1 rounded border border-yellow-200 z-10">
+      ⏰ Starts {formatDate(discount.validFrom)}
+    </div>
+  )}
   <div className="flex-grow">
     <div className="flex justify-between items-start mb-2">
       <h3 className="font-bold text-lg text-gray-800">{discount.title}</h3>
@@ -366,12 +377,17 @@ if (discountsRes.ok) {
     </div>
   </div>
   
-  <button
-    onClick={() => handleDiscountBooking(discount)}
-    className="w-full mt-4 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
-  >
-    Book Visit
-  </button>
+ <button
+  onClick={() => handleDiscountBooking(discount)}
+  disabled={isFutureDiscount(discount)}
+  className={`w-full mt-4 ${
+    isFutureDiscount(discount)
+      ? 'bg-gray-300 cursor-not-allowed text-gray-500'
+      : 'bg-purple-600 hover:bg-purple-700 text-white'
+  } px-4 py-2 rounded-lg font-medium transition-colors`}
+>
+  {isFutureDiscount(discount) ? 'Starts Soon' : 'Book Visit'}
+</button>
 </div>
             ))}
           </div>
@@ -400,8 +416,14 @@ if (discountsRes.ok) {
             {regularDiscounts.map((discount) => (
               <div 
   key={discount.id} 
-  className="bg-white border border-purple-300 rounded-lg p-4 shadow-sm flex flex-col h-full"
+  className="bg-white border border-purple-300 rounded-lg p-4 shadow-sm flex flex-col h-full relative"
 >
+  {/* Future Discount Badge */}
+  {isFutureDiscount(discount) && (
+    <div className="absolute top-2 right-2 bg-yellow-100 text-yellow-800 text-xs font-semibold px-2 py-1 rounded border border-yellow-200 z-10">
+      ⏰ Starts {formatDate(discount.validFrom)}
+    </div>
+  )}
   <div className="flex-grow">
     <div className="flex justify-between items-start mb-2">
       <h3 className="font-bold text-lg text-gray-800">{discount.title}</h3>
@@ -441,11 +463,16 @@ if (discountsRes.ok) {
   </div>
   
   <button
-    onClick={() => handleDiscountBooking(discount)}
-    className="w-full mt-4 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
-  >
-    Book Visit
-  </button>
+  onClick={() => handleDiscountBooking(discount)}
+  disabled={isFutureDiscount(discount)}
+  className={`w-full mt-4 ${
+    isFutureDiscount(discount)
+      ? 'bg-gray-300 cursor-not-allowed text-gray-500'
+      : 'bg-purple-600 hover:bg-purple-700 text-white'
+  } px-4 py-2 rounded-lg font-medium transition-colors`}
+>
+  {isFutureDiscount(discount) ? 'Starts Soon' : 'Book Visit'}
+</button>
 </div>
             ))}
           </div>
