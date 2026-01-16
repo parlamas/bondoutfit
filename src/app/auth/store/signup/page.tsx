@@ -352,17 +352,8 @@ export default function StoreSignUpPage() {
                 <div className="space-y-2">
                   <input
   type="text"
-  name="categories"
   value={formData.categories.join(', ')}
-  onChange={(e) =>
-    setFormData(prev => ({
-      ...prev,
-      categories: e.target.value
-        .split(',')
-        .map(c => c.trim())
-        .filter(Boolean),
-    }))
-  }
+  onChange={handleChange}
   className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
   placeholder="e.g. footwear, handbags, dresses"
 />
