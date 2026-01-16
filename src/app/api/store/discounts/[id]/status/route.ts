@@ -43,9 +43,17 @@ export async function PATCH(
       );
     }
 
+    // When posting a discount, also set isActive to true
+    const updateData: any = { status };
+    if (status === "POSTED") {
+      updateData.isActive = true;
+    } else if (status === "DISMOUNTED" || status === "DELETED") {
+      updateData.isActive = false;
+    }
+
     const updatedDiscount = await prisma.discount.update({
       where: { id: params.id },
-      data: { status },
+      data: updateData,
     });
 
     return NextResponse.json({
