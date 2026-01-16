@@ -12,35 +12,15 @@ export async function GET(
     
     const now = new Date();
     
-    console.log('=== DISCOUNTS API DEBUG ===');
+    console.log('=== DISCOUNTS API DEBUG - FULL ===');
     console.log('Store ID:', storeId);
-    console.log('Current date for filtering:', now.toISOString());
+    console.log('Current date:', now.toISOString());
+    console.log('Current date (local):', now.toLocaleString());
     
-    // Fetch POSTED discounts with proper date filtering
-    const discounts = await prisma.discount.findMany({
+    // FIRST: Get ALL discounts for this store to debug
+    const allDiscounts = await prisma.discount.findMany({
       where: {
         storeId,
-        status: 'POSTED',
-        isActive: true,
-        // Handle date filtering properly:
-        // - If validFrom is null, discount is valid (no start date restriction)
-        // - If validFrom is set, check if now is after or equal to validFrom
-        // - If validTo is null, discount never expires
-        // - If validTo is set, check if now is before or equal to validTo
-        AND: [
-          {
-            OR: [
-              { validFrom: null },
-              { validFrom: { lte: now } }
-            ]
-          },
-          {
-            OR: [
-              { validTo: null },
-              { validTo: { gte: now } }
-            ]
-          }
-        ]
       },
       select: {
         id: true,
@@ -57,24 +37,75 @@ export async function GET(
         svdOnly: true,
         status: true,
         isActive: true,
-      },
-      orderBy: {
-        validFrom: 'asc',
+        createdAt: true,
+        updatedAt: true,
       },
     });
     
-    console.log('Number of discounts found:', discounts.length);
-    console.log('Discount details:', discounts.map(d => ({
+    console.log('=== ALL DISCOUNTS IN DATABASE ===');
+    console.log('Total discounts:', allDiscounts.length);
+    
+    allDiscounts.forEach((discount, index) => {
+      console.log(`\nDiscount ${index + 1}:`);
+      console.log('  Title:', discount.title);
+      console.log('  Status:', discount.status);
+      console.log('  isActive:', discount.isActive);
+      console.log('  validFrom:', discount.validFrom);
+      console.log('  validTo:', discount.validTo);
+      console.log('  svdOnly:', discount.svdOnly);
+      console.log('  Type:', discount.type);
+      console.log('  Code:', discount.code);
+      console.log('  Created:', discount.createdAt);
+      console.log('  Updated:', discount.updatedAt);
+    });
+    
+    // SECOND: Apply filters manually to see what passes
+    const filteredDiscounts = allDiscounts.filter(discount => {
+      const isPosted = discount.status === 'POSTED';
+      const isActive = discount.isActive === true;
+      
+      // Date filtering
+      const now = new Date();
+      const validFromPass = !discount.validFrom || new Date(discount.validFrom) <= now;
+      const validToPass = !discount.validTo || new Date(discount.validTo) >= now;
+      
+      const passes = isPosted && isActive && validFromPass && validToPass;
+      
+      console.log(`\nFilter check for "${discount.title}":`);
+      console.log('  Is POSTED?', isPosted, `(${discount.status})`);
+      console.log('  Is active?', isActive, `(${discount.isActive})`);
+      console.log('  Valid from pass?', validFromPass, `(validFrom: ${discount.validFrom})`);
+      console.log('  Valid to pass?', validToPass, `(validTo: ${discount.validTo})`);
+      console.log('  PASSES ALL?', passes);
+      
+      return passes;
+    });
+    
+    console.log('\n=== FILTERED DISCOUNTS ===');
+    console.log('Passing discounts:', filteredDiscounts.length);
+    
+    // Return only the filtered discounts
+    const result = filteredDiscounts.map(d => ({
+      id: d.id,
       title: d.title,
-      status: d.status,
-      isActive: d.isActive,
+      description: d.description,
+      discountPercent: d.discountPercent,
+      discountAmount: d.discountAmount,
       validFrom: d.validFrom,
       validTo: d.validTo,
+      code: d.code,
+      type: d.type,
+      minPurchase: d.minPurchase,
+      maxDiscount: d.maxDiscount,
       svdOnly: d.svdOnly,
-      hasCode: !!d.code
-    })));
+      status: d.status,
+      isActive: d.isActive,
+    }));
     
-    return NextResponse.json(discounts);
+    console.log('\n=== RETURNING ===');
+    console.log('Number of discounts to return:', result.length);
+    
+    return NextResponse.json(result);
   } catch (error) {
     console.error('Error fetching discounts:', error);
     return NextResponse.json(
@@ -83,3 +114,4 @@ export async function GET(
     );
   }
 }
+
