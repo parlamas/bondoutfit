@@ -269,52 +269,54 @@ export default function StorePage({
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {svdDiscounts.map((discount) => (
               <div 
-                key={discount.id} 
-                className="bg-white border border-purple-300 rounded-lg p-4 shadow-sm"
-              >
-                <div className="flex justify-between items-start mb-2">
-                  <h3 className="font-bold text-lg text-gray-800">{discount.title}</h3>
-                  <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded text-sm font-semibold">
-                    {getDiscountValue(discount)} {getDiscountTypeLabel(discount.type)}
-                  </span>
-                </div>
-                
-                {discount.description && (
-                  <p className="text-gray-600 mb-3 text-sm">{discount.description}</p>
-                )}
-                
-                <div className="space-y-1 text-xs text-gray-500">
-                  <div className="flex justify-between">
-                    <span>Valid From:</span>
-                    <span className="font-medium">{formatDate(discount.validFrom)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Valid To:</span>
-                    <span className="font-medium">{formatDate(discount.validTo)}</span>
-                  </div>
-                  {discount.minPurchase && (
-                    <div className="flex justify-between">
-                      <span>Min. Purchase:</span>
-                      <span>€{discount.minPurchase}</span>
-                    </div>
-                  )}
-                                              {discount.code && (
-                    <div className="mt-2 pt-2 border-t">
-                      <span className="font-semibold">Use Code:</span>
-                      <span className="ml-2 bg-gray-100 px-2 py-1 rounded font-mono">
-                        {discount.code}
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                <button
-  onClick={() => handleDiscountBooking(discount)}
-  className="w-full mt-4 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+  key={discount.id} 
+  className="bg-white border border-purple-300 rounded-lg p-4 shadow-sm flex flex-col h-full"
 >
-  Schedule Visit to Claim
-</button>
-              </div>
+  <div className="flex-grow">
+    <div className="flex justify-between items-start mb-2">
+      <h3 className="font-bold text-lg text-gray-800">{discount.title}</h3>
+      <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded text-sm font-semibold">
+        {getDiscountValue(discount)} {getDiscountTypeLabel(discount.type)}
+      </span>
+    </div>
+    
+    {discount.description && (
+      <p className="text-gray-600 mb-3 text-sm">{discount.description}</p>
+    )}
+    
+    <div className="space-y-1 text-xs text-gray-500">
+      <div className="flex justify-between">
+        <span>Valid From:</span>
+        <span className="font-medium">{formatDate(discount.validFrom)}</span>
+      </div>
+      <div className="flex justify-between">
+        <span>Valid To:</span>
+        <span className="font-medium">{formatDate(discount.validTo)}</span>
+      </div>
+      {discount.minPurchase && (
+        <div className="flex justify-between">
+          <span>Min. Purchase:</span>
+          <span>€{discount.minPurchase}</span>
+        </div>
+      )}
+      {discount.code && (
+        <div className="mt-2 pt-2 border-t">
+          <span className="font-semibold">Use Code:</span>
+          <span className="ml-2 bg-gray-100 px-2 py-1 rounded font-mono">
+            {discount.code}
+          </span>
+        </div>
+      )}
+    </div>
+  </div>
+  
+  <button
+    onClick={() => handleDiscountBooking(discount)}
+    className="w-full mt-4 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+  >
+    Book Visit
+  </button>
+</div>
             ))}
           </div>
         </div>
@@ -341,51 +343,54 @@ export default function StorePage({
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {regularDiscounts.map((discount) => (
               <div 
-                key={discount.id} 
-                className="bg-white border border-blue-300 rounded-lg p-4 shadow-sm"
-              >
-                <div className="flex justify-between items-start mb-2">
-                  <h3 className="font-bold text-lg text-gray-800">{discount.title}</h3>
-                  <span className="bg-red-100 text-red-800 px-2 py-1 rounded text-sm font-semibold">
-                    {getDiscountValue(discount)} {getDiscountTypeLabel(discount.type)}
-                  </span>
-                </div>
-                
-                {discount.description && (
-                  <p className="text-gray-600 mb-3 text-sm">{discount.description}</p>
-                )}
-                
-                <div className="space-y-1 text-xs text-gray-500">
-                  <div className="flex justify-between">
-                    <span>Valid From:</span>
-                    <span className="font-medium">{formatDate(discount.validFrom)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Valid To:</span>
-                    <span className="font-medium">{formatDate(discount.validTo)}</span>
-                  </div>
-                  {discount.minPurchase && (
-                    <div className="flex justify-between">
-                      <span>Min. Purchase:</span>
-                      <span>€{discount.minPurchase}</span>
-                    </div>
-                  )}
-                                  {discount.code && (
-                  <div className="mt-2 pt-2 border-t">
-                    <span className="font-semibold">Use Code:</span>
-                    <span className="ml-2 bg-gray-100 px-2 py-1 rounded font-mono">
-                      {discount.code}
-                    </span>
-                  </div>
-                )}
-              </div>
-              <button
-                onClick={() => handleDiscountBooking(discount)}
-                className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
-              >
-                Schedule Visit to Claim
-              </button>
-              </div>
+  key={discount.id} 
+  className="bg-white border border-purple-300 rounded-lg p-4 shadow-sm flex flex-col h-full"
+>
+  <div className="flex-grow">
+    <div className="flex justify-between items-start mb-2">
+      <h3 className="font-bold text-lg text-gray-800">{discount.title}</h3>
+      <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded text-sm font-semibold">
+        {getDiscountValue(discount)} {getDiscountTypeLabel(discount.type)}
+      </span>
+    </div>
+    
+    {discount.description && (
+      <p className="text-gray-600 mb-3 text-sm">{discount.description}</p>
+    )}
+    
+    <div className="space-y-1 text-xs text-gray-500">
+      <div className="flex justify-between">
+        <span>Valid From:</span>
+        <span className="font-medium">{formatDate(discount.validFrom)}</span>
+      </div>
+      <div className="flex justify-between">
+        <span>Valid To:</span>
+        <span className="font-medium">{formatDate(discount.validTo)}</span>
+      </div>
+      {discount.minPurchase && (
+        <div className="flex justify-between">
+          <span>Min. Purchase:</span>
+          <span>€{discount.minPurchase}</span>
+        </div>
+      )}
+      {discount.code && (
+        <div className="mt-2 pt-2 border-t">
+          <span className="font-semibold">Use Code:</span>
+          <span className="ml-2 bg-gray-100 px-2 py-1 rounded font-mono">
+            {discount.code}
+          </span>
+        </div>
+      )}
+    </div>
+  </div>
+  
+  <button
+    onClick={() => handleDiscountBooking(discount)}
+    className="w-full mt-4 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+  >
+    Book Visit
+  </button>
+</div>
             ))}
           </div>
         </div>
