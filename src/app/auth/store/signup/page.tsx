@@ -1,4 +1,4 @@
-//src/app/auth/store/signup/page.tsx
+// src/app/auth/store/signup/page.tsx - COMPLETE WITH STORE TYPE FIELD
 
 'use client';
 
@@ -8,23 +8,23 @@ import Link from 'next/link';
 export default function StoreSignUpPage() {
   
   const [formData, setFormData] = useState({
-  email: '',
-  password: '',
-  name: '',
-  phoneCountry: '',
-  phoneArea: '',
-  phoneNumber: '',
-  city: '',
-  state: '',
-  zip: '',
-  role: 'STORE_MANAGER',
-  storeName: '',
-  country: '',
-  street: '',
-  streetNumber: '',
-  floor: '',
-  categories: [] as string[],
-});
+    email: '',
+    password: '',
+    name: '',
+    phoneCountry: '',
+    phoneArea: '',
+    phoneNumber: '',
+    city: '',
+    state: '',
+    zip: '',
+    role: 'STORE_MANAGER',
+    storeName: '',
+    country: '',
+    street: '',
+    streetNumber: '',
+    floor: '',
+    categories: [] as string[],
+  });
 
   
   const [loading, setLoading] = useState(false);
@@ -59,7 +59,14 @@ export default function StoreSignUpPage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    
+    if (name === 'categories') {
+      // Store categories as array with single string
+      setFormData(prev => ({ ...prev, categories: [value] }));
+    } else {
+      // For all other fields
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
   };
 
   if (success) {
@@ -160,24 +167,23 @@ export default function StoreSignUpPage() {
               {/* Phone Fields */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label htmlFor="phoneNumber" className="block text-xs font-medium text-gray-700">
+                  <label htmlFor="phoneCountry" className="block text-xs font-medium text-gray-700">
                     Country Code *
                   </label>
                   <input
-  id="phoneCountry"
-  name="phoneCountry"
-  type="text"
-  required
-  value={formData.phoneCountry}
-  onChange={handleChange}
-  className="mt-1 block w-full text-sm border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-  placeholder="+1"
-/>
-
+                    id="phoneCountry"
+                    name="phoneCountry"
+                    type="text"
+                    required
+                    value={formData.phoneCountry}
+                    onChange={handleChange}
+                    className="mt-1 block w-full text-sm border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="+1"
+                  />
                 </div>
 
                 <div>
-                  <label htmlFor="phoneNumber" className="block text-xs font-medium text-gray-700">
+                  <label htmlFor="phoneArea" className="block text-xs font-medium text-gray-700">
                     Area Code *
                   </label>
                   <input
@@ -194,7 +200,7 @@ export default function StoreSignUpPage() {
                 </div>
 
                 <div>
-                    <label htmlFor="phoneNumber" className="block text-xs font-medium text-gray-700">
+                  <label htmlFor="phoneNumber" className="block text-xs font-medium text-gray-700">
                     Phone Number *
                   </label>
                   <input
@@ -212,7 +218,7 @@ export default function StoreSignUpPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label htmlFor="phoneNumber" className="block text-xs font-medium text-gray-700">
+                  <label htmlFor="city" className="block text-xs font-medium text-gray-700">
                     City *
                   </label>
                   <input
@@ -228,7 +234,7 @@ export default function StoreSignUpPage() {
                 </div>
 
                 <div>
-                  <label htmlFor="phoneNumber" className="block text-xs font-medium text-gray-700">
+                  <label htmlFor="state" className="block text-xs font-medium text-gray-700">
                     State *
                   </label>
                   <input
@@ -244,7 +250,7 @@ export default function StoreSignUpPage() {
                 </div>
 
                 <div>
-                  <label htmlFor="phoneNumber" className="block text-xs font-medium text-gray-700">
+                  <label htmlFor="zip" className="block text-xs font-medium text-gray-700">
                     ZIP *
                   </label>
                   <input
@@ -314,7 +320,7 @@ export default function StoreSignUpPage() {
               </div>
 
               <div>
-                <label htmlFor="phoneNumber" className="block text-xs font-medium text-gray-700">
+                <label htmlFor="streetNumber" className="block text-xs font-medium text-gray-700">
                   Street Number *
                 </label>
                 <input
@@ -330,54 +336,34 @@ export default function StoreSignUpPage() {
               </div>
 
               <div>
-  <label htmlFor="floor" className="block text-xs font-medium text-gray-700">
-    Floor / Unit
-  </label>
-  <input
-    id="floor"
-    name="floor"
-    type="text"
-    value={formData.floor}
-    onChange={handleChange}
-    className="mt-1 block w-full text-sm border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-    placeholder="e.g. 2nd floor, Unit 5"
-  />
-</div>
+                <label htmlFor="floor" className="block text-xs font-medium text-gray-700">
+                  Floor / Unit
+                </label>
+                <input
+                  id="floor"
+                  name="floor"
+                  type="text"
+                  value={formData.floor}
+                  onChange={handleChange}
+                  className="mt-1 block w-full text-sm border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="e.g. 2nd floor, Unit 5"
+                />
+              </div>
 
-
+              {/* STORE TYPE FIELD - ADDED BACK */}
               <div>
                 <label htmlFor="categories" className="block text-xs font-medium text-gray-700">
                   Store Type
                 </label>
-                <div className="space-y-2">
-                  <input
-  type="text"
-  name="categoriesInput"
-  value={formData.categories.join(', ')}
-  onChange={(e) => {
-    const value = e.target.value;
-    if (value.includes(',')) {
-      // If there are commas, split by comma and trim
-      setFormData(prev => ({
-        ...prev,
-        categories: value
-          .split(',')
-          .map(c => c.trim())
-          .filter(Boolean)
-      }));
-    } else {
-      // If no commas, treat entire input as single category
-      setFormData(prev => ({
-        ...prev,
-        categories: value.trim() ? [value.trim()] : []
-      }));
-    }
-  }}
-  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-  placeholder="e.g. footwear, handbags, dresses"
-/>
-
-                </div>
+                <input
+                  id="categories"
+                  name="categories"
+                  type="text"
+                  value={formData.categories[0] || ''}
+                  onChange={handleChange}
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="e.g. Women's Fashion Boutique"
+                />
               </div>
             </div>
           </div>

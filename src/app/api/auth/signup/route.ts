@@ -56,29 +56,19 @@ const occupation = normalizeText(body.occupation);
     const streetNumber = body.streetNumber?.trim();
     const floor = body.floor ?? null;
     const categories = (() => {
+  if (!body.categories) return [];
+  
   if (Array.isArray(body.categories)) {
-    return body.categories.filter(Boolean).map((c: string) => c.trim());
-  }
-  
-  if (typeof body.categories === 'string') {
-    // Handle comma-separated string
+    // Simple: trim each item in the array
     return body.categories
-      .split(',')
-      .map((c: string) => c.trim())
-      .filter(Boolean);
+      .filter((item: any) => item != null && item !== '')
+      .map((item: any) => String(item).trim());
   }
   
-  if (body.categories && body.categories[0]) {
-    // Handle single string in array from your form
-    const catStr = body.categories[0];
-    if (catStr.includes(',')) {
-      return catStr
-        .split(',')
-        .map((c: string) => c.trim())
-        .filter(Boolean);
-    } else {
-      return [(catStr as string).trim()];
-    }
+  // If it's a string, put it in an array
+  if (typeof body.categories === 'string') {
+    const trimmed = body.categories.trim();
+    return trimmed ? [trimmed] : [];
   }
   
   return [];
