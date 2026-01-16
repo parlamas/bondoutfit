@@ -142,7 +142,7 @@ export default function EditDiscountPage() {
     }
   }
 
-  if (loading) return <div className="p-6">Loading...</div>;
+  if (loading) return <div className="p-6 inline">Loading...</div>;
 
   return (
     <div className="max-w-4xl mx-auto p-6">
@@ -152,19 +152,19 @@ export default function EditDiscountPage() {
           className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4"
         >
           <ArrowLeft className="w-4 h-4" />
-          Back to Discounts
+          <span className="inline">Back to Discounts</span>
         </button>
-        <h1 className="text-3xl font-bold text-gray-900">Edit Discount</h1>
-        <p className="text-gray-600 mt-2">Update your discount details</p>
+        <h1 className="text-3xl font-bold text-gray-900 inline">Edit Discount</h1>
+        <p className="text-gray-600 ml-4 mt-2 inline">Update your discount details</p>
       </div>
 
       <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-gray-200 p-6 space-y-6">
         {/* Basic Info */}
         <div className="space-y-4">
-          <h2 className="text-lg font-semibold text-gray-900">Basic Information</h2>
+          <h2 className="text-lg font-semibold text-gray-900 inline">Basic Information</h2>
           
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2 inline">
               Discount Title *
             </label>
             <input
@@ -179,7 +179,7 @@ export default function EditDiscountPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2 inline">
               Description
             </label>
             <textarea
@@ -194,7 +194,7 @@ export default function EditDiscountPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2 inline">
                 Discount Type *
               </label>
               <select
@@ -211,7 +211,7 @@ export default function EditDiscountPage() {
 
             {formData.type === "PERCENTAGE" && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2 inline">
                   Discount Percentage *
                 </label>
                 <div className="relative">
@@ -226,18 +226,18 @@ export default function EditDiscountPage() {
                     className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     placeholder="e.g., 20"
                   />
-                  <span className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500">%</span>
+                  <span className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 inline">%</span>
                 </div>
               </div>
             )}
 
             {formData.type === "AMOUNT" && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2 inline">
                   Discount Amount *
                 </label>
                 <div className="relative">
-                  <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500">€</span>
+                  <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 inline">€</span>
                   <input
                     type="number"
                     name="discountAmount"
@@ -256,11 +256,11 @@ export default function EditDiscountPage() {
 
         {/* Validity */}
         <div className="space-y-4">
-          <h2 className="text-lg font-semibold text-gray-900">Validity Period</h2>
+          <h2 className="text-lg font-semibold text-gray-900 inline">Validity Period</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2 inline">
                 Valid From *
               </label>
               <input
@@ -274,7 +274,7 @@ export default function EditDiscountPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2 inline">
                 Valid To *
               </label>
               <input
@@ -291,12 +291,12 @@ export default function EditDiscountPage() {
 
         {/* Advanced Settings */}
         <div className="space-y-4">
-          <h2 className="text-lg font-semibold text-gray-900">Advanced Settings</h2>
+          <h2 className="text-lg font-semibold text-gray-900 inline">Advanced Settings</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2 inline">
                   Discount Code (Optional)
                 </label>
                 <input
@@ -310,11 +310,11 @@ export default function EditDiscountPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2 inline">
                   Minimum Purchase (Optional)
                 </label>
                 <div className="relative">
-                  <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500">€</span>
+                  <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 inline">€</span>
                   <input
                     type="number"
                     name="minPurchase"
@@ -336,7 +336,7 @@ export default function EditDiscountPage() {
                   id="svdOnly"
                   className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                 />
-                <label htmlFor="svdOnly" className="text-sm text-gray-700">
+                <label htmlFor="svdOnly" className="text-sm text-gray-700 inline">
                   Scheduled Visit Discount Only
                 </label>
               </div>
@@ -344,11 +344,11 @@ export default function EditDiscountPage() {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2 inline">
                   Maximum Discount (Optional)
                 </label>
                 <div className="relative">
-                  <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500">€</span>
+                  <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 inline">€</span>
                   <input
                     type="number"
                     name="maxDiscount"
@@ -370,7 +370,7 @@ export default function EditDiscountPage() {
                   id="isStackable"
                   className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                 />
-                <label htmlFor="isStackable" className="text-sm text-gray-700">
+                <label htmlFor="isStackable" className="text-sm text-gray-700 inline">
                   Stackable with other discounts
                 </label>
               </div>
@@ -385,7 +385,7 @@ export default function EditDiscountPage() {
             onClick={() => router.back()}
             className="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
           >
-            Cancel
+            <span className="inline">Cancel</span>
           </button>
           <button
             type="submit"
@@ -393,7 +393,7 @@ export default function EditDiscountPage() {
             className="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
             <Save className="w-4 h-4" />
-            {saving ? "Saving..." : "Save Changes"}
+            <span className="inline">{saving ? "Saving..." : "Save Changes"}</span>
           </button>
         </div>
       </form>
