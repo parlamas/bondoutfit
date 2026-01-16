@@ -91,47 +91,64 @@ export default function StorePage({
   useEffect(() => {
   const load = async () => {
     try {
-      console.log('Loading store data for ID:', params.storeId);
+      console.log('=== DEBUGGING STORE PAGE ===');
+      console.log('Store ID:', params.storeId);
       
-      const [catRes, storeRes, discountsRes] = await Promise.all([
-        fetch(`/api/public/store/${params.storeId}/categories`),
-        fetch(`/api/stores/${params.storeId}/public`),
-        fetch(`/api/public/store/${params.storeId}/discounts`),
-      ]);
-
-      console.log('Category response status:', catRes.status);
+      // Test each endpoint separately
+      const storeUrl = `/api/stores/${params.storeId}/public`;
+      console.log('Fetching store from:', storeUrl);
+      
+      const storeRes = await fetch(storeUrl);
       console.log('Store response status:', storeRes.status);
-      console.log('Discounts response status:', discountsRes.status);
-
-      if (catRes.ok) {
-        const data: StoreCategory[] = await catRes.json();
-        console.log('Categories loaded:', data.length);
-        setCategories(data);
-      } else {
-        console.log('Categories failed to load');
-      }
-
+      console.log('Store response ok:', storeRes.ok);
+      
       if (storeRes.ok) {
         const storeData = await storeRes.json();
-        console.log('Store data loaded:', storeData);
-        console.log('Store name:', storeData?.name);
+        console.log('Store data received:', storeData);
+        console.log('Store name:', storeData.name);
+        console.log('Store has name property?', 'name' in storeData);
         setStore(storeData);
       } else {
-        console.log('Store failed to load');
+        console.log('Store fetch failed with status:', storeRes.status);
+        const errorText = await storeRes.text();
+        console.log('Error response:', errorText);
       }
-
+      
+      // Check discounts
+      const discountsUrl = `/api/public/store/${params.storeId}/discounts`;
+      console.log('\nFetching discounts from:', discountsUrl);
+      
+      const discountsRes = await fetch(discountsUrl);
+      console.log('Discounts response status:', discountsRes.status);
+      
       if (discountsRes.ok) {
         const discountData = await discountsRes.json();
-        console.log('Discounts loaded:', discountData.length);
-        console.log('Discount details:', discountData);
+        console.log('Discounts received:', discountData);
+        console.log('Number of discounts:', discountData.length);
         setDiscounts(discountData);
       } else {
-        console.log('Discounts failed to load');
+        const errorText = await discountsRes.text();
+        console.log('Discounts error:', errorText);
       }
+      
+      // Check categories
+      const categoriesUrl = `/api/public/store/${params.storeId}/categories`;
+      console.log('\nFetching categories from:', categoriesUrl);
+      
+      const catRes = await fetch(categoriesUrl);
+      console.log('Categories response status:', catRes.status);
+      
+      if (catRes.ok) {
+        const catData = await catRes.json();
+        console.log('Categories received:', catData.length);
+        setCategories(catData);
+      }
+      
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
       setLoading(false);
+      console.log('=== END DEBUGGING ===');
     }
   };
 
@@ -272,6 +289,14 @@ export default function StorePage({
 
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-6">
+      <div className="bg-yellow-100 border border-yellow-300 p-4 rounded-lg">
+  <h3 className="font-bold text-yellow-800">DEBUG INFO:</h3>
+  <p>Store ID: {params.storeId}</p>
+  <p>Store loaded: {store ? 'YES' : 'NO'}</p>
+  <p>Store name: {store?.name || 'NOT FOUND'}</p>
+  <p>Number of discounts: {discounts.length}</p>
+  <p>Loading: {loading ? 'YES' : 'NO'}</p>
+</div>
       <h1 className="text-3xl font-bold">{store.name}</h1>
 
       {/* SCHEDULED VISIT DISCOUNTS SECTION */}
