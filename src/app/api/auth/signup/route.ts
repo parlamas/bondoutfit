@@ -55,7 +55,34 @@ const occupation = normalizeText(body.occupation);
     const street = body.street?.trim();
     const streetNumber = body.streetNumber?.trim();
     const floor = body.floor ?? null;
-    const categories = Array.isArray(body.categories) ? body.categories : [];
+    const categories = (() => {
+  if (Array.isArray(body.categories)) {
+    return body.categories.filter(Boolean).map(c => c.trim());
+  }
+  
+  if (typeof body.categories === 'string') {
+    // Handle comma-separated string
+    return body.categories
+      .split(',')
+      .map(c => c.trim())
+      .filter(Boolean);
+  }
+  
+  if (body.categories && body.categories[0]) {
+    // Handle single string in array from your form
+    const catStr = body.categories[0];
+    if (catStr.includes(',')) {
+      return catStr
+        .split(',')
+        .map(c => c.trim())
+        .filter(Boolean);
+    } else {
+      return [catStr.trim()];
+    }
+  }
+  
+  return [];
+})();
 
     console.log("🧪 VALIDATED FIELDS:", {
   email: email,
