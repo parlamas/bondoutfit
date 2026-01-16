@@ -135,7 +135,7 @@ export async function GET() {
     orderBy: { createdAt: "desc" },
     include: {
       store: {
-        select: { name: true },
+        select: { storeName: true },
       },
     },
   });

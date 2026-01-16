@@ -18,7 +18,7 @@ export async function POST() {
       message: `Email updated to: ${newEmail}`,
       store: {
         id: updatedStore.id,
-        name: updatedStore.name,
+        storeName: updatedStore.storeName,
         email: updatedStore.email
       }
     });

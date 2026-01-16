@@ -1,4 +1,4 @@
-// src/app/api/visits/[id]/route.ts - FIXED
+// src/app/api/visits/[id]/route.ts - COMPLETELY FIXED
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
@@ -25,14 +25,15 @@ export async function GET(
         user: {
           select: {
             id: true,
-            name: true,
+            firstName: true,
+            lastName: true,
             email: true,
           }
         },
         store: {
           select: {
             id: true,
-            name: true,
+            storeName: true,
             street: true,
             streetNumber: true,
             city: true,
@@ -42,7 +43,8 @@ export async function GET(
               select: {
                 id: true,
                 email: true,
-                name: true,
+                firstName: true,
+                lastName: true,
               }
             }
           }
@@ -93,19 +95,21 @@ export async function PATCH(
         user: {
           select: {
             id: true,
-            name: true,
+            firstName: true,
+            lastName: true,
             email: true,
           }
         },
         store: {
           select: {
             id: true,
-            name: true,
+            storeName: true,
             manager: {
               select: {
                 id: true,
                 email: true,
-                name: true,
+                firstName: true,
+                lastName: true,
               }
             }
           }
@@ -206,13 +210,14 @@ export async function PATCH(
       include: {
         user: {
           select: {
-            name: true,
+            firstName: true,
+            lastName: true,
             email: true,
           }
         },
         store: {
           select: {
-            name: true,
+            storeName: true,
           }
         },
       },
@@ -280,7 +285,8 @@ export async function POST(
         user: {
           select: {
             id: true,
-            name: true,
+            firstName: true,
+            lastName: true,
           }
         },
       },
@@ -312,6 +318,12 @@ export async function POST(
 
     return NextResponse.json({
       canEdit,
+      reasons: canEdit ? [
+        'Change of plans',
+        'Scheduling conflict',
+        'Found alternative',
+        'Other reasons'
+      ] : [],
       requirements: {
         status: visit.status,
         checkedIn: visit.checkedIn,
@@ -320,6 +332,7 @@ export async function POST(
       },
       visit: {
         id: visit.id,
+        status: visit.status,
         scheduledDate: visit.scheduledDate,
         scheduledTime: visit.scheduledTime,
         numberOfPeople: visit.numberOfPeople,

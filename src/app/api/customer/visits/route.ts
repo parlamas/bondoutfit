@@ -67,7 +67,7 @@ export async function GET(request: NextRequest) {
             store: {
               select: {
                 id: true,
-                name: true,
+                storeName: true,
                 city: true,
                 country: true,
                 categories: true,
@@ -76,7 +76,8 @@ export async function GET(request: NextRequest) {
             },
             user: { // Changed from customer to user
               select: {
-                name: true,
+                firstName: true,
+                lastName: true,
                 email: true,
               },
             },

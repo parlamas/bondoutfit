@@ -89,7 +89,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Store not found' }, { status: 404 });
     }
 
-    console.log('Store found:', { id: store.id, name: store.name });
+    console.log('Store found:', { id: store.id, storeName: store.storeName });
 
     // Determine image type for database
     const imageType = 

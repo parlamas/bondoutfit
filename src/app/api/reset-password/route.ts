@@ -23,7 +23,8 @@ export async function POST(request: NextRequest) {
       select: {
         email: true,
         role: true,
-        name: true
+        firstName: true,
+        lastName: true
       }
     });
 

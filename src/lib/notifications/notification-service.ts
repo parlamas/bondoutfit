@@ -6,6 +6,11 @@ import { sendSMS, smsTemplates } from '@/lib/sms';
 
 export class NotificationService {
   
+  // Helper function to get full name from user
+  private getUserFullName(user: any): string {
+    return `${user.firstName} ${user.lastName || ''}`.trim();
+  }
+
   // Send visit reminder (24 hours before)
   async sendVisitReminder(visitId: string) {
     const visit = await prisma.visit.findUnique({
@@ -27,7 +32,7 @@ export class NotificationService {
     if (!preferences?.visitReminders) return;
 
     const notificationData = {
-      storeName: visit.store.name,
+      storeName: visit.store.storeName,
       scheduledDate: visit.scheduledDate,
       scheduledTime: visit.scheduledTime,
       storeAddress: `${visit.store.street} ${visit.store.streetNumber}, ${visit.store.city}`,
@@ -41,7 +46,7 @@ export class NotificationService {
         data: {
           userId: visit.userId,
           title: 'Visit Reminder',
-          message: `Your visit to ${visit.store.name} is tomorrow at ${visit.scheduledTime}`,
+          message: `Your visit to ${visit.store.storeName} is tomorrow at ${visit.scheduledTime}`,
           type: 'VISIT_REMINDER',
           data: { visitId: visit.id, storeId: visit.storeId },
           actionUrl: `/visits/${visit.id}`,
@@ -94,14 +99,16 @@ export class NotificationService {
     const preferences = visit.store.storeNotificationPreference;
     if (!preferences?.newVisitBookings) return;
 
+    const customerName = this.getUserFullName(visit.user); // FIXED: use helper function
+    
     const notificationData = {
-      customerName: visit.user.name,
+      customerName, // FIXED: changed from visit.user.name
       scheduledDate: visit.scheduledDate,
       scheduledTime: visit.scheduledTime,
       numberOfPeople: visit.numberOfPeople,
       customerNotes: visit.customerNotes,
       visitId: visit.id,
-      storeName: visit.store.name,
+      storeName: visit.store.storeName,
     };
 
     // Store in-app notification
@@ -110,7 +117,7 @@ export class NotificationService {
         data: {
           storeId: visit.storeId,
           title: 'New Visit Booked',
-          message: `${visit.user.name} booked a visit for ${visit.scheduledDate}`,
+          message: `${customerName} booked a visit for ${visit.scheduledDate}`, // FIXED
           type: 'NEW_VISIT',
           data: { visitId: visit.id, userId: visit.userId },
           actionUrl: `/dashboard/store/visits/${visit.id}`,
@@ -157,7 +164,7 @@ export class NotificationService {
     if (!preferences?.visitConfirmations) return;
 
     const notificationData = {
-      storeName: visit.store.name,
+      storeName: visit.store.storeName,
       scheduledDate: visit.scheduledDate,
       scheduledTime: visit.scheduledTime,
       storeAddress: `${visit.store.street} ${visit.store.streetNumber}, ${visit.store.city}`,
@@ -208,7 +215,7 @@ export class NotificationService {
           'Visit Cancelled',
           'visit-cancelled',
           {
-            storeName: visit.store.name,
+            storeName: visit.store.storeName,
             scheduledDate: visit.scheduledDate,
             scheduledTime: visit.scheduledTime,
             cancellationReason: reason || 'Store request',
@@ -229,7 +236,7 @@ export class NotificationService {
           'Visit Cancelled by Customer',
           'visit-cancelled',
           {
-            customerName: visit.user.name,
+            customerName: this.getUserFullName(visit.user), // FIXED
             scheduledDate: visit.scheduledDate,
             scheduledTime: visit.scheduledTime,
             cancellationReason: reason || 'Customer request',
@@ -312,7 +319,7 @@ export class NotificationService {
       'Missed Visit',
       'visit-missed',
       {
-        storeName: visit.store.name,
+        storeName: visit.store.storeName,
         scheduledDate: visit.scheduledDate,
         scheduledTime: visit.scheduledTime,
         visitId: visit.id,
@@ -326,7 +333,7 @@ export class NotificationService {
         data: {
           userId: visit.userId,
           title: 'Missed Visit',
-          message: `You missed your visit to ${visit.store.name}`,
+          message: `You missed your visit to ${visit.store.storeName}`,
           type: 'VISIT_MISSED',
           data: { visitId: visit.id, storeId: visit.storeId },
           actionUrl: `/visits/${visit.id}`,
@@ -338,7 +345,7 @@ export class NotificationService {
     if (preferences?.smsEnabled && visit.user.phoneNumber) {
       await sendSMS(
         `${visit.user.phoneCountry}${visit.user.phoneNumber}`,
-        `You missed your visit to ${visit.store.name}. Schedule a new visit: ${process.env.NEXTAUTH_URL}/schedule/${visit.storeId}`
+        `You missed your visit to ${visit.store.storeName}. Schedule a new visit: ${process.env.NEXTAUTH_URL}/schedule/${visit.storeId}`
       );
     }
   }
@@ -368,11 +375,11 @@ export class NotificationService {
       'Customer Missed Visit',
       'store-missed-visit',
       {
-        customerName: visit.user.name,
+        customerName: this.getUserFullName(visit.user), // FIXED
         scheduledDate: visit.scheduledDate,
         scheduledTime: visit.scheduledTime,
         visitId: visit.id,
-        storeName: visit.store.name,
+        storeName: visit.store.storeName,
         customerEmail: visit.user.email,
         customerPhone: visit.user.phoneNumber ? 
           `${visit.user.phoneCountry}${visit.user.phoneNumber}` : 'Not provided',
@@ -385,7 +392,7 @@ export class NotificationService {
         data: {
           storeId: visit.storeId,
           title: 'Customer Missed Visit',
-          message: `${visit.user.name} missed their scheduled visit`,
+          message: `${this.getUserFullName(visit.user)} missed their scheduled visit`, // FIXED
           type: 'VISIT_MISSED',
           data: { visitId: visit.id, userId: visit.userId },
           actionUrl: `/dashboard/store/visits/${visit.id}`,
@@ -397,7 +404,7 @@ export class NotificationService {
     if (preferences?.smsEnabled && visit.store.manager.phoneNumber) {
       await sendSMS(
         `${visit.store.manager.phoneCountry}${visit.store.manager.phoneNumber}`,
-        `Customer ${visit.user.name} missed their visit at ${visit.scheduledTime}. View: ${process.env.NEXTAUTH_URL}/dashboard/store/visits`
+        `Customer ${this.getUserFullName(visit.user)} missed their visit at ${visit.scheduledTime}. View: ${process.env.NEXTAUTH_URL}/dashboard/store/visits` // FIXED
       );
     }
   }
@@ -425,7 +432,7 @@ export class NotificationService {
       'You Missed Your Visit',
       'visit-missed-reminder',
       {
-        storeName: visit.store.name,
+        storeName: visit.store.storeName,
         scheduledDate: visit.scheduledDate,
         scheduledTime: visit.scheduledTime,
         visitId: visit.id,
@@ -439,7 +446,7 @@ export class NotificationService {
     if (preferences?.smsEnabled && visit.user.phoneNumber) {
       await sendSMS(
         `${visit.user.phoneCountry}${visit.user.phoneNumber}`,
-        `You missed your visit to ${visit.store.name}. Contact store: ${visit.store.phoneNumber}`
+        `You missed your visit to ${visit.store.storeName}. Contact store: ${visit.store.phoneNumber}`
       );
     }
   }
@@ -468,7 +475,7 @@ export class NotificationService {
       'Your Discount is Ready!',
       'discount-available',
       {
-        storeName: visit.store.name,
+        storeName: visit.store.storeName,
         discountCode: visit.discount.code,
         discountAmount: visit.discount.discountAmount || visit.discount.discountPercent,
         discountType: visit.discount.type,
@@ -483,7 +490,7 @@ export class NotificationService {
         data: {
           userId: visit.userId,
           title: 'Discount Unlocked!',
-          message: `You earned a discount at ${visit.store.name}`,
+          message: `You earned a discount at ${visit.store.storeName}`,
           type: 'DISCOUNT_AVAILABLE',
           data: { 
             visitId: visit.id, 
@@ -519,7 +526,7 @@ export class NotificationService {
         'Visit Completed',
         'visit-completed',
         {
-          storeName: visit.store.name,
+          storeName: visit.store.storeName,
           visitDate: visit.scheduledDate,
           visitTime: visit.scheduledTime,
           visitId: visit.id,
@@ -539,7 +546,7 @@ export class NotificationService {
         'Visit Completed',
         'store-visit-completed',
         {
-          customerName: visit.user.name,
+          customerName: this.getUserFullName(visit.user), // FIXED
           visitDate: visit.scheduledDate,
           visitTime: visit.scheduledTime,
           visitId: visit.id,
@@ -582,7 +589,7 @@ export class NotificationService {
       'How was your visit?',
       'review-reminder',
       {
-        storeName: visit.store.name,
+        storeName: visit.store.storeName,
         visitDate: visit.scheduledDate,
         visitId: visit.id,
         storeId: visit.storeId,

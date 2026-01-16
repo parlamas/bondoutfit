@@ -32,6 +32,7 @@ const normalizeText = (value: any) => {
     const email = body.email?.trim();
     const password = body.password;
     const name = body.name?.trim();
+    const nameParts = name ? name.trim().split(' ') : [''];
     const role = body.role;
 
 const phoneCountry = normalizeText(body.phoneCountry);
@@ -139,7 +140,8 @@ const occupation = normalizeText(body.occupation);
       const createdUser = await tx.user.create({
         data: {
           email,
-          name,
+          firstName: nameParts[0] || '',
+          lastName: nameParts.length > 1 ? nameParts.slice(1).join(' ') : null,
           password: hashedPassword,
           role,
 
@@ -165,7 +167,7 @@ const occupation = normalizeText(body.occupation);
       if (role === "STORE_MANAGER") {
         await tx.store.create({
           data: {
-            name: storeName!,
+            storeName: storeName!,
             email, // ADD THIS LINE - copies manager's email to store
             phoneCountry,
             phoneArea,

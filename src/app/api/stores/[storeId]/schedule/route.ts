@@ -11,7 +11,7 @@ export async function GET(
     where: { id: params.storeId },
     select: {
       id: true,
-      name: true,
+      storeName: true,
       country: true,
       city: true,
       openingHours: true,

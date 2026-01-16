@@ -26,19 +26,21 @@ export async function POST(
         user: {
           select: {
             id: true,
-            name: true,
+            firstName: true,
+            lastName: true,
             email: true,
           }
         },
         store: {
           select: {
             id: true,
-            name: true,
+            storeName: true,
             manager: {
               select: {
                 id: true,
                 email: true,
-                name: true,
+                firstName: true,
+                lastName: true,
               }
             }
           }
@@ -105,13 +107,14 @@ export async function POST(
       include: {
         user: {
           select: {
-            name: true,
+            firstName: true,
+            lastName: true,
             email: true,
           }
         },
         store: {
           select: {
-            name: true,
+          storeName: true,
           }
         },
       },
@@ -190,7 +193,8 @@ export async function GET(
         user: {
           select: {
             id: true,
-            name: true,
+            firstName: true,
+            lastName: true,
           }
         },
       },

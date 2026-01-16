@@ -12,7 +12,7 @@ export async function GET(
     where: { id: params.storeId },
     select: {
       id: true,
-      name: true,
+      storeName: true,
       description: true,
       website: true,
       email: true,
@@ -105,7 +105,7 @@ export async function POST(
       message: "Store email updated successfully",
       store: {
         id: updatedStore.id,
-        name: updatedStore.name,
+        storeName: updatedStore.storeName,
         email: updatedStore.email
       }
     });

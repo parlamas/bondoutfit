@@ -38,7 +38,8 @@ export async function GET(request: NextRequest) {
       include: {
         user: {
           select: {
-            name: true,
+            firstName: true,
+            lastName: true,
             email: true,
           },
         },
@@ -51,7 +52,7 @@ export async function GET(request: NextRequest) {
 
     const formattedCheckIns = checkIns.map(visit => ({
       id: visit.id,
-      customerName: visit.user.name,
+      customerName: visit.user.firstName + (visit.user.lastName ? ' ' + visit.user.lastName : ''),
       customerEmail: visit.user.email,
       checkedInAt: visit.checkedInAt,
       scheduledDate: visit.scheduledDate,

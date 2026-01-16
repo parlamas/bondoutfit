@@ -25,7 +25,8 @@ export async function GET(
         user: {
           select: {
             id: true,
-            name: true,
+            firstName: true,
+            lastName: true,
             email: true,
           },
         },
@@ -44,9 +45,9 @@ export async function GET(
     return NextResponse.json({
       visit: {
         id: visit.id,
-        customerName: visit.user.name,
+        customerName: visit.user.firstName + (visit.user.lastName ? ' ' + visit.user.lastName : ''),
         customerEmail: visit.user.email,
-        storeName: visit.store.name,
+        storeName: visit.store.storeName,
         scheduledDate: visit.scheduledDate,
         scheduledTime: visit.scheduledTime,
         numberOfPeople: visit.numberOfPeople,

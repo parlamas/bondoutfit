@@ -79,13 +79,14 @@ export async function POST(
         store: {
           select: {
             id: true,
-            name: true,
+            storeName: true,
           },
         },
         user: {
           select: {
             id: true,
-            name: true,
+            firstName: true,
+            lastName: true,
             email: true,
           },
         },
@@ -116,9 +117,9 @@ export async function POST(
       message: 'Customer checked in successfully',
       visit: {
         id: updatedVisit.id,
-        customerName: updatedVisit.user.name,
+        customerName: updatedVisit.user.firstName + (updatedVisit.user.lastName ? ' ' + updatedVisit.user.lastName : ''),
         customerEmail: updatedVisit.user.email,
-        storeName: updatedVisit.store.name,
+        storeName: updatedVisit.store.storeName,
         scheduledDate: updatedVisit.scheduledDate,
         scheduledTime: updatedVisit.scheduledTime,
         numberOfPeople: updatedVisit.numberOfPeople,

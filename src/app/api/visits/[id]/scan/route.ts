@@ -1,4 +1,4 @@
-// src/app/api/visits/[id]/scan/route.ts - FIXED DISCOUNT QUERY
+// src/app/api/visits/[id]/scan/route.ts - COMPLETELY FIXED
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
@@ -35,19 +35,21 @@ export async function POST(
         user: {
           select: {
             id: true,
-            name: true,
+            firstName: true,
+            lastName: true,
             email: true,
           }
         },
         store: {
           select: {
             id: true,
-            name: true,
+            storeName: true,
             manager: {
               select: {
                 id: true,
                 email: true,
-                name: true,
+                firstName: true,
+                lastName: true,
               }
             }
           }
@@ -120,7 +122,8 @@ export async function POST(
           user: {
             select: {
               id: true,
-              name: true,
+              firstName: true,
+              lastName: true,
               email: true,
             }
           },
@@ -156,7 +159,7 @@ export async function POST(
                 validFrom: now,
                 validTo: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
                 storeId: visit.storeId,
-                title: `Visit Reward - ${visit.user.name}`,
+                title: `Visit Reward - ${visit.user.firstName} ${visit.user.lastName || ''}`,
                 description: `Discount unlocked for completing visit on ${visit.scheduledDate}`,
                 status: 'POSTED',
                 applicableCategories: [],
@@ -201,7 +204,8 @@ export async function POST(
         }
       }
 
-      message = `✅ Checked in ${visit.user.name} successfully! Discount unlocked.`;
+      const customerName = visit.user.firstName + (visit.user.lastName ? ' ' + visit.user.lastName : '');
+      message = `✅ Checked in ${customerName} successfully! Discount unlocked.`;
 
     } else if (visit.checkedIn && visit.status === 'SCHEDULED') {
       // Second scan - mark as completed
@@ -215,14 +219,16 @@ export async function POST(
           user: {
             select: {
               id: true,
-              name: true,
+              firstName: true,
+              lastName: true,
               email: true,
             }
           },
         },
       });
 
-      message = `✅ Marked ${visit.user.name}'s visit as COMPLETED.`;
+      const customerName = visit.user.firstName + (visit.user.lastName ? ' ' + visit.user.lastName : '');
+      message = `✅ Marked ${customerName}'s visit as COMPLETED.`;
 
     } else {
       // Already completed or cancelled
@@ -258,6 +264,8 @@ export async function POST(
 
     console.log(`📊 Scan result: ${message}`);
 
+    const customerName = updatedVisit.user.firstName + (updatedVisit.user.lastName ? ' ' + updatedVisit.user.lastName : '');
+
     return NextResponse.json({
       success: true,
       message,
@@ -273,7 +281,7 @@ export async function POST(
         scheduledDate: updatedVisit.scheduledDate,
         scheduledTime: updatedVisit.scheduledTime,
         user: {
-          name: updatedVisit.user.name,
+          name: customerName,
           email: updatedVisit.user.email,
         },
       },
