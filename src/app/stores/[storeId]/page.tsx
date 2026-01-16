@@ -30,6 +30,8 @@ type Discount = {
   minPurchase: number | null;
   maxDiscount: number | null;
   svdOnly: boolean;
+  status: string; // ADD THIS LINE
+  isActive: boolean; // ADD THIS LINE
 };
 
 type StorePublicData = {
@@ -105,9 +107,15 @@ export default function StorePage({
         }
 
         if (discountsRes.ok) {
-          const discountData = await discountsRes.json();
-          setDiscounts(discountData);
-        }
+  const discountData = await discountsRes.json();
+  
+  // Debug log to see what discounts are being returned
+  console.log('Discounts from API:', discountData);
+  console.log('Number of discounts:', discountData.length);
+  
+  // The API already filters for POSTED and active discounts
+  setDiscounts(discountData);
+}
       } catch (error) {
         console.error('Error loading data:', error);
       } finally {
@@ -138,6 +146,10 @@ export default function StorePage({
 
     loadImages();
   }, [selectedCategoryId, params.storeId]);
+
+  useEffect(() => {
+  console.log('Current discounts in state:', discounts);
+}, [discounts]);
 
   const formatDate = (dateString: string | null) => {
     if (!dateString) return 'No expiry';
