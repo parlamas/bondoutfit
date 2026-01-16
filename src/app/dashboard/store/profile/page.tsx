@@ -14,7 +14,7 @@ import {
 
 interface StoreProfile {
   id: string;
-  name: string;
+  storeName: string;
   email: string;
   description?: string;
   phoneCountry?: string;
@@ -305,7 +305,7 @@ export default function StoreProfilePage() {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name: storeProfile.name,
+          storeName: storeProfile.storeName,
           email: storeProfile.email,
           description: storeProfile.description,
           website: storeProfile.website,
@@ -511,8 +511,8 @@ export default function StoreProfilePage() {
                     </label>
                     <input
                       type="text"
-                      value={storeProfile.name}
-                      onChange={(e) => setStoreProfile({ ...storeProfile, name: e.target.value })}
+                      value={storeProfile.storeName}
+                      onChange={(e) => setStoreProfile({ ...storeProfile, storeName: e.target.value })}
                       className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                       required
                     />
