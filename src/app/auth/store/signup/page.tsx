@@ -352,17 +352,29 @@ export default function StoreSignUpPage() {
                 <div className="space-y-2">
                   <input
   type="text"
-  name="categories"
-  value={formData.categories[0] || ''}
+  name="categoriesInput"
+  value={formData.categories.join(', ')}
   onChange={(e) => {
-    // Take the first word or phrase as a single category
-    setFormData(prev => ({
-      ...prev,
-      categories: e.target.value ? [e.target.value.trim()] : []
-    }));
+    const value = e.target.value;
+    if (value.includes(',')) {
+      // If there are commas, split by comma and trim
+      setFormData(prev => ({
+        ...prev,
+        categories: value
+          .split(',')
+          .map(c => c.trim())
+          .filter(Boolean)
+      }));
+    } else {
+      // If no commas, treat entire input as single category
+      setFormData(prev => ({
+        ...prev,
+        categories: value.trim() ? [value.trim()] : []
+      }));
+    }
   }}
   className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-  placeholder="e.g. Women's Fashion Boutique"
+  placeholder="e.g. footwear, handbags, dresses"
 />
 
                 </div>
