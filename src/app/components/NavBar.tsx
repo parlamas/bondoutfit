@@ -1,4 +1,4 @@
-//src/app/components/NavBar.tsx
+// src/app/components/NavBar.tsx - COMPLETE UPDATED VERSION
 
 "use client";
 
@@ -37,33 +37,18 @@ export default function RoleBasedNavbar() {
     {status !== "authenticated" && isHome && (
       <>
         <Link
-  href="/auth/customer/signup"
-  className="rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700"
->
-  Customer Sign Up
-</Link>
+          href="/auth/customer/signin"
+          className="rounded-md border px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+        >
+          Customer Sign In
+        </Link>
 
-<Link
-  href="/auth/customer/signin"
-  className="rounded-md border px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
->
-  Customer Sign In
-</Link>
-
-<Link
-  href="/auth/store/signup"
-  className="rounded-md bg-gray-800 px-3 py-2 text-sm font-medium text-white hover:bg-gray-900"
->
-  Store Sign Up
-</Link>
-
-<Link
-  href="/auth/store/signin"
-  className="rounded-md border px-3 py-2 text-sm font-medium text-gray-800 hover:bg-gray-100"
->
-  Store Sign In
-</Link>
-
+        <Link
+          href="/auth/store/signin"
+          className="rounded-md border px-3 py-2 text-sm font-medium text-gray-800 hover:bg-gray-100"
+        >
+          Store Sign In
+        </Link>
       </>
     )}
 
@@ -77,13 +62,23 @@ export default function RoleBasedNavbar() {
     )}
 
     {status === "authenticated" && (
-      <button
-        type="button"
-        onClick={() => signOut({ callbackUrl: "/" })}
-        className="rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700"
-      >
-        Sign out
-      </button>
+      <>
+        {role === "STORE_MANAGER" && (
+          <Link
+            href="/dashboard/store"
+            className="rounded-md bg-gray-800 px-3 py-2 text-sm font-medium text-white hover:bg-gray-900"
+          >
+            Store Dashboard
+          </Link>
+        )}
+        <button
+          type="button"
+          onClick={() => signOut({ callbackUrl: "/" })}
+          className="rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700"
+        >
+          Sign out
+        </button>
+      </>
     )}
   </nav>
 </div>
