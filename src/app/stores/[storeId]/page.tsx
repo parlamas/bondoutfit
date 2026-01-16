@@ -115,21 +115,35 @@ export default function StorePage({
       }
       
       // Check discounts
-      const discountsUrl = `/api/public/store/${params.storeId}/discounts`;
-      console.log('\nFetching discounts from:', discountsUrl);
-      
-      const discountsRes = await fetch(discountsUrl);
-      console.log('Discounts response status:', discountsRes.status);
-      
-      if (discountsRes.ok) {
-        const discountData = await discountsRes.json();
-        console.log('Discounts received:', discountData);
-        console.log('Number of discounts:', discountData.length);
-        setDiscounts(discountData);
-      } else {
-        const errorText = await discountsRes.text();
-        console.log('Discounts error:', errorText);
-      }
+const discountsUrl = `/api/public/store/${params.storeId}/discounts`;
+console.log('\nFetching discounts from:', discountsUrl);
+
+const discountsRes = await fetch(discountsUrl);
+console.log('Discounts response status:', discountsRes.status);
+
+if (discountsRes.ok) {
+  const discountData = await discountsRes.json();
+  console.log('Discounts received from API:', discountData);
+  console.log('Number of discounts:', discountData.length);
+  
+  // Debug each discount
+  discountData.forEach((discount: Discount, index: number) => {
+    console.log(`Discount ${index + 1}:`, {
+      title: discount.title,
+      status: discount.status,
+      isActive: discount.isActive,
+      validFrom: discount.validFrom,
+      validTo: discount.validTo,
+      svdOnly: discount.svdOnly,
+      type: discount.type
+    });
+  });
+  
+  setDiscounts(discountData);
+} else {
+  const errorText = await discountsRes.text();
+  console.log('Discounts error:', errorText);
+}
       
       // Check categories
       const categoriesUrl = `/api/public/store/${params.storeId}/categories`;
