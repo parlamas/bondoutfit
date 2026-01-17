@@ -613,36 +613,34 @@ export default function StorePage({
   <div className="border border-gray-200 rounded-lg p-4">
     <h3 className="font-medium text-gray-900 mb-3">Opening Hours</h3>
     <div className="text-sm text-gray-700 space-y-2">
-      {store.openingHours.map((hourObj, index) => {
-        if (!hourObj || typeof hourObj !== 'object') {
-          return null; // Skip invalid entries
-        }
-        
-        const dayNames = [
-          'Sunday', 'Monday', 'Tuesday', 'Wednesday', 
-          'Thursday', 'Friday', 'Saturday'
-        ];
-        const label = hourObj.day !== undefined 
-          ? dayNames[hourObj.day] 
-          : dayNames[index];
-        
-        let displayText = 'Closed';
-        
-        if (hourObj.closed) {
-          displayText = 'Closed';
-        } else if (hourObj.open && hourObj.close) {
-          displayText = `${hourObj.open} – ${hourObj.close}`;
-        }
-        
-        return (
-          <div key={index} className="flex justify-between items-center">
-            <span className="font-medium text-gray-800">{label}</span>
-            <span className="text-gray-900">
-              {displayText}
-            </span>
-          </div>
-        );
-      })}
+      {store.openingHours
+        .filter((hourObj) => hourObj && typeof hourObj === 'object')
+        .map((hourObj, index) => {
+          const dayNames = [
+            'Sunday', 'Monday', 'Tuesday', 'Wednesday', 
+            'Thursday', 'Friday', 'Saturday'
+          ];
+          const label = hourObj.day !== undefined 
+            ? dayNames[hourObj.day] 
+            : dayNames[index];
+          
+          let displayText = 'Closed';
+          
+          if (hourObj.closed) {
+            displayText = 'Closed';
+          } else if (hourObj.open && hourObj.close) {
+            displayText = `${hourObj.open} – ${hourObj.close}`;
+          }
+          
+          return (
+            <div key={index} className="flex justify-between items-center">
+              <span className="font-medium text-gray-800">{label}</span>
+              <span className="text-gray-900">
+                {displayText}
+              </span>
+            </div>
+          );
+        })}
     </div>
   </div>
 )}
