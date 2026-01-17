@@ -60,6 +60,11 @@ export default function VisitDetailsPage() {
   const [cancelReason, setCancelReason] = useState('');
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancelEligibility, setCancelEligibility] = useState<any>(null);
+
+  // Message states
+const [successMessage, setSuccessMessage] = useState<string>('');
+const [errorMessage, setErrorMessage] = useState<string>('');
+const [infoMessage, setInfoMessage] = useState<string>('');
   
   // Editing states
   const [editing, setEditing] = useState(false);
@@ -170,86 +175,111 @@ export default function VisitDetailsPage() {
   }
 
   async function handleCancelVisit() {
-    if (!cancelReason.trim()) {
-      alert('Please provide a reason for cancellation');
-      return;
-    }
-
-    setCancelling(true);
-    try {
+  if (!cancelReason.trim()) {
+    setErrorMessage('Please provide a reason for cancellation');
+    return;
+  }
+  
+  setCancelling(true);
+  setErrorMessage('');
+  setSuccessMessage('');
+  
+  try {
       const res = await fetch(`/api/visits/${visitId}/cancel`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ reason: cancelReason }),
       });
 
-      const data = await res.json();
+            const data = await res.json();
 
       if (res.ok) {
-        alert('Visit cancelled successfully!');
+        setSuccessMessage('Visit cancelled successfully!');
         setVisit(prev => prev ? { ...prev, status: 'CANCELLED' } : null);
         setShowCancelModal(false);
         setCancelReason('');
+        setTimeout(() => setSuccessMessage(''), 5000);
       } else {
-        alert(`Failed to cancel visit: ${data.error}`);
+        setErrorMessage(`Failed to cancel visit: ${data.error}`);
       }
     } catch (error) {
       console.error('Error cancelling visit:', error);
-      alert('An error occurred while cancelling the visit');
+      setErrorMessage('An error occurred while cancelling the visit');
     } finally {
       setCancelling(false);
     }
   }
 
   async function handleEditVisit() {
-    try {
-      const res = await fetch(`/api/visits/${visitId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(editForm),
-      });
+  setErrorMessage('');
+  setSuccessMessage('');
+  
+  try {
+    const res = await fetch(`/api/visits/${visitId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(editForm),
+    });
 
-      const data = await res.json();
+    const data = await res.json();
 
-      if (res.ok) {
-        alert('Visit updated successfully!');
-        setVisit(data.visit);
-        setEditing(false);
-        loadVisit(); // Reload visit data
-      } else {
-        alert(`Failed to update visit: ${data.error}`);
-      }
-    } catch (error) {
-      console.error('Error updating visit:', error);
-      alert('An error occurred while updating the visit');
+    if (res.ok) {
+      setSuccessMessage('Visit updated successfully!');
+      setVisit(data.visit);
+      setEditing(false);
+      loadVisit();
+      
+      // Clear success message after 5 seconds
+      setTimeout(() => setSuccessMessage(''), 5000);
+    } else {
+      setErrorMessage(`Failed to update visit: ${data.error}`);
     }
+  } catch (error) {
+    console.error('Error updating visit:', error);
+    setErrorMessage('An error occurred while updating the visit');
   }
+}
 
   function handleDownloadQR() {
-    if (!qrCodeDataUrl) return;
-    
-    const link = document.createElement('a');
-    link.href = qrCodeDataUrl;
-    link.download = `visit-${visitId}-qrcode.png`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    
-    alert('QR code downloaded!');
+  if (!qrCodeDataUrl) {
+    setErrorMessage('QR code is not ready yet');
+    return;
   }
+  
+  const link = document.createElement('a');
+  link.href = qrCodeDataUrl;
+  link.download = `visit-${visitId}-qrcode.png`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  
+  setSuccessMessage('QR code downloaded!');
+  setTimeout(() => setSuccessMessage(''), 3000);
+}
 
   function handleShare() {
-    if (navigator.share) {
-      navigator.share({
-        title: `Visit to ${visit?.store.storeName}`,
-        text: `My visit to ${visit?.store.storeName} on ${formatDate(visit?.scheduledDate || '')}`,
-        url: window.location.href,
+  setErrorMessage('');
+  setInfoMessage('');
+  
+  if (navigator.share) {
+    navigator.share({
+      title: `Visit to ${visit?.store.storeName}`,
+      text: `My visit to ${visit?.store.storeName} on ${formatDate(visit?.scheduledDate || '')}`,
+      url: window.location.href,
+    }).catch(err => {
+      setErrorMessage('Failed to share: ' + err.message);
+    });
+  } else {
+    navigator.clipboard.writeText(window.location.href)
+      .then(() => {
+        setInfoMessage('Link copied to clipboard!');
+        setTimeout(() => setInfoMessage(''), 3000);
+      })
+      .catch(err => {
+        setErrorMessage('Failed to copy to clipboard: ' + err.message);
       });
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-      alert('Link copied to clipboard!');
-    }
   }
+}
 
   function formatDate(dateString: string) {
     return format(new Date(dateString), 'EEEE, MMMM d, yyyy');
@@ -319,10 +349,39 @@ export default function VisitDetailsPage() {
   const canCancel = cancelEligibility?.canCancel && visit.status === 'SCHEDULED';
   const canEdit = editEligibility?.canEdit && visit.status === 'SCHEDULED';
 
-  return (
+    return (
     <div className="max-w-6xl mx-auto p-4 sm:p-6">
-      {/* Cancellation Modal */}
-      {showCancelModal && (
+    {/* Inline Messages */}
+    <div className="mb-4 space-y-3">
+      {successMessage && (
+        <div className="p-3 bg-green-100 border border-green-200 text-green-800 rounded-lg">
+          <div className="flex items-center gap-2">
+            <CheckCircle className="w-5 h-5" />
+            <span>{successMessage}</span>
+          </div>
+        </div>
+      )}
+      
+      {errorMessage && (
+        <div className="p-3 bg-red-100 border border-red-200 text-red-800 rounded-lg">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="w-5 h-5" />
+            <span>{errorMessage}</span>
+          </div>
+        </div>
+      )}
+      
+      {infoMessage && (
+        <div className="p-3 bg-blue-100 border border-blue-200 text-blue-800 rounded-lg">
+          <div className="flex items-center gap-2">
+            <span>{infoMessage}</span>
+          </div>
+        </div>
+      )}
+    </div>
+    
+        {/* Cancellation Modal */}
+    {showCancelModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl max-w-md w-full p-6">
             <h3 className="text-xl font-bold text-gray-900 mb-4">Cancel Visit</h3>
@@ -891,6 +950,6 @@ export default function VisitDetailsPage() {
           }
         }
       `}</style>
-    </div>
+        </div>
   );
 }
