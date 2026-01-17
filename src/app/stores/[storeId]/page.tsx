@@ -626,10 +626,17 @@ export default function StorePage({
           
           let displayText = 'Closed';
           
-          if (hourObj.closed) {
+          // Check if closed is explicitly true
+          if (hourObj.closed === true) {
             displayText = 'Closed';
-          } else if (hourObj.open && hourObj.close) {
+          } 
+          // Check if open and close exist (they could be empty strings)
+          else if (hourObj.open !== undefined && hourObj.close !== undefined && hourObj.open !== '' && hourObj.close !== '') {
             displayText = `${hourObj.open} – ${hourObj.close}`;
+          }
+          // If closed is false but no hours specified
+          else if (hourObj.closed === false) {
+            displayText = 'Hours not specified';
           }
           
           return (
