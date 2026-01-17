@@ -725,7 +725,7 @@ export default function StorePage({
         </div>
       )}
 
-            {visitSubmitted && (
+                        {visitSubmitted && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl p-6 max-w-md w-full text-center">
             <div className="text-green-600 text-4xl mb-4">✓</div>
@@ -737,7 +737,7 @@ export default function StorePage({
         </div>
       )}
         </div>
-  </div>
-</div>
+      </div>
+    </div>
   );
 }
