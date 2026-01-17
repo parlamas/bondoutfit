@@ -99,20 +99,37 @@ export default function StorePage({
       console.log('Fetching store from:', storeUrl);
       
       const storeRes = await fetch(storeUrl);
-      console.log('Store response status:', storeRes.status);
-      console.log('Store response ok:', storeRes.ok);
-      
-      if (storeRes.ok) {
-        const storeData = await storeRes.json();
-        console.log('Store data received:', storeData);
-        console.log('Store name:', storeData.storeName);
-        console.log('Store has name property?', 'name' in storeData);
-        setStore(storeData);
-      } else {
-        console.log('Store fetch failed with status:', storeRes.status);
-        const errorText = await storeRes.text();
-        console.log('Error response:', errorText);
-      }
+console.log('Store response status:', storeRes.status);
+console.log('Store response ok:', storeRes.ok);
+
+if (storeRes.ok) {
+  const storeData = await storeRes.json();
+  console.log('Store data received:', storeData);
+  console.log('Store name:', storeData.storeName);
+  console.log('Store has name property?', 'name' in storeData);
+  
+  // ADD THIS DEBUGGING:
+  console.log('Opening hours data:', storeData.openingHours);
+  console.log('Type of opening hours:', typeof storeData.openingHours);
+  if (storeData.openingHours) {
+    console.log('First entry:', Object.entries(storeData.openingHours)[0]);
+    // Also log what the value actually is
+    const firstEntry = Object.entries(storeData.openingHours)[0];
+    if (firstEntry) {
+      console.log('First entry key:', firstEntry[0]);
+      console.log('First entry value:', firstEntry[1]);
+      console.log('Type of value:', typeof firstEntry[1]);
+      console.log('Is value an object?', firstEntry[1] && typeof firstEntry[1] === 'object');
+      console.log('Value properties:', firstEntry[1] ? Object.keys(firstEntry[1]) : 'null');
+    }
+  }
+  
+  setStore(storeData);
+} else {
+  console.log('Store fetch failed with status:', storeRes.status);
+  const errorText = await storeRes.text();
+  console.log('Error response:', errorText);
+}
       
       // Check discounts
 const discountsUrl = `/api/public/store/${params.storeId}/discounts`;
@@ -618,39 +635,50 @@ if (discountsRes.ok) {
           </div>
 
           {/* OPENING HOURS */}
-          {store.openingHours && (
-            <div className="border border-gray-200 rounded-lg p-4">
-              <h3 className="font-medium text-gray-900 mb-3">Opening Hours</h3>
-              <div className="text-sm text-gray-700 space-y-2">
-                {Object.entries(store.openingHours).map(([day, value]) => {
-                  const dayNames = [
-                    'Sunday', 'Monday', 'Tuesday', 'Wednesday', 
-                    'Thursday', 'Friday', 'Saturday'
-                  ];
-                  const label = Number.isInteger(Number(day)) 
-                    ? dayNames[Number(day)] 
-                    : day;
-                  
-                  return (
-                    <div key={day} className="flex justify-between items-center">
-                      <span className="font-medium text-gray-800">{label}</span>
-                      <span className="text-gray-900">
-                        {typeof value === 'string'
-                          ? value
-                          : Array.isArray(value)
-                          ? value.join(' – ')
-                          : value?.open && value?.close
-                          ? `${value.open} – ${value.close}`
-                          : 'Closed'}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
+{store.openingHours && (
+  <div className="border border-gray-200 rounded-lg p-4">
+    <h3 className="font-medium text-gray-900 mb-3">Opening Hours</h3>
+    <div className="text-sm text-gray-700 space-y-2">
+      {Object.entries(store.openingHours).map(([day, value]) => {
+        const dayNames = [
+          'Sunday', 'Monday', 'Tuesday', 'Wednesday', 
+          'Thursday', 'Friday', 'Saturday'
+        ];
+        const label = Number.isInteger(Number(day)) 
+          ? dayNames[Number(day)] 
+          : day;
+        
+        // Safely handle the value
+        let displayText = 'Closed';
+        
+        if (typeof value === 'string') {
+          displayText = value;
+        } else if (Array.isArray(value)) {
+          displayText = value.join(' – ');
+        } else if (value && typeof value === 'object') {
+          // Handle the object format {day, open, close, closed}
+          if (value.closed) {
+            displayText = 'Closed';
+          } else if (value.open && value.close) {
+            displayText = `${value.open} – ${value.close}`;
+          } else if (value.day) {
+            // If there's a day property that contains the schedule
+            displayText = value.day;
+          }
+        }
+        
+        return (
+          <div key={day} className="flex justify-between items-center">
+            <span className="font-medium text-gray-800">{label}</span>
+            <span className="text-gray-900">
+              {displayText}
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  </div>
+)}
 
       {/* BOOKING FORM MODAL */}
       {showBookingForm && (
