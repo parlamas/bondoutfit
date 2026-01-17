@@ -140,10 +140,105 @@ export async function POST(
       },
     });
 
-    // TODO: Send notifications
-    // - Email to store manager if customer cancelled
-    // - Email to customer if store manager cancelled
-    // - In-app notifications
+        // Send email notification to store manager
+    if (isCustomerOwner) {
+      try {
+        // Assuming you have an email service utility
+        const { sendEmail } = await import('@/lib/email-service');
+        
+        await sendEmail({
+          to: visit.store.manager?.email, // Store manager email
+          subject: `Visit Cancelled - ${visit.store.storeName}`,
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <h2 style="color: #dc2626;">Visit Cancellation Notification</h2>
+              <p>A customer has cancelled their scheduled visit:</p>
+              
+              <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <h3 style="color: #1e293b; margin-top: 0;">Visit Details:</h3>
+                <ul style="list-style: none; padding: 0;">
+                  <li style="margin-bottom: 8px;"><strong>Customer:</strong> ${visit.user.firstName} ${visit.user.lastName}</li>
+                  <li style="margin-bottom: 8px;"><strong>Email:</strong> ${visit.user.email}</li>
+                  <li style="margin-bottom: 8px;"><strong>Scheduled Date:</strong> ${new Date(visit.scheduledDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</li>
+                  <li style="margin-bottom: 8px;"><strong>Time:</strong> ${visit.scheduledTime}</li>
+                  <li style="margin-bottom: 8px;"><strong>Number of People:</strong> ${visit.numberOfPeople}</li>
+                  <li style="margin-bottom: 8px;"><strong>Cancellation Reason:</strong> ${reason || 'No reason provided'}</li>
+                  <li style="margin-bottom: 8px;"><strong>Cancelled At:</strong> ${now.toLocaleString()}</li>
+                </ul>
+              </div>
+              
+              <p style="color: #64748b; font-size: 14px;">This cancellation has been recorded in your store dashboard.</p>
+              
+              <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e2e8f0; color: #64748b; font-size: 12px;">
+                <p>You can view all your visits in the store dashboard.</p>
+              </div>
+            </div>
+          `,
+          text: `
+            Visit Cancellation Notification
+            
+            A customer has cancelled their scheduled visit:
+            
+            Customer: ${visit.user.firstName} ${visit.user.lastName}
+            Email: ${visit.user.email}
+            Scheduled Date: ${new Date(visit.scheduledDate).toLocaleDateString()}
+            Time: ${visit.scheduledTime}
+            Number of People: ${visit.numberOfPeople}
+            Cancellation Reason: ${reason || 'No reason provided'}
+            Cancelled At: ${now.toLocaleString()}
+            
+            This cancellation has been recorded in your store dashboard.
+            
+            You can view all your visits in the store dashboard.
+          `
+        });
+        
+        console.log(`📧 Cancellation email sent to store manager: ${visit.store.manager?.email}`);
+      } catch (emailError) {
+        console.error('Failed to send cancellation email:', emailError);
+        // Don't fail the request if email fails
+      }
+    }
+
+    // Send email to customer if store manager cancelled
+    if (!isCustomerOwner) {
+      try {
+        const { sendEmail } = await import('@/lib/email-service');
+        
+        await sendEmail({
+          to: visit.user.email,
+          subject: `Your visit to ${visit.store.storeName} has been cancelled`,
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <h2 style="color: #dc2626;">Visit Cancelled</h2>
+              <p>Your scheduled visit has been cancelled by the store.</p>
+              
+              <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <h3 style="color: #1e293b; margin-top: 0;">Visit Details:</h3>
+                <ul style="list-style: none; padding: 0;">
+                  <li style="margin-bottom: 8px;"><strong>Store:</strong> ${visit.store.storeName}</li>
+                  <li style="margin-bottom: 8px;"><strong>Scheduled Date:</strong> ${new Date(visit.scheduledDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</li>
+                  <li style="margin-bottom: 8px;"><strong>Time:</strong> ${visit.scheduledTime}</li>
+                  <li style="margin-bottom: 8px;"><strong>Number of People:</strong> ${visit.numberOfPeople}</li>
+                  <li style="margin-bottom: 8px;"><strong>Cancellation Reason:</strong> ${reason || 'Cancelled by store manager'}</li>
+                  <li style="margin-bottom: 8px;"><strong>Cancelled At:</strong> ${now.toLocaleString()}</li>
+                </ul>
+              </div>
+              
+              <p>If you have any questions, please contact the store directly.</p>
+              
+              <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e2e8f0; color: #64748b; font-size: 12px;">
+                <p>You can view all your visits in your customer dashboard.</p>
+              </div>
+            </div>
+          `
+        });
+        
+        console.log(`📧 Cancellation email sent to customer: ${visit.user.email}`);
+      } catch (emailError) {
+        console.error('Failed to send customer cancellation email:', emailError);
+      }
+    }
 
     console.log(`📝 Visit ${visitId} cancelled by ${isCustomerOwner ? 'customer' : 'manager'}. Reason: ${reason || 'No reason'}`);
 
