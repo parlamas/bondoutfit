@@ -122,15 +122,15 @@ model User {
   avatarUrl  String?
 
   // Relations
-  storesManaged Store[]
-  visits        Visit[]
-  accounts      Account[]
-  sessions      Session[]
-  notifications Notification[]
-  favorites     Favorite[]
-  reviews       Review[]
-  orders        Order[]
-  auditLogs     AuditLog[]
+  storesManaged           Store[]
+  visits                  Visit[]
+  accounts                Account[]
+  sessions                Session[]
+  notifications           Notification[]
+  favorites               Favorite[]
+  reviews                 Review[]
+  orders                  Order[]
+  auditLogs               AuditLog[]
   notificationPreferences UserNotificationPreference? // ADD THIS LINE
 
   // Tokens
@@ -208,20 +208,21 @@ model Store {
   tiktokUrl    String?
 
   // Relations
-  manager         User                  @relation(fields: [managerId], references: [id], onDelete: Cascade)
-  visits          Visit[]
-  discounts       Discount[]
-  items           StoreItem[]
-  images          StoreImage[]
-  weeklyDiscounts StoreWeeklyDiscount[]
-  reviews         Review[]
-  favorites       Favorite[]
-  notifications   StoreNotification[]
-  orders          Order[]
-  analytics       StoreAnalytics[]
-  auditLogs       AuditLog[]
-  collections     StoreCollection[]
-  storeCategories StoreCategory[]
+  manager                     User                         @relation(fields: [managerId], references: [id], onDelete: Cascade)
+  visits                      Visit[]
+  discounts                   Discount[]
+  items                       StoreItem[]
+  images                      StoreImage[]
+  weeklyDiscounts             StoreWeeklyDiscount[]
+  reviews                     Review[]
+  favorites                   Favorite[]
+  notifications               StoreNotification[]
+  userNotifications           Notification[] // ADD THIS LINE
+  orders                      Order[]
+  analytics                   StoreAnalytics[]
+  auditLogs                   AuditLog[]
+  collections                 StoreCollection[]
+  storeCategories             StoreCategory[]
   storeNotificationPreference StoreNotificationPreference? // ADD THIS LINE
 
   // Analytics
@@ -257,8 +258,8 @@ model StoreImage {
   title        String?
   description  String?
   altText      String?
-  order        Int         @default(0)
-  status       ImageStatus @default(ACTIVE)
+  order        Int            @default(0)
+  status       ImageStatus    @default(ACTIVE)
 
   // Metadata
   fileSize Int?
@@ -304,11 +305,11 @@ model StoreWeeklyDiscount {
   // Restrictions
   applicableCategories String[]
   excludedItems        String[]
-  isActive             Boolean @default(true)
+  isActive             Boolean  @default(true)
 
   // Usage
   maxUses   Int?
-  totalUses Int @default(0)
+  totalUses Int  @default(0)
 
   store Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
 
@@ -424,7 +425,7 @@ model Visit {
   userId     String
   storeId    String
   discountId String?
-  qrCodeData      String?  // ← ADD THIS LINE
+  qrCodeData String? // ← ADD THIS LINE
 
   // Scheduling
   scheduledDate DateTime
@@ -441,20 +442,20 @@ model Visit {
   status      VisitStatus @default(SCHEDULED)
 
   // Automation Tracking
-  completedAt      DateTime?
-  cancelledAt      DateTime?
-  missedAt        DateTime?
-  lastScanAt      DateTime?  // Last time QR code was scanned
+  completedAt DateTime?
+  cancelledAt DateTime?
+  missedAt    DateTime?
+  lastScanAt  DateTime? // Last time QR code was scanned
 
   // Notification tracking
   reminderSentAt     DateTime?
   confirmationSentAt DateTime?
-  
+
   // Cancellation Info
-  cancelledBy     String?    // 'CUSTOMER' or 'STORE'
+  cancelledBy        String? // 'CUSTOMER' or 'STORE'
   cancellationReason String?
 
-    // Rescheduling Info
+  // Rescheduling Info
   rescheduledAt   DateTime?
   rescheduledBy   String?
   rescheduleNotes String?
@@ -469,7 +470,7 @@ model Visit {
   // Customer Details
   customerNotes   String?
   specialRequests String?
-  numberOfPeople  Int @default(1)
+  numberOfPeople  Int     @default(1)
 
   // Relations
   user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -513,7 +514,7 @@ model Discount {
   // Validity
   validFrom DateTime?
   validTo   DateTime?
-  isActive  Boolean @default(true)
+  isActive  Boolean   @default(true)
 
   // Usage Limits
   maxUses        Int?
@@ -524,10 +525,10 @@ model Discount {
   // Restrictions
   applicableCategories String[]
   excludedItems        String[]
-  svdOnly              Boolean @default(false)
-  isPublic             Boolean @default(true)
-  isStackable          Boolean @default(false)
-  status               DiscountStatus @default(DRAFT)  // ADD THIS LINE
+  svdOnly              Boolean        @default(false)
+  isPublic             Boolean        @default(true)
+  isStackable          Boolean        @default(false)
+  status               DiscountStatus @default(DRAFT) // ADD THIS LINE
 
   // Relations
   store  Store               @relation(fields: [storeId], references: [id], onDelete: Cascade)
@@ -614,22 +615,24 @@ model Favorite {
  */
 
 model Notification {
-  id     String @id @default(cuid())
-  userId String
-
+  id        String   @id @default(cuid())
+  userId    String
+  type      String // e.g., 'VISIT_CANCELLED', 'NEW_BOOKING', 'REMINDER', etc.
   title     String
   message   String
-  type      String
-  isRead    Boolean @default(false)
-  data      Json?
-  actionUrl String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
+  data      Json? // Additional data as JSON
+  read      Boolean  @default(false)
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  @@index([userId])
-  @@index([userId, isRead])
+  // Relations
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  store   Store?  @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  storeId String?
+
+  @@index([userId, read])
+  @@index([createdAt])
+  @@index([storeId])
 }
 
 model StoreNotification {
@@ -662,9 +665,9 @@ model Order {
   userId  String
   storeId String
 
-  orderNumber   String @unique
-  status        String @default("pending")
-  paymentStatus String @default("pending")
+  orderNumber   String  @unique
+  status        String  @default("pending")
+  paymentStatus String  @default("pending")
   paymentMethod String?
 
   subtotal Int
@@ -754,7 +757,7 @@ model StoreAnalytics {
  */
 
 model Account {
-  id                String @id @default(cuid())
+  id                String  @id @default(cuid())
   userId            String
   type              String
   provider          String
@@ -843,7 +846,7 @@ model StoreCollection {
   title     String
   createdAt DateTime @default(now())
 
-  store  Store @relation(fields: [storeId], references: [id])
+  store  Store             @relation(fields: [storeId], references: [id])
   images CollectionImage[]
 }
 
@@ -864,7 +867,7 @@ model StoreCategory {
   order     Int
   createdAt DateTime @default(now())
 
-  store  Store @relation(fields: [storeId], references: [id])
+  store  Store                @relation(fields: [storeId], references: [id])
   images StoreCategoryImage[]
 }
 
@@ -880,43 +883,43 @@ model StoreCategoryImage {
 }
 
 model UserNotificationPreference {
-  id      String @id @default(cuid())
-  userId  String @unique
-  
+  id     String @id @default(cuid())
+  userId String @unique
+
   // Channel preferences
   emailEnabled Boolean @default(true)
   smsEnabled   Boolean @default(false)
   pushEnabled  Boolean @default(true)
   inAppEnabled Boolean @default(true)
-  
+
   // Type preferences
   visitReminders     Boolean @default(true)
   visitConfirmations Boolean @default(true)
   discountAlerts     Boolean @default(true)
   marketingEmails    Boolean @default(false)
-  
+
   // Timing preferences (in hours before event)
-  reminderLeadTime   Int @default(24)
+  reminderLeadTime     Int @default(24)
   confirmationLeadTime Int @default(1)
-  
+
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model StoreNotificationPreference {
   id      String @id @default(cuid())
   storeId String @unique
-  
+
   // Channel preferences
   emailEnabled Boolean @default(true)
   smsEnabled   Boolean @default(false)
   pushEnabled  Boolean @default(true)
-  
+
   // Type preferences
-  newVisitBookings     Boolean @default(true)
-  visitCancellations   Boolean @default(true)
-  visitReminders       Boolean @default(true)
-  lowStockAlerts       Boolean @default(true)
-  systemAlerts         Boolean @default(true)
-  
+  newVisitBookings   Boolean @default(true)
+  visitCancellations Boolean @default(true)
+  visitReminders     Boolean @default(true)
+  lowStockAlerts     Boolean @default(true)
+  systemAlerts       Boolean @default(true)
+
   store Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
 }

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Bulk Cancellation API</title>
+</head>
+<body>
+    <h1>Test Bulk Cancellation</h1>
+    <button onclick="testGet()">Test GET</button>
+    <button onclick="testPost()">Test POST</button>
+    <div id="result"></div>
+    
+    <script>
+        async function testGet() {
+            const res = await fetch('/api/visits/cancel-all')
+            const data = await res.json()
+            document.getElementById('result').innerHTML = 
+                '<pre>' + JSON.stringify(data, null, 2) + '</pre>'
+        }
+        
+        async function testPost() {
+            const res = await fetch('/api/visits/cancel-all', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ reason: 'Browser test' })
+            })
+            const data = await res.json()
+            document.getElementById('result').innerHTML = 
+                '<pre>' + JSON.stringify(data, null, 2) + '</pre>'
+        }
+    </script>
+</body>
+</html>

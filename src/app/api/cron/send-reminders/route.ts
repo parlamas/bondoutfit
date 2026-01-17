@@ -15,7 +15,6 @@ export async function GET(request: NextRequest) {
     const results = await notificationService.sendScheduledReminders();
     
     return NextResponse.json({
-      success: true,
       timestamp: new Date().toISOString(),
       ...results,
     });
