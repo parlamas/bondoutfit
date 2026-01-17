@@ -37,7 +37,12 @@ type VisitDetails = {
     country: string;
     phoneNumber?: string;
     email?: string;
-    openingHours?: string;
+    openingHours?: Array<{  // ✅ Change from string to array of objects
+      day: string;
+      open: string;
+      close: string;
+      closed: boolean;
+    }>;
   };
 };
 
@@ -684,11 +689,23 @@ export default function VisitDetailsPage() {
               )}
               
               {visit.store.openingHours && (
-                <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
-                  <div className="text-sm font-medium text-blue-800 mb-1">Opening Hours</div>
-                  <div className="text-sm text-blue-700 whitespace-pre-line">{visit.store.openingHours}</div>
-                </div>
-              )}
+  <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+    <div className="text-sm font-medium text-blue-800 mb-1">Opening Hours</div>
+    <div className="text-sm text-blue-700">
+      {visit.store.openingHours.map((hours, index) => (
+        <div key={index} className="flex justify-between">
+          <span className="font-medium">{hours.day}:</span>
+          <span>
+            {hours.closed 
+              ? 'Closed' 
+              : `${hours.open} - ${hours.close}`
+            }
+          </span>
+        </div>
+      ))}
+    </div>
+  </div>
+)}
             </div>
           </div>
 
