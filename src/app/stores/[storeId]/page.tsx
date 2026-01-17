@@ -306,6 +306,13 @@ export default function StorePage({
   const svdDiscounts = discounts.filter(d => d.svdOnly);
   const regularDiscounts = discounts.filter(d => !d.svdOnly);
 
+  console.log('Store opening hours before render:', store.openingHours);
+  console.log('Is array?', Array.isArray(store.openingHours));
+  if (store.openingHours && Array.isArray(store.openingHours)) {
+    console.log('First item in opening hours:', store.openingHours[0]);
+    console.log('Type of first item:', typeof store.openingHours[0]);
+  }
+
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-6">
       <h1 className="text-3xl font-bold">{store.storeName}</h1>
@@ -725,7 +732,8 @@ export default function StorePage({
         </div>
       )}
 
-                        {visitSubmitted && (
+      
+      {visitSubmitted && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl p-6 max-w-md w-full text-center">
             <div className="text-green-600 text-4xl mb-4">✓</div>
@@ -736,8 +744,10 @@ export default function StorePage({
           </div>
         </div>
       )}
-        </div>
-      </div>
     </div>
+  </div>
+</div>
   );
 }
+
+                        
