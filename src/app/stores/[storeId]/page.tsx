@@ -58,7 +58,7 @@ type StorePublicData = {
   phoneNumber: string;
   email: string | null;
   website: string | null;
-  openingHours: { [key: string]: any } | null;
+  openingHours: Array<{day?: number; open?: string; close?: string; closed?: boolean}> | null; // CHANGED
   acceptedCurrencies: string[];
   items: any[];
 };
@@ -607,6 +607,10 @@ export default function StorePage({
     <h3 className="font-medium text-gray-900 mb-3">Opening Hours</h3>
     <div className="text-sm text-gray-700 space-y-2">
       {store.openingHours.map((hourObj, index) => {
+        if (!hourObj || typeof hourObj !== 'object') {
+          return null; // Skip invalid entries
+        }
+        
         const dayNames = [
           'Sunday', 'Monday', 'Tuesday', 'Wednesday', 
           'Thursday', 'Friday', 'Saturday'
