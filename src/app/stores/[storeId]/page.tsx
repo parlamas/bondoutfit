@@ -137,6 +137,20 @@ export default function StorePage({
           const discountData = await discountsRes.json();
           console.log('Discounts received from API:', discountData);
           console.log('Number of discounts:', discountData.length);
+
+            console.log('Store opening hours before render:', store.openingHours);
+  console.log('Is array?', Array.isArray(store.openingHours));
+  if (store.openingHours && Array.isArray(store.openingHours)) {
+    console.log('First item in opening hours:', store.openingHours[0]);
+    console.log('Type of first item:', typeof store.openingHours[0]);
+    console.log('First item keys:', Object.keys(store.openingHours[0]));
+    console.log('First item closed value:', store.openingHours[0].closed);
+    console.log('Type of closed:', typeof store.openingHours[0].closed);
+    console.log('First item open value:', store.openingHours[0].open);
+    console.log('Type of open:', typeof store.openingHours[0].open);
+    console.log('First item close value:', store.openingHours[0].close);
+    console.log('Type of close:', typeof store.openingHours[0].close);
+  }
           
           discountData.forEach((discount: Discount, index: number) => {
             console.log(`Discount ${index + 1}:`, {
@@ -613,41 +627,41 @@ export default function StorePage({
   <div className="border border-gray-200 rounded-lg p-4">
     <h3 className="font-medium text-gray-900 mb-3">Opening Hours</h3>
     <div className="text-sm text-gray-700 space-y-2">
-      {store.openingHours
-        .filter((hourObj) => hourObj && typeof hourObj === 'object')
-        .map((hourObj, index) => {
-          const dayNames = [
-            'Sunday', 'Monday', 'Tuesday', 'Wednesday', 
-            'Thursday', 'Friday', 'Saturday'
-          ];
-          const label = hourObj.day !== undefined 
-            ? dayNames[hourObj.day] 
-            : dayNames[index];
-          
-          let displayText = 'Closed';
-          
-          // Check if closed is explicitly true
-          if (hourObj.closed === true) {
-            displayText = 'Closed';
-          } 
-          // Check if open and close exist (they could be empty strings)
-          else if (hourObj.open !== undefined && hourObj.close !== undefined && hourObj.open !== '' && hourObj.close !== '') {
-            displayText = `${hourObj.open} – ${hourObj.close}`;
-          }
-          // If closed is false but no hours specified
-          else if (hourObj.closed === false) {
-            displayText = 'Hours not specified';
-          }
-          
-          return (
-            <div key={index} className="flex justify-between items-center">
-              <span className="font-medium text-gray-800">{label}</span>
-              <span className="text-gray-900">
-                {displayText}
-              </span>
-            </div>
-          );
-        })}
+      {store.openingHours.map((hourObj, index) => {
+        // Safely extract properties with defaults
+        const day = hourObj?.day ?? index;
+        const open = hourObj?.open ?? '';
+        const close = hourObj?.close ?? '';
+        const closed = hourObj?.closed ?? false;
+        
+        const dayNames = [
+          'Sunday', 'Monday', 'Tuesday', 'Wednesday', 
+          'Thursday', 'Friday', 'Saturday'
+        ];
+        const label = dayNames[day] || `Day ${day}`;
+        
+        // Determine display text
+        let displayText = 'Closed';
+        if (closed === true) {
+          displayText = 'Closed';
+        } else if (open && close) {
+          // Convert to string if not already
+          const openStr = String(open);
+          const closeStr = String(close);
+          displayText = `${openStr} – ${closeStr}`;
+        } else if (closed === false) {
+          displayText = 'Hours not specified';
+        }
+        
+        return (
+          <div key={index} className="flex justify-between items-center">
+            <span className="font-medium text-gray-800">{label}</span>
+            <span className="text-gray-900">
+              {displayText}
+            </span>
+          </div>
+        );
+      })}
     </div>
   </div>
 )}
