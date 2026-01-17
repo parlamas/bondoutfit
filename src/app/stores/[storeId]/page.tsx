@@ -777,7 +777,9 @@ if (discountsRes.ok) {
             </p>
           </div>
         </div>
-      )}
-    </div>
+                </div> {/* This closes the <div className="flex-1 space-y-6"> */}
+        </div> {/* This closes the <div className="flex flex-col md:flex-row gap-6"> */}
+      </div> {/* This closes the main <div className="max-w-6xl mx-auto p-6 space-y-6"> */}
+    </div> {/* This closes the component's return JSX */}
   );
 }
