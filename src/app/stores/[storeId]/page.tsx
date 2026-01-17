@@ -30,13 +30,13 @@ type Discount = {
   minPurchase: number | null;
   maxDiscount: number | null;
   svdOnly: boolean;
-  status: string; // ADD THIS LINE
-  isActive: boolean; // ADD THIS LINE
+  status: string;
+  isActive: boolean;
 };
 
 type StorePublicData = {
   id: string;
-  storeName: string; // CHANGED FROM 'name' TO 'storeName'
+  storeName: string;
   description: string | null;
   categories: string[];
   images: {
@@ -72,7 +72,6 @@ export default function StorePage({
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>('none');
   const [loading, setLoading] = useState(true);
   const [store, setStore] = useState<StorePublicData | null>(null);
-  const [showHours, setShowHours] = useState(true);
   const [categoryImages, setCategoryImages] = useState<CategoryImage[]>([]);
   const [discounts, setDiscounts] = useState<Discount[]>([]);
   const [showDiscounts, setShowDiscounts] = useState(true);
@@ -89,102 +88,96 @@ export default function StorePage({
   const [selectedDiscountId, setSelectedDiscountId] = useState<string>('');
 
   useEffect(() => {
-  const load = async () => {
-    try {
-      console.log('=== DEBUGGING STORE PAGE ===');
-      console.log('Store ID:', params.storeId);
-      
-      // Test each endpoint separately
-      const storeUrl = `/api/stores/${params.storeId}/public`;
-      console.log('Fetching store from:', storeUrl);
-      
-      const storeRes = await fetch(storeUrl);
-console.log('Store response status:', storeRes.status);
-console.log('Store response ok:', storeRes.ok);
+    const load = async () => {
+      try {
+        console.log('=== DEBUGGING STORE PAGE ===');
+        console.log('Store ID:', params.storeId);
+        
+        const storeUrl = `/api/stores/${params.storeId}/public`;
+        console.log('Fetching store from:', storeUrl);
+        
+        const storeRes = await fetch(storeUrl);
+        console.log('Store response status:', storeRes.status);
+        console.log('Store response ok:', storeRes.ok);
 
-if (storeRes.ok) {
-  const storeData = await storeRes.json();
-  console.log('Store data received:', storeData);
-  console.log('Store name:', storeData.storeName);
-  console.log('Store has name property?', 'name' in storeData);
-  
-  // ADD THIS DEBUGGING:
-  console.log('Opening hours data:', storeData.openingHours);
-  console.log('Type of opening hours:', typeof storeData.openingHours);
-  if (storeData.openingHours) {
-    console.log('First entry:', Object.entries(storeData.openingHours)[0]);
-    // Also log what the value actually is
-    const firstEntry = Object.entries(storeData.openingHours)[0];
-    if (firstEntry) {
-      console.log('First entry key:', firstEntry[0]);
-      console.log('First entry value:', firstEntry[1]);
-      console.log('Type of value:', typeof firstEntry[1]);
-      console.log('Is value an object?', firstEntry[1] && typeof firstEntry[1] === 'object');
-      console.log('Value properties:', firstEntry[1] ? Object.keys(firstEntry[1]) : 'null');
-    }
-  }
-  
-  setStore(storeData);
-} else {
-  console.log('Store fetch failed with status:', storeRes.status);
-  const errorText = await storeRes.text();
-  console.log('Error response:', errorText);
-}
-      
-      // Check discounts
-const discountsUrl = `/api/public/store/${params.storeId}/discounts`;
-console.log('\nFetching discounts from:', discountsUrl);
+        if (storeRes.ok) {
+          const storeData = await storeRes.json();
+          console.log('Store data received:', storeData);
+          console.log('Store name:', storeData.storeName);
+          console.log('Store has name property?', 'name' in storeData);
+          
+          console.log('Opening hours data:', storeData.openingHours);
+          console.log('Type of opening hours:', typeof storeData.openingHours);
+          if (storeData.openingHours) {
+            console.log('First entry:', Object.entries(storeData.openingHours)[0]);
+            const firstEntry = Object.entries(storeData.openingHours)[0];
+            if (firstEntry) {
+              console.log('First entry key:', firstEntry[0]);
+              console.log('First entry value:', firstEntry[1]);
+              console.log('Type of value:', typeof firstEntry[1]);
+              console.log('Is value an object?', firstEntry[1] && typeof firstEntry[1] === 'object');
+              console.log('Value properties:', firstEntry[1] ? Object.keys(firstEntry[1]) : 'null');
+            }
+          }
+          
+          setStore(storeData);
+        } else {
+          console.log('Store fetch failed with status:', storeRes.status);
+          const errorText = await storeRes.text();
+          console.log('Error response:', errorText);
+        }
+        
+        const discountsUrl = `/api/public/store/${params.storeId}/discounts`;
+        console.log('\nFetching discounts from:', discountsUrl);
 
-const discountsRes = await fetch(discountsUrl);
-console.log('Discounts response status:', discountsRes.status);
+        const discountsRes = await fetch(discountsUrl);
+        console.log('Discounts response status:', discountsRes.status);
 
-if (discountsRes.ok) {
-  const discountData = await discountsRes.json();
-  console.log('Discounts received from API:', discountData);
-  console.log('Number of discounts:', discountData.length);
-  
-  // Debug each discount
-  discountData.forEach((discount: Discount, index: number) => {
-    console.log(`Discount ${index + 1}:`, {
-      title: discount.title,
-      status: discount.status,
-      isActive: discount.isActive,
-      validFrom: discount.validFrom,
-      validTo: discount.validTo,
-      svdOnly: discount.svdOnly,
-      type: discount.type
-    });
-  });
-  
-  setDiscounts(discountData);
-} else {
-  const errorText = await discountsRes.text();
-  console.log('Discounts error:', errorText);
-}
-      
-      // Check categories
-      const categoriesUrl = `/api/public/store/${params.storeId}/categories`;
-      console.log('\nFetching categories from:', categoriesUrl);
-      
-      const catRes = await fetch(categoriesUrl);
-      console.log('Categories response status:', catRes.status);
-      
-      if (catRes.ok) {
-        const catData = await catRes.json();
-        console.log('Categories received:', catData.length);
-        setCategories(catData);
+        if (discountsRes.ok) {
+          const discountData = await discountsRes.json();
+          console.log('Discounts received from API:', discountData);
+          console.log('Number of discounts:', discountData.length);
+          
+          discountData.forEach((discount: Discount, index: number) => {
+            console.log(`Discount ${index + 1}:`, {
+              title: discount.title,
+              status: discount.status,
+              isActive: discount.isActive,
+              validFrom: discount.validFrom,
+              validTo: discount.validTo,
+              svdOnly: discount.svdOnly,
+              type: discount.type
+            });
+          });
+          
+          setDiscounts(discountData);
+        } else {
+          const errorText = await discountsRes.text();
+          console.log('Discounts error:', errorText);
+        }
+        
+        const categoriesUrl = `/api/public/store/${params.storeId}/categories`;
+        console.log('\nFetching categories from:', categoriesUrl);
+        
+        const catRes = await fetch(categoriesUrl);
+        console.log('Categories response status:', catRes.status);
+        
+        if (catRes.ok) {
+          const catData = await catRes.json();
+          console.log('Categories received:', catData.length);
+          setCategories(catData);
+        }
+        
+      } catch (error) {
+        console.error('Error loading data:', error);
+      } finally {
+        setLoading(false);
+        console.log('=== END DEBUGGING ===');
       }
-      
-    } catch (error) {
-      console.error('Error loading data:', error);
-    } finally {
-      setLoading(false);
-      console.log('=== END DEBUGGING ===');
-    }
-  };
+    };
 
-  load();
-}, [params.storeId]);
+    load();
+  }, [params.storeId]);
 
   useEffect(() => {
     setCategoryImages([]);
@@ -208,8 +201,8 @@ if (discountsRes.ok) {
   }, [selectedCategoryId, params.storeId]);
 
   useEffect(() => {
-  console.log('Current discounts in state:', discounts);
-}, [discounts]);
+    console.log('Current discounts in state:', discounts);
+  }, [discounts]);
 
   const formatDate = (dateString: string | null) => {
     if (!dateString) return 'No expiry';
@@ -240,9 +233,9 @@ if (discountsRes.ok) {
   };
 
   const isFutureDiscount = (discount: Discount) => {
-  if (!discount.validFrom) return false;
-  return new Date(discount.validFrom) > new Date();
-};
+    if (!discount.validFrom) return false;
+    return new Date(discount.validFrom) > new Date();
+  };
 
   const handleBookVisitClick = () => {
     if (status === 'unauthenticated') {
@@ -252,7 +245,7 @@ if (discountsRes.ok) {
     setShowBookingForm(true);
   };
 
-    const handleDiscountBooking = (discount: Discount) => {
+  const handleDiscountBooking = (discount: Discount) => {
     if (status === 'unauthenticated') {
       router.push('/auth/customer/signin');
       return;
@@ -277,7 +270,7 @@ if (discountsRes.ok) {
       const res = await fetch('/api/visits', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
+        body: JSON.stringify({
           storeId: params.storeId,
           scheduledDate: bookingData.date,
           scheduledTime: bookingData.time,
@@ -290,7 +283,6 @@ if (discountsRes.ok) {
         const visit = await res.json();
         setVisitSubmitted(true);
         setShowBookingForm(false);
-        // Redirect to visit details page
         router.push(`/visits/${visit.id}`);
       }
     } catch (error) {
@@ -303,14 +295,6 @@ if (discountsRes.ok) {
   if (loading) return <p className="p-6">Loading…</p>;
   if (!store) return null;
 
-    //useEffect(() => {
-    //console.log('Store data in component:', store);
-    //console.log('Store email in component:', store?.email);
-    //console.log('Accepted currencies:', store?.acceptedCurrencies);
-    //console.log('Type of acceptedCurrencies:', typeof store?.acceptedCurrencies);
-    //console.log('Is array?', Array.isArray(store?.acceptedCurrencies));
-  //}, [store]);
-
   const storefrontImage = store.images.find(
     (img) => img.type === 'STOREFRONT'
   );
@@ -319,16 +303,13 @@ if (discountsRes.ok) {
     (img) => img.type === 'GALLERY' && img.categoryId == null
   );
 
-  // Separate SVD (Scheduled Visit Discounts) from regular discounts
   const svdDiscounts = discounts.filter(d => d.svdOnly);
   const regularDiscounts = discounts.filter(d => !d.svdOnly);
 
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-6">
-      
       <h1 className="text-3xl font-bold">{store.storeName}</h1>
 
-      {/* SCHEDULED VISIT DISCOUNTS SECTION */}
       {svdDiscounts.length > 0 && showDiscounts && (
         <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
           <div className="flex justify-between items-center mb-3">
@@ -347,71 +328,69 @@ if (discountsRes.ok) {
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {svdDiscounts.map((discount) => (
               <div 
-  key={discount.id} 
-  className="bg-white border border-purple-300 rounded-lg p-4 shadow-sm flex flex-col h-full relative"
->
-  {/* Future Discount Badge */}
-  {isFutureDiscount(discount) && (
-    <div className="absolute top-2 right-2 bg-yellow-100 text-yellow-800 text-xs font-semibold px-2 py-1 rounded border border-yellow-200 z-10">
-      ⏰ Starts {formatDate(discount.validFrom)}
-    </div>
-  )}
-  <div className="flex-grow">
-    <div className="flex justify-between items-start mb-2">
-      <h3 className="font-bold text-lg text-gray-800">{discount.title}</h3>
-      <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded text-sm font-semibold">
-        {getDiscountValue(discount)} {getDiscountTypeLabel(discount.type)}
-      </span>
-    </div>
-    
-    {discount.description && (
-      <p className="text-gray-600 mb-3 text-sm">{discount.description}</p>
-    )}
-    
-    <div className="space-y-1 text-xs text-gray-500">
-      <div className="flex justify-between">
-        <span>Valid From:</span>
-        <span className="font-medium">{formatDate(discount.validFrom)}</span>
-      </div>
-      <div className="flex justify-between">
-        <span>Valid To:</span>
-        <span className="font-medium">{formatDate(discount.validTo)}</span>
-      </div>
-      {discount.minPurchase && (
-        <div className="flex justify-between">
-          <span>Min. Purchase:</span>
-          <span>€{discount.minPurchase}</span>
-        </div>
-      )}
-      {discount.code && (
-        <div className="mt-2 pt-2 border-t">
-          <span className="font-semibold">Use Code:</span>
-          <span className="ml-2 bg-gray-100 px-2 py-1 rounded font-mono">
-            {discount.code}
-          </span>
-        </div>
-      )}
-    </div>
-  </div>
-  
- <button
-  onClick={() => handleDiscountBooking(discount)}
-  disabled={isFutureDiscount(discount)}
-  className={`w-full mt-4 ${
-    isFutureDiscount(discount)
-      ? 'bg-gray-300 cursor-not-allowed text-gray-500'
-      : 'bg-purple-600 hover:bg-purple-700 text-white'
-  } px-4 py-2 rounded-lg font-medium transition-colors`}
->
-  {isFutureDiscount(discount) ? 'Starts Soon' : 'Book Visit'}
-</button>
-</div>
+                key={discount.id} 
+                className="bg-white border border-purple-300 rounded-lg p-4 shadow-sm flex flex-col h-full relative"
+              >
+                {isFutureDiscount(discount) && (
+                  <div className="absolute top-2 right-2 bg-yellow-100 text-yellow-800 text-xs font-semibold px-2 py-1 rounded border border-yellow-200 z-10">
+                    ⏰ Starts {formatDate(discount.validFrom)}
+                  </div>
+                )}
+                <div className="flex-grow">
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="font-bold text-lg text-gray-800">{discount.title}</h3>
+                    <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded text-sm font-semibold">
+                      {getDiscountValue(discount)} {getDiscountTypeLabel(discount.type)}
+                    </span>
+                  </div>
+                  
+                  {discount.description && (
+                    <p className="text-gray-600 mb-3 text-sm">{discount.description}</p>
+                  )}
+                  
+                  <div className="space-y-1 text-xs text-gray-500">
+                    <div className="flex justify-between">
+                      <span>Valid From:</span>
+                      <span className="font-medium">{formatDate(discount.validFrom)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Valid To:</span>
+                      <span className="font-medium">{formatDate(discount.validTo)}</span>
+                    </div>
+                    {discount.minPurchase && (
+                      <div className="flex justify-between">
+                        <span>Min. Purchase:</span>
+                        <span>€{discount.minPurchase}</span>
+                      </div>
+                    )}
+                    {discount.code && (
+                      <div className="mt-2 pt-2 border-t">
+                        <span className="font-semibold">Use Code:</span>
+                        <span className="ml-2 bg-gray-100 px-2 py-1 rounded font-mono">
+                          {discount.code}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                
+                <button
+                  onClick={() => handleDiscountBooking(discount)}
+                  disabled={isFutureDiscount(discount)}
+                  className={`w-full mt-4 ${
+                    isFutureDiscount(discount)
+                      ? 'bg-gray-300 cursor-not-allowed text-gray-500'
+                      : 'bg-purple-600 hover:bg-purple-700 text-white'
+                  } px-4 py-2 rounded-lg font-medium transition-colors`}
+                >
+                  {isFutureDiscount(discount) ? 'Starts Soon' : 'Book Visit'}
+                </button>
+              </div>
             ))}
           </div>
         </div>
       )}
 
-      {/* REGULAR DISCOUNTS SECTION */}
       {regularDiscounts.length > 0 && showDiscounts && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <div className="flex justify-between items-center mb-3">
@@ -432,71 +411,69 @@ if (discountsRes.ok) {
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {regularDiscounts.map((discount) => (
               <div 
-  key={discount.id} 
-  className="bg-white border border-purple-300 rounded-lg p-4 shadow-sm flex flex-col h-full relative"
->
-  {/* Future Discount Badge */}
-  {isFutureDiscount(discount) && (
-    <div className="absolute top-2 right-2 bg-yellow-100 text-yellow-800 text-xs font-semibold px-2 py-1 rounded border border-yellow-200 z-10">
-      ⏰ Starts {formatDate(discount.validFrom)}
-    </div>
-  )}
-  <div className="flex-grow">
-    <div className="flex justify-between items-start mb-2">
-      <h3 className="font-bold text-lg text-gray-800">{discount.title}</h3>
-      <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded text-sm font-semibold">
-        {getDiscountValue(discount)} {getDiscountTypeLabel(discount.type)}
-      </span>
-    </div>
-    
-    {discount.description && (
-      <p className="text-gray-600 mb-3 text-sm">{discount.description}</p>
-    )}
-    
-    <div className="space-y-1 text-xs text-gray-500">
-      <div className="flex justify-between">
-        <span>Valid From:</span>
-        <span className="font-medium">{formatDate(discount.validFrom)}</span>
-      </div>
-      <div className="flex justify-between">
-        <span>Valid To:</span>
-        <span className="font-medium">{formatDate(discount.validTo)}</span>
-      </div>
-      {discount.minPurchase && (
-        <div className="flex justify-between">
-          <span>Min. Purchase:</span>
-          <span>€{discount.minPurchase}</span>
-        </div>
-      )}
-      {discount.code && (
-        <div className="mt-2 pt-2 border-t">
-          <span className="font-semibold">Use Code:</span>
-          <span className="ml-2 bg-gray-100 px-2 py-1 rounded font-mono">
-            {discount.code}
-          </span>
-        </div>
-      )}
-    </div>
-  </div>
-  
-  <button
-  onClick={() => handleDiscountBooking(discount)}
-  disabled={isFutureDiscount(discount)}
-  className={`w-full mt-4 ${
-    isFutureDiscount(discount)
-      ? 'bg-gray-300 cursor-not-allowed text-gray-500'
-      : 'bg-purple-600 hover:bg-purple-700 text-white'
-  } px-4 py-2 rounded-lg font-medium transition-colors`}
->
-  {isFutureDiscount(discount) ? 'Starts Soon' : 'Book Visit'}
-</button>
-</div>
+                key={discount.id} 
+                className="bg-white border border-purple-300 rounded-lg p-4 shadow-sm flex flex-col h-full relative"
+              >
+                {isFutureDiscount(discount) && (
+                  <div className="absolute top-2 right-2 bg-yellow-100 text-yellow-800 text-xs font-semibold px-2 py-1 rounded border border-yellow-200 z-10">
+                    ⏰ Starts {formatDate(discount.validFrom)}
+                  </div>
+                )}
+                <div className="flex-grow">
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="font-bold text-lg text-gray-800">{discount.title}</h3>
+                    <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded text-sm font-semibold">
+                      {getDiscountValue(discount)} {getDiscountTypeLabel(discount.type)}
+                    </span>
+                  </div>
+                  
+                  {discount.description && (
+                    <p className="text-gray-600 mb-3 text-sm">{discount.description}</p>
+                  )}
+                  
+                  <div className="space-y-1 text-xs text-gray-500">
+                    <div className="flex justify-between">
+                      <span>Valid From:</span>
+                      <span className="font-medium">{formatDate(discount.validFrom)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Valid To:</span>
+                      <span className="font-medium">{formatDate(discount.validTo)}</span>
+                    </div>
+                    {discount.minPurchase && (
+                      <div className="flex justify-between">
+                        <span>Min. Purchase:</span>
+                        <span>€{discount.minPurchase}</span>
+                      </div>
+                    )}
+                    {discount.code && (
+                      <div className="mt-2 pt-2 border-t">
+                        <span className="font-semibold">Use Code:</span>
+                        <span className="ml-2 bg-gray-100 px-2 py-1 rounded font-mono">
+                          {discount.code}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                
+                <button
+                  onClick={() => handleDiscountBooking(discount)}
+                  disabled={isFutureDiscount(discount)}
+                  className={`w-full mt-4 ${
+                    isFutureDiscount(discount)
+                      ? 'bg-gray-300 cursor-not-allowed text-gray-500'
+                      : 'bg-purple-600 hover:bg-purple-700 text-white'
+                  } px-4 py-2 rounded-lg font-medium transition-colors`}
+                >
+                  {isFutureDiscount(discount) ? 'Starts Soon' : 'Book Visit'}
+                </button>
+              </div>
             ))}
           </div>
         </div>
       )}
 
-      {/* SHOW DISCOUNTS BUTTON WHEN HIDDEN */}
       {!showDiscounts && discounts.length > 0 && (
         <button
           onClick={() => setShowDiscounts(true)}
@@ -506,9 +483,7 @@ if (discountsRes.ok) {
         </button>
       )}
 
-      {/* MAIN CONTENT AREA */}
       <div className="flex flex-col md:flex-row gap-6">
-        {/* IMAGES SECTION */}
         <div className="grid grid-cols-2 gap-4 max-w-md">
           {storefrontImage && (
             <img
@@ -550,9 +525,7 @@ if (discountsRes.ok) {
             ))}
         </div>
 
-        {/* CONTACT & CATEGORIES SECTION */}
         <div className="flex-1 space-y-6">
-          {/* CATEGORY DROPDOWN */}
           <div>
             <h3 className="font-medium text-gray-900 mb-2">Browse Categories</h3>
             <select
@@ -569,12 +542,10 @@ if (discountsRes.ok) {
             </select>
           </div>
 
-          {/* CONTACT INFORMATION */}
           <div className="border border-gray-200 rounded-lg p-4">
             <h3 className="font-medium text-gray-900 mb-3">Contact Information</h3>
             
             <div className="space-y-3 text-sm text-gray-700">
-              {/* Full Address with Floor */}
               <div>
                 <div className="font-medium text-gray-600">Address</div>
                 <div className="text-gray-900">
@@ -585,7 +556,6 @@ if (discountsRes.ok) {
                 </div>
               </div>
 
-              {/* Full Phone Number */}
               {store.phoneNumber && (
                 <div>
                   <div className="font-medium text-gray-600">Phone</div>
@@ -595,7 +565,6 @@ if (discountsRes.ok) {
                 </div>
               )}
 
-              {/* Email */}
               {store.email && (
                 <div>
                   <div className="font-medium text-gray-600">Email</div>
@@ -608,7 +577,6 @@ if (discountsRes.ok) {
                 </div>
               )}
 
-              {/* Website */}
               {store.website && (
                 <div>
                   <div className="font-medium text-gray-600">Website</div>
@@ -622,72 +590,69 @@ if (discountsRes.ok) {
                   </a>
                 </div>
               )}
-              {/* Accepted Currencies */}
-{store.acceptedCurrencies && Array.isArray(store.acceptedCurrencies) && store.acceptedCurrencies.length > 0 && (
-  <div>
-    <div className="font-medium text-gray-600">Accepted Currencies</div>
-    <div className="text-gray-900">
-      {store.acceptedCurrencies.join(', ')}
-    </div>
-  </div>
-)}
+
+              {store.acceptedCurrencies && Array.isArray(store.acceptedCurrencies) && store.acceptedCurrencies.length > 0 && (
+                <div>
+                  <div className="font-medium text-gray-600">Accepted Currencies</div>
+                  <div className="text-gray-900">
+                    {store.acceptedCurrencies.join(', ')}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
-          {/* OPENING HOURS */}
-{store.openingHours && (
-  <div className="border border-gray-200 rounded-lg p-4">
-    <h3 className="font-medium text-gray-900 mb-3">Opening Hours</h3>
-    <div className="text-sm text-gray-700 space-y-2">
-      {Object.entries(store.openingHours).map(([day, value]) => {
-        const dayNames = [
-          'Sunday', 'Monday', 'Tuesday', 'Wednesday', 
-          'Thursday', 'Friday', 'Saturday'
-        ];
-        const label = Number.isInteger(Number(day)) 
-          ? dayNames[Number(day)] 
-          : day;
-        
-        // Safely handle the value
-        let displayText = 'Closed';
-        
-        if (typeof value === 'string') {
-          displayText = value;
-        } else if (Array.isArray(value)) {
-          displayText = value.join(' – ');
-        } else if (value && typeof value === 'object') {
-          // Handle the object format {day, open, close, closed}
-          if (value.closed) {
-            displayText = 'Closed';
-          } else if (value.open && value.close) {
-            displayText = `${value.open} – ${value.close}`;
-          } else if (value.day) {
-            // If there's a day property that contains the schedule
-            displayText = value.day;
-          }
-        }
-        
-        return (
-          <div key={day} className="flex justify-between items-center">
-            <span className="font-medium text-gray-800">{label}</span>
-            <span className="text-gray-900">
-              {displayText}
-            </span>
-          </div>
-        );
-      })}
-    </div>
-  </div>
-)}
+          {store.openingHours && (
+            <div className="border border-gray-200 rounded-lg p-4">
+              <h3 className="font-medium text-gray-900 mb-3">Opening Hours</h3>
+              <div className="text-sm text-gray-700 space-y-2">
+                {Object.entries(store.openingHours).map(([day, value]) => {
+                  const dayNames = [
+                    'Sunday', 'Monday', 'Tuesday', 'Wednesday', 
+                    'Thursday', 'Friday', 'Saturday'
+                  ];
+                  const label = Number.isInteger(Number(day)) 
+                    ? dayNames[Number(day)] 
+                    : day;
+                  
+                  let displayText = 'Closed';
+                  
+                  if (typeof value === 'string') {
+                    displayText = value;
+                  } else if (Array.isArray(value)) {
+                    displayText = value.join(' – ');
+                  } else if (value && typeof value === 'object') {
+                    if (value.closed) {
+                      displayText = 'Closed';
+                    } else if (value.open && value.close) {
+                      displayText = `${value.open} – ${value.close}`;
+                    } else if (value.day) {
+                      displayText = value.day;
+                    }
+                  }
+                  
+                  return (
+                    <div key={day} className="flex justify-between items-center">
+                      <span className="font-medium text-gray-800">{label}</span>
+                      <span className="text-gray-900">
+                        {displayText}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
 
-      {/* BOOKING FORM MODAL */}
       {showBookingForm && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl p-6 max-w-md w-full">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-xl font-semibold">Book a Visit</h3>
               <button
-                                onClick={() => {
+                onClick={() => {
                   setShowBookingForm(false);
                   setSelectedDiscountId('');
                 }}
@@ -766,7 +731,6 @@ if (discountsRes.ok) {
         </div>
       )}
 
-      {/* VISIT SUBMITTED MESSAGE */}
       {visitSubmitted && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl p-6 max-w-md w-full text-center">
@@ -777,9 +741,7 @@ if (discountsRes.ok) {
             </p>
           </div>
         </div>
-                </div> {/* This closes the <div className="flex-1 space-y-6"> */}
-        </div> {/* This closes the <div className="flex flex-col md:flex-row gap-6"> */}
-      </div> {/* This closes the main <div className="max-w-6xl mx-auto p-6 space-y-6"> */}
-    </div> {/* This closes the component's return JSX */}
+      )}
+    </div>
   );
 }
