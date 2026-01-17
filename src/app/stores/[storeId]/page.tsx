@@ -602,49 +602,39 @@ export default function StorePage({
             </div>
           </div>
 
-          {store.openingHours && (
-            <div className="border border-gray-200 rounded-lg p-4">
-              <h3 className="font-medium text-gray-900 mb-3">Opening Hours</h3>
-              <div className="text-sm text-gray-700 space-y-2">
-                {Object.entries(store.openingHours).map(([day, value]) => {
-                  const dayNames = [
-                    'Sunday', 'Monday', 'Tuesday', 'Wednesday', 
-                    'Thursday', 'Friday', 'Saturday'
-                  ];
-                  const label = Number.isInteger(Number(day)) 
-                    ? dayNames[Number(day)] 
-                    : day;
-                  
-                  let displayText = 'Closed';
-                  
-                  if (typeof value === 'string') {
-                    displayText = value;
-                  } else if (Array.isArray(value)) {
-                    displayText = value.join(' – ');
-                  } else if (value && typeof value === 'object') {
-                    if (value.closed) {
-                      displayText = 'Closed';
-                    } else if (value.open && value.close) {
-                      displayText = `${value.open} – ${value.close}`;
-                    } else if (value.day) {
-                      displayText = value.day;
-                    }
-                  }
-                  
-                  return (
-                    <div key={day} className="flex justify-between items-center">
-                      <span className="font-medium text-gray-800">{label}</span>
-                      <span className="text-gray-900">
-                        {displayText}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
+          {store.openingHours && Array.isArray(store.openingHours) && (
+  <div className="border border-gray-200 rounded-lg p-4">
+    <h3 className="font-medium text-gray-900 mb-3">Opening Hours</h3>
+    <div className="text-sm text-gray-700 space-y-2">
+      {store.openingHours.map((hourObj, index) => {
+        const dayNames = [
+          'Sunday', 'Monday', 'Tuesday', 'Wednesday', 
+          'Thursday', 'Friday', 'Saturday'
+        ];
+        const label = hourObj.day !== undefined 
+          ? dayNames[hourObj.day] 
+          : dayNames[index];
+        
+        let displayText = 'Closed';
+        
+        if (hourObj.closed) {
+          displayText = 'Closed';
+        } else if (hourObj.open && hourObj.close) {
+          displayText = `${hourObj.open} – ${hourObj.close}`;
+        }
+        
+        return (
+          <div key={index} className="flex justify-between items-center">
+            <span className="font-medium text-gray-800">{label}</span>
+            <span className="text-gray-900">
+              {displayText}
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  </div>
+)}
 
       {showBookingForm && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
@@ -731,7 +721,7 @@ export default function StorePage({
         </div>
       )}
 
-      {visitSubmitted && (
+            {visitSubmitted && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl p-6 max-w-md w-full text-center">
             <div className="text-green-600 text-4xl mb-4">✓</div>
@@ -742,6 +732,8 @@ export default function StorePage({
           </div>
         </div>
       )}
-    </div>
+        </div>
+  </div>
+</div>
   );
 }
