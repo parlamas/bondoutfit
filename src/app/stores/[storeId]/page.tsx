@@ -137,20 +137,6 @@ export default function StorePage({
           const discountData = await discountsRes.json();
           console.log('Discounts received from API:', discountData);
           console.log('Number of discounts:', discountData.length);
-
-            console.log('Store opening hours before render:', store.openingHours);
-  console.log('Is array?', Array.isArray(store.openingHours));
-  if (store.openingHours && Array.isArray(store.openingHours)) {
-    console.log('First item in opening hours:', store.openingHours[0]);
-    console.log('Type of first item:', typeof store.openingHours[0]);
-    console.log('First item keys:', Object.keys(store.openingHours[0]));
-    console.log('First item closed value:', store.openingHours[0].closed);
-    console.log('Type of closed:', typeof store.openingHours[0].closed);
-    console.log('First item open value:', store.openingHours[0].open);
-    console.log('Type of open:', typeof store.openingHours[0].open);
-    console.log('First item close value:', store.openingHours[0].close);
-    console.log('Type of close:', typeof store.openingHours[0].close);
-  }
           
           discountData.forEach((discount: Discount, index: number) => {
             console.log(`Discount ${index + 1}:`, {
