@@ -315,7 +315,16 @@ export default function StorePage({
 
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-6">
-      <h1 className="text-3xl font-bold">{store.storeName}</h1>
+      <div className="flex flex-col gap-1">
+  <h1 className="text-3xl font-bold">{store.storeName}</h1>
+
+  {Array.isArray(store.categories) && store.categories.length > 0 && (
+    <div className="text-sm text-gray-600">
+      {store.categories.join(' • ')}
+    </div>
+  )}
+</div>
+
 
       {svdDiscounts.length > 0 && showDiscounts && (
         <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
@@ -540,7 +549,7 @@ export default function StorePage({
               onChange={(e) => setSelectedCategoryId(e.target.value)}
               className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
-              <option value="none">No category (no category images shown)</option>
+              <option value="none">No category</option>
               {categories.map((category) => (
                 <option key={category.id} value={category.id}>
                   {category.title}
@@ -754,5 +763,3 @@ export default function StorePage({
 </div>
   );
 }
-
-                        
