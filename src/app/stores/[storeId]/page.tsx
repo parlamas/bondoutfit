@@ -315,17 +315,22 @@ export default function StorePage({
 
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-6">
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-2">
   <h1 className="text-3xl font-bold">{store.storeName}</h1>
 
   {Array.isArray(store.categories) && store.categories.length > 0 && (
-  <div className="text-sm text-gray-600">
-    {store.categories.join(' • ')}
-  </div>
-)}
+    <div className="text-sm text-gray-600">
+      {store.categories.join(' • ')}
+    </div>
+  )}
 
-
+  {store.description && (
+    <p className="text-gray-700 max-w-3xl">
+      {store.description}
+    </p>
+  )}
 </div>
+
 
 
       {svdDiscounts.length > 0 && showDiscounts && (
