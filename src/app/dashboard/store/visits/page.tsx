@@ -14,7 +14,6 @@ type Visit = {
   scheduledTime: string;
   numberOfPeople: number;
   status: 'SCHEDULED' | 'COMPLETED' | 'MISSED' | 'CANCELLED';
-  checkedIn: boolean;
   checkedInAt: string | null;
   customerNotes: string | null;
   discountUnlocked: boolean;
@@ -61,7 +60,7 @@ export default function StoreVisitsPage() {
       const res = await fetch('/api/store/visits');
       if (res.ok) {
         const data = await res.json();
-        setVisits(data);
+setVisits(data.visits || []);
       }
     } catch (error) {
       console.error('Failed to load visits', error);
@@ -91,12 +90,19 @@ export default function StoreVisitsPage() {
       console.log('Processing scan for visit:', visitId);
 
       // Find the visit locally
-      const visit = visits.find(v => v.id === visitId);
+      let visit = visits.find(v => v.id === visitId);
 
-      if (!visit) {
-        setScanMessage({ type: 'error', text: 'Visit not found. Invalid QR code.' });
-        return;
-      }
+if (!visit) {
+  const verifyRes = await fetch(`/api/visits/${visitId}/verify`);
+  if (!verifyRes.ok) {
+    setScanMessage({ type: 'error', text: 'Visit not found. Invalid QR code.' });
+    return;
+  }
+
+  const verifyData = await verifyRes.json();
+  visit = verifyData.visit;
+}
+
 
       // Call the scan API endpoint
       const response = await fetch(`/api/visits/${visitId}/scan`, {
@@ -114,12 +120,12 @@ export default function StoreVisitsPage() {
       const result = await response.json();
       
       if (response.ok) {
-        if (visit.status === 'SCHEDULED' && !visit.checkedIn) {
+        if (visit.status === 'SCHEDULED' && !visit.checkedInAt) {
           setScanMessage({ 
             type: 'success', 
             text: `✅ Checked in ${visit.user.name} (${visit.numberOfPeople} people) at ${formatTime(new Date().toISOString())}` 
           });
-        } else if (visit.checkedIn && visit.status === 'SCHEDULED') {
+        } else if (!!visit.checkedInAt && visit.status === 'SCHEDULED') {
           setScanMessage({ 
             type: 'success', 
             text: `✅ Marked ${visit.user.name}'s visit as COMPLETED` 
@@ -492,7 +498,7 @@ export default function StoreVisitsPage() {
                       {getStatusIcon(visit.status)}
                       {visit.status}
                     </span>
-                    {visit.checkedIn && (
+                    {!!visit.checkedInAt && (
                       <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 flex items-center gap-1">
                         <CheckCircle className="w-3 h-3" />
                         Checked In
@@ -553,7 +559,7 @@ export default function StoreVisitsPage() {
                 <div className="ml-4 space-y-3 min-w-[280px]">
                   {visit.status === 'SCHEDULED' && (
                     <div className="text-center">
-                      {!visit.checkedIn ? (
+                      {!visit.checkedInAt ? (
                         <div className="px-4 py-3 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg">
                           <div className="flex items-center justify-center gap-2 mb-2">
                             <Scan className="w-5 h-5 text-blue-600" />
@@ -621,10 +627,11 @@ export default function StoreVisitsPage() {
               </div>
 
               {visit.checkedInAt && (
-                <div className="pt-4 mt-4 border-t border-gray-100 text-sm text-gray-500">
-                  Checked in at: {new Date(visit.checkedInAt).toLocaleString()}
-                </div>
-              )}
+  <div className="pt-4 mt-4 border-t border-gray-100 text-sm text-gray-500">
+    Checked in at: {new Date(visit.checkedInAt).toLocaleString()}
+  </div>
+)}
+
             </div>
           ))}
                 </div>
