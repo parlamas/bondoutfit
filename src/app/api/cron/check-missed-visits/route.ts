@@ -1,5 +1,7 @@
 // src/app/api/cron/check-missed-visits/route.ts
 
+export const dynamic = 'force-dynamic';
+
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { NotificationService } from '@/lib/notifications/notification-service';

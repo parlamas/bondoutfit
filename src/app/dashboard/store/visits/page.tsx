@@ -103,6 +103,12 @@ if (!visit) {
   visit = verifyData.visit;
 }
 
+if (!visit) {
+  setScanMessage({ type: 'error', text: 'Visit not found.' });
+  return;
+}
+
+
 
       // Call the scan API endpoint
       const response = await fetch(`/api/visits/${visitId}/scan`, {
