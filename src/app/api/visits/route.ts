@@ -76,7 +76,15 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { storeId, scheduledDate, scheduledTime, numberOfPeople, discountId } = body;
+    const {
+  storeId,
+  scheduledDate,
+  scheduledTime,
+  numberOfPeople,
+  discountId,
+  customerNotes,
+} = body;
+
 
     if (!storeId || !scheduledDate || !scheduledTime) {
       return NextResponse.json(
@@ -131,6 +139,7 @@ export async function POST(req: NextRequest) {
         scheduledTime,
         numberOfPeople: numberOfPeople || 1,
         discountId: discountId || null,
+        customerNotes: customerNotes || null,
         status: "SCHEDULED",
       },
       include: {
@@ -220,6 +229,13 @@ export async function POST(req: NextRequest) {
               <li><strong>Party Size:</strong> ${visit.numberOfPeople} person(s)</li>
               ${visit.discount ? `<li><strong>Discount:</strong> ${visit.discount.title}</li>` : ''}
             </ul>
+            ${visit.customerNotes ? `
+  <p><strong>Customer is interested in:</strong></p>
+  <p style="background:#f9f9f9;padding:10px;border-radius:6px;">
+    ${visit.customerNotes}
+  </p>
+` : ''}
+
             ${qrCodeDataUrl ? `
               <p><strong>Customer's Check-in QR Code:</strong></p>
               <img src="${qrCodeDataUrl}" alt="QR Code for check-in" style="width: 200px; height: 200px;"/>
