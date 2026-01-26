@@ -318,11 +318,12 @@ export default function StorePage({
       <div className="flex flex-col gap-1">
   <h1 className="text-3xl font-bold">{store.storeName}</h1>
 
-  {categories.length > 0 && (
+  {Array.isArray(store.categories) && store.categories.length > 0 && (
   <div className="text-sm text-gray-600">
-    {categories.map(c => c.title).join(' • ')}
+    {store.categories.join(' • ')}
   </div>
 )}
+
 
 </div>
 
