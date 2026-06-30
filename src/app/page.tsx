@@ -35,14 +35,14 @@ function StoreSelector() {
 
   return (
     <section className="max-w-4xl mx-auto px-4 py-8 sm:px-6 sm:py-10">
-      <div className="bg-white rounded-xl shadow-md p-4 sm:p-6 space-y-4 sm:space-y-6">
-        <h2 className="text-xl font-semibold text-gray-900">
-          Schedule a Visit & Get a Discount
+      <div className="bg-brand-paper border border-brand-stoneborder rounded-xl shadow-sm p-5 sm:p-7 space-y-5 sm:space-y-6">
+        <h2 className="font-serif text-2xl font-semibold text-brand-ink">
+          Schedule a Visit &amp; Get a Discount
         </h2>
 
         {/* Country */}
         <div>
-          <label className="block text-sm font-medium mb-1">Country</label>
+          <label className="block text-sm font-sans font-medium text-brand-ink mb-1.5">Country</label>
           <select
             value={country}
             onChange={e => {
@@ -50,7 +50,7 @@ function StoreSelector() {
               setCity("");
               setStoreId("");
             }}
-            className="w-full border rounded-md p-2"
+            className="w-full border border-brand-stoneborder bg-white rounded-lg p-2.5 font-sans text-brand-ink focus:ring-2 focus:ring-brand-gold focus:border-brand-gold"
           >
             <option value="">Select country</option>
             {countries.map(c => (
@@ -62,14 +62,14 @@ function StoreSelector() {
         {/* City */}
         {country && (
           <div>
-            <label className="block text-sm font-medium mb-1">City</label>
+            <label className="block text-sm font-sans font-medium text-brand-ink mb-1.5">City</label>
             <select
               value={city}
               onChange={e => {
                 setCity(e.target.value);
                 setStoreId("");
               }}
-              className="w-full border rounded-md p-2"
+              className="w-full border border-brand-stoneborder bg-white rounded-lg p-2.5 font-sans text-brand-ink focus:ring-2 focus:ring-brand-gold focus:border-brand-gold"
             >
               <option value="">Select city</option>
               {cities.map(c => (
@@ -82,11 +82,11 @@ function StoreSelector() {
         {/* Store */}
         {city && (
           <div>
-            <label className="block text-sm font-medium mb-1">Store</label>
+            <label className="block text-sm font-sans font-medium text-brand-ink mb-1.5">Store</label>
             <select
               value={storeId}
               onChange={e => setStoreId(e.target.value)}
-              className="w-full border rounded-md p-2"
+              className="w-full border border-brand-stoneborder bg-white rounded-lg p-2.5 font-sans text-brand-ink focus:ring-2 focus:ring-brand-gold focus:border-brand-gold"
             >
               <option value="">Select store</option>
               {filteredStores.map(s => (
@@ -100,9 +100,9 @@ function StoreSelector() {
         {storeId && (
           <button
             onClick={() => router.push(`/stores/${storeId}`)}
-            className="w-full bg-blue-600 text-white py-3 rounded-lg text-base font-medium hover:bg-blue-700 transition"
+            className="w-full bg-brand-ink hover:bg-brand-golddeep text-white py-3 rounded-lg text-base font-serif font-semibold transition-colors"
           >
-            View Store & Schedule Visit
+            View Store &amp; Schedule Visit
           </button>
         )}
       </div>
@@ -112,15 +112,15 @@ function StoreSelector() {
 
 function IntroSection() {
   return (
-    <section className="max-w-5xl mx-auto px-4 py-10 grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-10">
+    <section className="max-w-5xl mx-auto px-4 py-10 grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
       {/* Customers */}
-      <div className="bg-white rounded-xl shadow p-6">
+      <div className="bg-brand-paper border border-brand-stoneborder rounded-xl shadow-sm p-6">
         <div className="flex items-center gap-3 mb-4">
-          <Users className="h-8 w-8 text-blue-600" />
-          <h3 className="text-xl font-semibold">For Customers</h3>
+          <Users className="h-7 w-7 text-brand-gold" />
+          <h3 className="font-serif text-xl font-semibold text-brand-ink">For Customers</h3>
         </div>
-        <p className="text-gray-700 leading-relaxed">
-          With <strong>Scheduled Visit Discount (SVD)</strong>, you book a store
+        <p className="text-brand-inksoft font-sans leading-relaxed">
+          With <strong className="text-brand-ink">Scheduled Visit Discount (SVD)</strong>, you book a store
           visit in advance. If you arrive on time and make a purchase, you
           receive a pre-agreed discount. No waiting, no uncertainty, better
           prices.
@@ -128,12 +128,12 @@ function IntroSection() {
       </div>
 
       {/* Store Managers */}
-      <div className="bg-white rounded-xl shadow p-6">
+      <div className="bg-brand-paper border border-brand-stoneborder rounded-xl shadow-sm p-6">
         <div className="flex items-center gap-3 mb-4">
-          <Shield className="h-8 w-8 text-gray-800" />
-          <h3 className="text-xl font-semibold">For Store Managers</h3>
+          <Shield className="h-7 w-7 text-brand-ink" />
+          <h3 className="font-serif text-xl font-semibold text-brand-ink">For Store Managers</h3>
         </div>
-        <p className="text-gray-700 leading-relaxed">
+        <p className="text-brand-inksoft font-sans leading-relaxed">
           SVD turns planned visits into predictable demand. You know who is
           coming, when, and why. Discounts are offset by higher conversion,
           smoother operations, and better use of staff and space.
@@ -161,10 +161,14 @@ export default function HomePage() {
   }, [role, router]);
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-14 md:pt-0">
+    <div className="min-h-screen bg-brand-stone pt-14 md:pt-0">
       <MobileMenu />
       {role !== "STORE_MANAGER" && <StoreSelector />}
       <IntroSection />
     </div>
   );
 }
+
+
+
+

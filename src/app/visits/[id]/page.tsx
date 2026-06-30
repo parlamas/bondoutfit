@@ -1,4 +1,4 @@
-// src/app/visits/[id]/page.tsx - COMPLETE VERSION WITH EDIT & CANCEL
+// src/app/visits/[id]/page.tsx
 
 'use client';
 
@@ -6,8 +6,10 @@ import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter, useParams } from 'next/navigation';
 import QRCode from 'react-qr-code';
-import { Calendar, Clock, Users, MapPin, AlertCircle, CheckCircle, XCircle, Edit, Printer, Home, Download, Share2, Phone, Mail } from 'lucide-react';
+import { Calendar, Clock, Users, MapPin, AlertCircle, CheckCircle, XCircle, Edit, Printer, Home, Download, Share2, Phone, Mail, Image as ImageIcon } from 'lucide-react';
 import { format } from 'date-fns';
+import Image from 'next/image';
+import Link from 'next/link';
 
 type VisitDetails = {
   id: string;
@@ -25,6 +27,8 @@ type VisitDetails = {
   checkedIn: boolean;
   checkedInAt?: string;
   customerNotes?: string;
+  notes?: string;
+  inspirationImages: string[];
   verificationCode: string;
   store: {
     id: string;
@@ -37,7 +41,8 @@ type VisitDetails = {
     country: string;
     phoneNumber?: string;
     email?: string;
-    openingHours?: Array<{  // ✅ Change from string to array of objects
+    logoUrl?: string;
+    openingHours?: Array<{
       day: string;
       open: string;
       close: string;
@@ -62,9 +67,9 @@ export default function VisitDetailsPage() {
   const [cancelEligibility, setCancelEligibility] = useState<any>(null);
 
   // Message states
-const [successMessage, setSuccessMessage] = useState<string>('');
-const [errorMessage, setErrorMessage] = useState<string>('');
-const [infoMessage, setInfoMessage] = useState<string>('');
+  const [successMessage, setSuccessMessage] = useState<string>('');
+  const [errorMessage, setErrorMessage] = useState<string>('');
+  const [infoMessage, setInfoMessage] = useState<string>('');
   
   // Editing states
   const [editing, setEditing] = useState(false);
@@ -79,6 +84,9 @@ const [infoMessage, setInfoMessage] = useState<string>('');
   // QR Code states
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string>('');
 
+  // Image modal state
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.replace('/auth/customer/signin');
@@ -86,10 +94,9 @@ const [infoMessage, setInfoMessage] = useState<string>('');
     }
 
     if (status === 'authenticated') {
-      loadVisit();
-      checkCancelEligibility();
-      checkEditEligibility();
-    }
+  loadVisit();
+  checkCancelEligibility();
+}
   }, [status, router, visitId]);
 
   // Generate QR code data URL
@@ -98,6 +105,13 @@ const [infoMessage, setInfoMessage] = useState<string>('');
       generateQRCode();
     }
   }, [visit]);
+
+  // Check edit eligibility when visit loads
+useEffect(() => {
+  if (visit) {
+    checkEditEligibility();
+  }
+}, [visit]);
 
   async function loadVisit() {
     try {
@@ -111,7 +125,7 @@ const [infoMessage, setInfoMessage] = useState<string>('');
           scheduledDate: data.scheduledDate,
           scheduledTime: data.scheduledTime,
           numberOfPeople: data.numberOfPeople,
-          customerNotes: data.customerNotes || '',
+          customerNotes: data.customerNotes || data.notes || '',
         });
       } else {
         console.error('Failed to load visit');
@@ -138,16 +152,30 @@ const [infoMessage, setInfoMessage] = useState<string>('');
   }
 
   async function checkEditEligibility() {
-    try {
-      const res = await fetch(`/api/visits/${visitId}?checkEdit=true`);
-      if (res.ok) {
-        const data = await res.json();
-        setEditEligibility(data);
+  try {
+    // Calculate edit eligibility locally instead of calling an API
+    if (!visit) return;
+    
+    const visitDate = new Date(`${visit.scheduledDate}T${visit.scheduledTime}`);
+    const now = new Date();
+    const timeDiff = visitDate.getTime() - now.getTime();
+    const hoursUntilVisit = timeDiff / (1000 * 60 * 60);
+    
+    const canEdit = 
+      visit.status === 'SCHEDULED' && 
+      !visit.checkedIn && 
+      hoursUntilVisit >= 2;
+    
+    setEditEligibility({
+      canEdit,
+      requirements: {
+        hoursUntilVisit
       }
-    } catch (error) {
-      console.error('Failed to check edit eligibility:', error);
-    }
+    });
+  } catch (error) {
+    console.error('Failed to check edit eligibility:', error);
   }
+}
 
   async function generateQRCode() {
     if (!visit) return;
@@ -175,23 +203,23 @@ const [infoMessage, setInfoMessage] = useState<string>('');
   }
 
   async function handleCancelVisit() {
-  if (!cancelReason.trim()) {
-    setErrorMessage('Please provide a reason for cancellation');
-    return;
-  }
-  
-  setCancelling(true);
-  setErrorMessage('');
-  setSuccessMessage('');
-  
-  try {
+    if (!cancelReason.trim()) {
+      setErrorMessage('Please provide a reason for cancellation');
+      return;
+    }
+    
+    setCancelling(true);
+    setErrorMessage('');
+    setSuccessMessage('');
+    
+    try {
       const res = await fetch(`/api/visits/${visitId}/cancel`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ reason: cancelReason }),
       });
 
-            const data = await res.json();
+      const data = await res.json();
 
       if (res.ok) {
         setSuccessMessage('Visit cancelled successfully!');
@@ -211,75 +239,75 @@ const [infoMessage, setInfoMessage] = useState<string>('');
   }
 
   async function handleEditVisit() {
-  setErrorMessage('');
-  setSuccessMessage('');
-  
-  try {
-    const res = await fetch(`/api/visits/${visitId}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(editForm),
-    });
+    setErrorMessage('');
+    setSuccessMessage('');
+    
+    try {
+      const res = await fetch(`/api/visits/${visitId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editForm),
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-    if (res.ok) {
-      setSuccessMessage('Visit updated successfully!');
-      setVisit(data.visit);
-      setEditing(false);
-      loadVisit();
-      
-      // Clear success message after 5 seconds
-      setTimeout(() => setSuccessMessage(''), 5000);
-    } else {
-      setErrorMessage(`Failed to update visit: ${data.error}`);
+      if (res.ok) {
+        setSuccessMessage('Visit updated successfully!');
+        setVisit(data.visit);
+        setEditing(false);
+        loadVisit();
+        
+        // Clear success message after 5 seconds
+        setTimeout(() => setSuccessMessage(''), 5000);
+      } else {
+        setErrorMessage(`Failed to update visit: ${data.error}`);
+      }
+    } catch (error) {
+      console.error('Error updating visit:', error);
+      setErrorMessage('An error occurred while updating the visit');
     }
-  } catch (error) {
-    console.error('Error updating visit:', error);
-    setErrorMessage('An error occurred while updating the visit');
   }
-}
 
   function handleDownloadQR() {
-  if (!qrCodeDataUrl) {
-    setErrorMessage('QR code is not ready yet');
-    return;
+    if (!qrCodeDataUrl) {
+      setErrorMessage('QR code is not ready yet');
+      return;
+    }
+    
+    const link = document.createElement('a');
+    link.href = qrCodeDataUrl;
+    link.download = `visit-${visitId}-qrcode.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    setSuccessMessage('QR code downloaded!');
+    setTimeout(() => setSuccessMessage(''), 3000);
   }
-  
-  const link = document.createElement('a');
-  link.href = qrCodeDataUrl;
-  link.download = `visit-${visitId}-qrcode.png`;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  
-  setSuccessMessage('QR code downloaded!');
-  setTimeout(() => setSuccessMessage(''), 3000);
-}
 
   function handleShare() {
-  setErrorMessage('');
-  setInfoMessage('');
-  
-  if (navigator.share) {
-    navigator.share({
-      title: `Visit to ${visit?.store.storeName}`,
-      text: `My visit to ${visit?.store.storeName} on ${formatDate(visit?.scheduledDate || '')}`,
-      url: window.location.href,
-    }).catch(err => {
-      setErrorMessage('Failed to share: ' + err.message);
-    });
-  } else {
-    navigator.clipboard.writeText(window.location.href)
-      .then(() => {
-        setInfoMessage('Link copied to clipboard!');
-        setTimeout(() => setInfoMessage(''), 3000);
-      })
-      .catch(err => {
-        setErrorMessage('Failed to copy to clipboard: ' + err.message);
+    setErrorMessage('');
+    setInfoMessage('');
+    
+    if (navigator.share) {
+      navigator.share({
+        title: `Visit to ${visit?.store.storeName}`,
+        text: `My visit to ${visit?.store.storeName} on ${formatDate(visit?.scheduledDate || '')}`,
+        url: window.location.href,
+      }).catch(err => {
+        setErrorMessage('Failed to share: ' + err.message);
       });
+    } else {
+      navigator.clipboard.writeText(window.location.href)
+        .then(() => {
+          setInfoMessage('Link copied to clipboard!');
+          setTimeout(() => setInfoMessage(''), 3000);
+        })
+        .catch(err => {
+          setErrorMessage('Failed to copy to clipboard: ' + err.message);
+        });
+    }
   }
-}
 
   function formatDate(dateString: string) {
     return format(new Date(dateString), 'EEEE, MMMM d, yyyy');
@@ -349,39 +377,39 @@ const [infoMessage, setInfoMessage] = useState<string>('');
   const canCancel = cancelEligibility?.canCancel && visit.status === 'SCHEDULED';
   const canEdit = editEligibility?.canEdit && visit.status === 'SCHEDULED';
 
-    return (
+  return (
     <div className="max-w-6xl mx-auto p-4 sm:p-6">
-    {/* Inline Messages */}
-    <div className="mb-4 space-y-3">
-      {successMessage && (
-        <div className="p-3 bg-green-100 border border-green-200 text-green-800 rounded-lg">
-          <div className="flex items-center gap-2">
-            <CheckCircle className="w-5 h-5" />
-            <span>{successMessage}</span>
+      {/* Inline Messages */}
+      <div className="mb-4 space-y-3">
+        {successMessage && (
+          <div className="p-3 bg-green-100 border border-green-200 text-green-800 rounded-lg">
+            <div className="flex items-center gap-2">
+              <CheckCircle className="w-5 h-5" />
+              <span>{successMessage}</span>
+            </div>
           </div>
-        </div>
-      )}
+        )}
+        
+        {errorMessage && (
+          <div className="p-3 bg-red-100 border border-red-200 text-red-800 rounded-lg">
+            <div className="flex items-center gap-2">
+              <AlertCircle className="w-5 h-5" />
+              <span>{errorMessage}</span>
+            </div>
+          </div>
+        )}
+        
+        {infoMessage && (
+          <div className="p-3 bg-blue-100 border border-blue-200 text-blue-800 rounded-lg">
+            <div className="flex items-center gap-2">
+              <span>{infoMessage}</span>
+            </div>
+          </div>
+        )}
+      </div>
       
-      {errorMessage && (
-        <div className="p-3 bg-red-100 border border-red-200 text-red-800 rounded-lg">
-          <div className="flex items-center gap-2">
-            <AlertCircle className="w-5 h-5" />
-            <span>{errorMessage}</span>
-          </div>
-        </div>
-      )}
-      
-      {infoMessage && (
-        <div className="p-3 bg-blue-100 border border-blue-200 text-blue-800 rounded-lg">
-          <div className="flex items-center gap-2">
-            <span>{infoMessage}</span>
-          </div>
-        </div>
-      )}
-    </div>
-    
-        {/* Cancellation Modal */}
-    {showCancelModal && (
+      {/* Cancellation Modal */}
+      {showCancelModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl max-w-md w-full p-6">
             <h3 className="text-xl font-bold text-gray-900 mb-4">Cancel Visit</h3>
@@ -535,6 +563,33 @@ const [infoMessage, setInfoMessage] = useState<string>('');
         </div>
       )}
 
+      {/* Image Modal */}
+      {selectedImage && (
+        <div
+          className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4"
+          onClick={() => setSelectedImage(null)}
+        >
+          <div
+            className="relative max-w-4xl w-full max-h-[90vh]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setSelectedImage(null)}
+              className="absolute -top-10 right-0 text-white hover:text-gray-300"
+            >
+              <XCircle className="w-8 h-8" />
+            </button>
+            <Image
+              src={selectedImage}
+              alt="Inspiration full size"
+              width={1200}
+              height={1200}
+              className="w-full h-full object-contain"
+            />
+          </div>
+        </div>
+      )}
+
       <div className="mb-8">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
@@ -638,11 +693,11 @@ const [infoMessage, setInfoMessage] = useState<string>('');
                 </div>
               )}
 
-              {visit.customerNotes && (
+              {(visit.customerNotes || visit.notes) && (
                 <div className="mt-4">
                   <div className="text-sm font-medium text-gray-700 mb-2">Your Notes:</div>
                   <div className="text-gray-600 bg-gray-50 p-4 rounded-lg border border-gray-200">
-                    {visit.customerNotes}
+                    {visit.customerNotes || visit.notes}
                   </div>
                 </div>
               )}
@@ -702,6 +757,37 @@ const [infoMessage, setInfoMessage] = useState<string>('');
             </div>
           </div>
 
+          {/* Inspiration Images Section */}
+          {visit.inspirationImages && visit.inspirationImages.length > 0 && (
+            <div className="bg-white border border-gray-200 rounded-xl p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <ImageIcon className="w-5 h-5 text-blue-600" />
+                <h2 className="text-xl font-semibold text-gray-900">
+                  Your Inspiration Images ({visit.inspirationImages.length})
+                </h2>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                {visit.inspirationImages.map((url, index) => (
+                  <div
+                    key={index}
+                    className="relative aspect-square rounded-lg overflow-hidden border border-gray-200 cursor-pointer hover:opacity-90 transition-opacity"
+                    onClick={() => setSelectedImage(url)}
+                  >
+                    <Image
+                      src={url}
+                      alt={`Inspiration ${index + 1}`}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                ))}
+              </div>
+              <p className="text-sm text-gray-500 mt-4">
+                Click on any image to view full size
+              </p>
+            </div>
+          )}
+
           <div className="bg-white border border-gray-200 rounded-xl p-6">
             <h2 className="text-xl font-semibold text-gray-900 mb-6">Store Information</h2>
             <div className="space-y-4">
@@ -748,23 +834,23 @@ const [infoMessage, setInfoMessage] = useState<string>('');
               )}
               
               {visit.store.openingHours && (
-  <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
-    <div className="text-sm font-medium text-blue-800 mb-1">Opening Hours</div>
-    <div className="text-sm text-blue-700">
-      {visit.store.openingHours.map((hours, index) => (
-        <div key={index} className="flex justify-between">
-          <span className="font-medium">{hours.day}:</span>
-          <span>
-            {hours.closed 
-              ? 'Closed' 
-              : `${hours.open} - ${hours.close}`
-            }
-          </span>
-        </div>
-      ))}
-    </div>
-  </div>
-)}
+                <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                  <div className="text-sm font-medium text-blue-800 mb-1">Opening Hours</div>
+                  <div className="text-sm text-blue-700">
+                    {visit.store.openingHours.map((hours, index) => (
+                      <div key={index} className="flex justify-between">
+                        <span className="font-medium">{hours.day}:</span>
+                        <span>
+                          {hours.closed 
+                            ? 'Closed' 
+                            : `${hours.open} - ${hours.close}`
+                          }
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -950,6 +1036,6 @@ const [infoMessage, setInfoMessage] = useState<string>('');
           }
         }
       `}</style>
-        </div>
+    </div>
   );
 }

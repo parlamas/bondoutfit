@@ -1,4 +1,4 @@
-// src/app/api/store/visits/route.ts
+//src/app/api/store/visits/route.ts
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
@@ -80,7 +80,21 @@ export async function GET(req: NextRequest) {
         { scheduledDate: 'desc' },
         { scheduledTime: 'desc' },
       ],
-      include: {
+      select: {
+        id: true,
+        scheduledDate: true,
+        scheduledTime: true,
+        numberOfPeople: true,
+        status: true,
+        checkedIn: true,
+        checkedInAt: true,
+        cancelledAt: true,
+        cancellationReason: true,
+        customerNotes: true,
+        notes: true,  // ← ADD THIS LINE
+        discountUnlocked: true,
+        discountUsed: true,
+        inspirationImages: true,
         user: {
           select: {
             id: true,
@@ -114,11 +128,10 @@ export async function GET(req: NextRequest) {
       checkedInAt: visit.checkedInAt?.toISOString() || null,
       cancelledAt: visit.cancelledAt?.toISOString() || null,
       cancellationReason: visit.cancellationReason,
-      customerNotes: visit.customerNotes,
+      customerNotes: visit.notes || visit.customerNotes,  // ← Use notes first, fallback to customerNotes
       discountUnlocked: visit.discountUnlocked,
       discountUsed: visit.discountUsed,
-      // Only include fields that exist in your schema
-      // discountCode: visit.discountCode, // Uncomment if this field exists
+      inspirationImages: visit.inspirationImages,
       user: visit.user,
       storeName: store.storeName,
     }));

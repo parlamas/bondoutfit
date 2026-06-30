@@ -109,12 +109,23 @@ export default function SchedulePage() {
               <h3 className="font-semibold text-gray-900">{store.name}</h3>
               <p className="text-sm text-gray-600 mt-1">{store.city}</p>
               <div className="flex flex-wrap gap-1 mt-2">
-                {store.categories.slice(0, 2).map((cat, idx) => (
-                  <span key={idx} className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded">
-                    {cat}
-                  </span>
-                ))}
-              </div>
+  {store.categories && store.categories.length > 0 ? (
+    store.categories.slice(0, 2).map((cat, idx) => (
+      <span key={idx} className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded">
+        {cat}
+      </span>
+    ))
+  ) : (
+    <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded">
+      No categories
+    </span>
+  )}
+  {store.categories && store.categories.length > 2 && (
+    <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded">
+      +{store.categories.length - 2}
+    </span>
+  )}
+</div>
             </button>
           ))}
         </div>

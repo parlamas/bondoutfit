@@ -460,6 +460,10 @@ model Visit {
   rescheduledBy   String?
   rescheduleNotes String?
 
+  // Image uploads for customer inspiration
+  inspirationImages     String[] // Array of Cloudinary URLs
+  inspirationImageIds   String[] // Optional: Cloudinary public IDs for deletion if needed
+
   // Discount Tracking
   discountUnlocked Boolean @default(false)
   discountUsed     Boolean @default(false)

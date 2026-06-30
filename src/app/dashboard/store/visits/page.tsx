@@ -18,6 +18,7 @@ type Visit = {
   customerNotes: string | null;
   discountUnlocked: boolean;
   discountUsed: boolean;
+  inspirationImages: string[];
   user: {
     name: string;
     email: string;
@@ -558,6 +559,28 @@ if (!visit) {
                       <p className="text-gray-600 text-sm bg-gray-50 p-3 rounded-lg">
                         {visit.customerNotes}
                       </p>
+                    </div>
+                  )}
+                                    {/* Inspiration Images */}
+                  {visit.inspirationImages && visit.inspirationImages.length > 0 && (
+                    <div className="mb-4">
+                      <div className="text-sm font-medium text-gray-700 mb-2">
+                        Customer's Inspiration Images ({visit.inspirationImages.length})
+                      </div>
+                      <div className="grid grid-cols-3 gap-2">
+                        {visit.inspirationImages.map((url, index) => (
+                          <div
+                            key={index}
+                            className="relative aspect-square rounded-lg overflow-hidden border border-gray-200"
+                          >
+                            <img
+                              src={url}
+                              alt={`Inspiration ${index + 1}`}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>

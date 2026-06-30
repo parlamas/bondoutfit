@@ -248,7 +248,7 @@ if (!session) {
               <div className="bg-white rounded-xl shadow p-6">
                 <h2 className="text-xl font-bold text-gray-900 mb-4">QR Code Scanner</h2>
                 
-                {!scanResult ? (
+              {!scanResult ? (
   <div className="space-y-4">
     <QRScanner 
       onScan={handleScan}
@@ -261,23 +261,24 @@ if (!session) {
     
     <div className="flex items-center justify-center gap-4">
       <div className="flex-1 h-px bg-gray-300"></div>
-      <span className="text-sm text-gray-500">or</span>
+      {/*<span className="text-sm text-gray-500">or</span>*/}
       <div className="flex-1 h-px bg-gray-300"></div>
     </div>
     
-    <div className="text-center">
-      <button
-        onClick={simulateScan}
-        className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
-      >
-        Test with Simulated QR Code
-      </button>
-      <p className="text-xs text-gray-500 mt-2">
-        Use this to test without a physical QR code
-      </p>
-    </div>
+    {process.env.NODE_ENV === 'development' && (
+      <div className="text-center">
+        <button
+          onClick={simulateScan}
+          className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
+        >
+          Test with Simulated QR Code
+        </button>
+        <p className="text-xs text-gray-500 mt-2">
+          Development only - simulates QR scan
+        </p>
+      </div>
+    )}
   </div>
-
 ) : (
   <div className="text-center">
     <div className="mb-4">

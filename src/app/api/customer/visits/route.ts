@@ -6,6 +6,7 @@ import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 export const dynamic = 'force-dynamic';
 
+// GET method - Fetch customer visits
 export async function GET(request: NextRequest) {
   try {
     console.log('API: Fetching customer visits...');
@@ -59,11 +60,20 @@ export async function GET(request: NextRequest) {
     console.log('API: Prisma where clause:', JSON.stringify(where, null, 2));
 
     try {
-      // Get visits with store details
+      // Get visits with store details - UPDATED to include notes and inspirationImages
       const [visits, total] = await Promise.all([
         prisma.visit.findMany({
           where,
-          include: {
+          select: {
+            id: true,
+            scheduledDate: true,
+            scheduledTime: true,
+            numberOfPeople: true,
+            status: true,
+            notes: true,
+            inspirationImages: true,
+            createdAt: true,
+            updatedAt: true,
             store: {
               select: {
                 id: true,
@@ -71,10 +81,10 @@ export async function GET(request: NextRequest) {
                 city: true,
                 country: true,
                 categories: true,
-                logoUrl: true, // Use logoUrl instead of image
+                logoUrl: true,
               },
             },
-            user: { // Changed from customer to user
+            user: {
               select: {
                 firstName: true,
                 lastName: true,
@@ -94,18 +104,25 @@ export async function GET(request: NextRequest) {
 
       console.log('API: Found', visits.length, 'visits out of', total, 'total');
 
-      // Format dates for frontend
+      // Format dates for frontend - UPDATED to include notes and inspirationImages
       const formattedVisits = visits.map(visit => ({
-        ...visit,
         id: visit.id,
-        store: visit.store,
         scheduledDate: visit.scheduledDate.toISOString().split('T')[0],
         scheduledTime: visit.scheduledTime,
         numberOfPeople: visit.numberOfPeople || 1,
         notes: visit.notes || undefined,
-        status: visit.status.toLowerCase(), // Convert to lowercase for frontend
+        inspirationImages: visit.inspirationImages || [],
+        status: visit.status.toLowerCase(),
         createdAt: visit.createdAt.toISOString(),
         updatedAt: visit.updatedAt.toISOString(),
+        store: {
+          id: visit.store.id,
+          name: visit.store.storeName,
+          city: visit.store.city,
+          country: visit.store.country,
+          categories: visit.store.categories,
+          logoUrl: visit.store.logoUrl,
+        },
       }));
 
       return NextResponse.json({
@@ -135,6 +152,129 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       { 
         error: 'Failed to fetch visits',
+        details: err.message 
+      },
+      { status: 500 }
+    );
+  }
+}
+
+// POST method - Create a new visit
+export async function POST(request: NextRequest) {
+  try {
+    console.log('API: Creating new visit...');
+    const session = await getServerSession(authOptions);
+    
+    if (!session || !session.user?.id) {
+      console.log('API: Unauthorized - no session or user ID');
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const body = await request.json();
+    console.log('API: Request body:', body);
+    
+    const { 
+      storeId, 
+      scheduledDate, 
+      scheduledTime, 
+      numberOfPeople, 
+      notes,
+      inspirationImages,
+      inspirationImageIds,
+      discountId 
+    } = body;
+
+    // Validate required fields
+    if (!storeId || !scheduledDate || !scheduledTime || !numberOfPeople) {
+      return NextResponse.json(
+        { error: 'Missing required fields' },
+        { status: 400 }
+      );
+    }
+
+    // Parse the date and time
+    const scheduledDateTime = new Date(`${scheduledDate}T${scheduledTime}:00`);
+    
+    // Check if date is in the past
+    if (scheduledDateTime < new Date()) {
+      return NextResponse.json(
+        { error: 'Cannot book visits in the past' },
+        { status: 400 }
+      );
+    }
+
+    // Verify the store exists
+    const store = await prisma.store.findUnique({
+      where: { id: storeId },
+      select: { id: true, storeName: true }
+    });
+
+    if (!store) {
+      return NextResponse.json(
+        { error: 'Store not found' },
+        { status: 404 }
+      );
+    }
+
+    // If discountId is provided, verify it exists and is valid
+    if (discountId) {
+      const discount = await prisma.discount.findUnique({
+        where: { id: discountId }
+      });
+      
+      if (!discount) {
+        return NextResponse.json(
+          { error: 'Discount not found' },
+          { status: 404 }
+        );
+      }
+    }
+
+    // Create the visit
+    const visit = await prisma.visit.create({
+      data: {
+        userId: session.user.id,
+        storeId,
+        scheduledDate: scheduledDateTime,
+        scheduledTime,
+        numberOfPeople: parseInt(numberOfPeople.toString()),
+        notes: notes || null,
+        discountId: discountId || null,
+        status: 'SCHEDULED',
+        // Add the image fields (they'll be undefined if not provided)
+        ...(inspirationImages && { inspirationImages }),
+        ...(inspirationImageIds && { inspirationImageIds }),
+      },
+      include: {
+        store: {
+          select: {
+            storeName: true,
+            email: true,
+          },
+        },
+        user: {
+          select: {
+            firstName: true,
+            lastName: true,
+            email: true,
+          },
+        },
+      },
+    });
+
+    console.log('API: Visit created successfully:', visit.id);
+
+    // TODO: Send confirmation notification
+    // await sendVisitConfirmation(visit);
+
+    return NextResponse.json(visit, { status: 201 });
+
+  } catch (error) {
+    console.error('API Error creating visit:', error);
+    const err = error as Error;
+    return NextResponse.json(
+      { 
+        error: 'Failed to create visit',
         details: err.message 
       },
       { status: 500 }

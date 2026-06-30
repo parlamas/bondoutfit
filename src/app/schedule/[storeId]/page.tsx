@@ -1,6 +1,10 @@
 // src/app/schedule/[storeId]/page.tsx
 
 import { headers } from "next/headers";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { redirect } from "next/navigation";
+import BookingForm from "./BookingForm";
 
 type Store = {
   id: string;
@@ -21,10 +25,9 @@ async function getStore(storeId: string): Promise<Store> {
     process.env.NODE_ENV === "development" ? "http" : "https";
 
   const res = await fetch(
-  `${protocol}://${host}/api/stores/${storeId}/schedule`,
-  { cache: "no-store" }
-);
-
+    `${protocol}://${host}/api/stores/${storeId}/schedule`,
+    { cache: "no-store" }
+  );
 
   if (!res.ok) {
     throw new Error("Failed to load store");
@@ -38,6 +41,13 @@ export default async function SchedulePage({
 }: {
   params: { storeId: string };
 }) {
+  const session = await getServerSession(authOptions);
+  
+  // Redirect to sign in if not authenticated
+  if (!session) {
+    redirect(`/auth/customer/signin?callbackUrl=/schedule/${params.storeId}`);
+  }
+
   const store = await getStore(params.storeId);
 
   return (
@@ -55,9 +65,7 @@ export default async function SchedulePage({
         </div>
       </div>
 
-      <div className="text-gray-700">
-        Scheduling UI goes here.
-      </div>
+      <BookingForm storeId={store.id} storeName={store.name} />
     </div>
   );
 }

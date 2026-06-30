@@ -1,4 +1,4 @@
-// src/app/dashboard/customer/page.tsx - WITH BOTH INDIVIDUAL & BULK CANCELLATION
+//src/app/dashboard/customer/page.tsx - WITH BOTH INDIVIDUAL & BULK CANCELLATION
 
 'use client';
 
@@ -7,8 +7,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { format } from 'date-fns';
 import Link from 'next/link';
-import { XCircle, AlertCircle, Calendar, Users, MapPin, X, Clock, CheckCircle, Ban, MoreVertical, Edit, Trash2, Info } from 'lucide-react';
-
+import { XCircle, AlertCircle, Calendar, Users, MapPin, X, Clock, CheckCircle, Ban, MoreVertical, Edit, Trash2, Info, Image as ImageIcon } from 'lucide-react';
 
 type Store = {
   id: string;
@@ -26,6 +25,7 @@ type Visit = {
   status: 'scheduled' | 'completed' | 'cancelled' | 'missed';
   numberOfPeople: number;
   notes?: string;
+  inspirationImages?: string[];
   store: Store;
   userId: string;
   createdAt: string;
@@ -101,7 +101,7 @@ export default function CustomerDashboard() {
       const res = await fetch(`/api/customer/visits${query}`);
       if (res.ok) {
         const data = await res.json();
-        console.log('API Response:', data); // Add this for debugging
+        console.log('API Response:', data);
         setVisits(data.visits || []);
         calculateStats(data.visits || []);
         
@@ -137,7 +137,7 @@ export default function CustomerDashboard() {
             status: 'scheduled' as const,
             numberOfPeople: ev.numberOfPeople || 1,
             store: {
-              id: '',
+              id: ev.storeId || '',
               name: ev.storeName || 'Unknown Store',
               city: ev.location?.split(',')[0] || '',
               country: ev.location?.split(',')[1]?.trim() || '',
@@ -225,6 +225,11 @@ export default function CustomerDashboard() {
     setActionMenuOpen(null);
   };
 
+  const handleViewDetails = (visitId: string) => {
+    router.push(`/visits/${visitId}`);
+    setActionMenuOpen(null);
+  };
+
   const isVisitEligibleForCancellation = (visit: Visit) => {
     if (visit.status !== 'scheduled') return false;
     
@@ -290,201 +295,199 @@ export default function CustomerDashboard() {
     return null;
   }
 
-  // Add this function inside your CustomerDashboard component:
+  const BulkCancelModal = ({ visits, onClose, onSuccess }: any) => {
+    const [reason, setReason] = useState('');
+    const [cancelling, setCancelling] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
-const BulkCancelModal = ({ visits, onClose, onSuccess }: any) => {
-  const [reason, setReason] = useState('');
-  const [cancelling, setCancelling] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const formatDateTime = (date: string, time: string) => {
-    try {
-      const dateObj = new Date(`${date}T${time}`);
-      return format(dateObj, 'MMM d, yyyy • h:mm a');
-    } catch {
-      return `${date} at ${time}`;
-    }
-  };
-
-  const handleBulkCancel = async () => {
-    if (!reason.trim()) {
-      setError('Please provide a reason for cancellation');
-      return;
-    }
-
-    setCancelling(true);
-    setError(null);
-
-    try {
-      const res = await fetch('/api/visits/cancel-all', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reason }),
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        alert(`✅ Successfully cancelled ${data.cancelledCount} visit(s)!`);
-        if (data.skippedCount > 0) {
-          alert(`ℹ️ ${data.skippedCount} visit(s) could not be cancelled`);
-        }
-        onSuccess();
-      } else {
-        setError(data.error || 'Failed to cancel visits');
+    const formatDateTime = (date: string, time: string) => {
+      try {
+        const dateObj = new Date(`${date}T${time}`);
+        return format(dateObj, 'MMM d, yyyy • h:mm a');
+      } catch {
+        return `${date} at ${time}`;
       }
-    } catch (error) {
-      console.error('Error bulk cancelling:', error);
-      setError('An error occurred while cancelling visits');
-    } finally {
-      setCancelling(false);
-    }
-  };
+    };
 
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <div>
-            <h3 className="text-xl font-bold text-gray-900">Cancel All Upcoming Visits</h3>
-            <p className="text-gray-600 text-sm mt-1">
-              This will cancel {visits.length} scheduled visit(s)
-            </p>
-          </div>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-            disabled={cancelling}
-          >
-            <X className="w-5 h-5 text-gray-500" />
-          </button>
-        </div>
+    const handleBulkCancel = async () => {
+      if (!reason.trim()) {
+        setError('Please provide a reason for cancellation');
+        return;
+      }
 
-        <div className="p-6 space-y-6">
-          <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <div className="flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 text-yellow-600 mt-0.5" />
-              <div>
-                <p className="text-yellow-800 font-medium mb-2">Important Information</p>
-                <ul className="text-yellow-700 text-sm space-y-1">
-                  <li>• This will cancel ALL your upcoming visits</li>
-                  <li>• Store managers will be notified of each cancellation</li>
-                  <li>• Refunds are subject to each store's cancellation policy</li>
-                  <li>• Once cancelled, visits cannot be reinstated automatically</li>
-                </ul>
-              </div>
+      setCancelling(true);
+      setError(null);
+
+      try {
+        const res = await fetch('/api/visits/cancel-all', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ reason }),
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          alert(`✅ Successfully cancelled ${data.cancelledCount} visit(s)!`);
+          if (data.skippedCount > 0) {
+            alert(`ℹ️ ${data.skippedCount} visit(s) could not be cancelled`);
+          }
+          onSuccess();
+        } else {
+          setError(data.error || 'Failed to cancel visits');
+        }
+      } catch (error) {
+        console.error('Error bulk cancelling:', error);
+        setError('An error occurred while cancelling visits');
+      } finally {
+        setCancelling(false);
+      }
+    };
+
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="flex items-center justify-between p-6 border-b border-gray-200">
+            <div>
+              <h3 className="text-xl font-bold text-gray-900">Cancel All Upcoming Visits</h3>
+              <p className="text-gray-600 text-sm mt-1">
+                This will cancel {visits.length} scheduled visit(s)
+              </p>
             </div>
-          </div>
-
-          <div>
-            <h4 className="font-medium text-gray-900 mb-3">
-              Visits to be cancelled ({visits.length}):
-            </h4>
-            <div className="border border-gray-200 rounded-lg divide-y max-h-60 overflow-y-auto">
-              {visits.map((visit: any) => (
-                <div key={visit.id} className="p-4 hover:bg-gray-50">
-                  <div className="flex items-start justify-between mb-2">
-                    <div className="font-medium text-gray-900">{visit.store.name}</div>
-                    <span className="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                      {visit.numberOfPeople} {visit.numberOfPeople === 1 ? 'person' : 'people'}
-                    </span>
-                  </div>
-                  
-                  <div className="text-sm text-gray-600 space-y-2">
-                    <div className="flex items-center gap-2">
-                      <Calendar className="w-4 h-4" />
-                      {formatDateTime(visit.scheduledDate, visit.scheduledTime)}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <MapPin className="w-4 h-4" />
-                      {visit.store.city}, {visit.store.country}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Reason for cancelling all visits
-            </label>
-            <select
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              disabled={cancelling}
-            >
-              <option value="">Select a reason...</option>
-              <option value="Change of travel plans">Change of travel plans</option>
-              <option value="Unexpected circumstances">Unexpected circumstances</option>
-              <option value="Dissatisfied with service">Dissatisfied with service</option>
-              <option value="Found better alternatives">Found better alternatives</option>
-              <option value="Other">Other</option>
-            </select>
-            
-            {reason === 'Other' && (
-              <input
-                type="text"
-                placeholder="Please specify..."
-                className="mt-2 w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                onChange={(e) => setReason(e.target.value)}
-                disabled={cancelling}
-              />
-            )}
-            
-            {error && (
-              <div className="mt-2 p-2 bg-red-50 text-red-700 text-sm rounded-lg">
-                {error}
-              </div>
-            )}
-          </div>
-
-          <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-            <div className="flex items-start gap-2">
-              <Info className="w-4 h-4 text-blue-600 mt-0.5" />
-              <div className="text-sm text-blue-700">
-                <p className="font-medium">What happens next?</p>
-                <ul className="mt-1 space-y-1">
-                  <li>• Store managers will receive email notifications</li>
-                  <li>• You'll receive a confirmation email summary</li>
-                  <li>• Refunds will be processed per store policies</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex gap-3 pt-4 border-t border-gray-200">
             <button
               onClick={onClose}
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
               disabled={cancelling}
-              className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50 font-medium"
             >
-              Go Back
+              <X className="w-5 h-5 text-gray-500" />
             </button>
-            <button
-              onClick={handleBulkCancel}
-              disabled={cancelling || !reason.trim()}
-              className="flex-1 px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium flex items-center justify-center gap-2"
-            >
-              {cancelling ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                  Cancelling...
-                </>
-              ) : (
-                <>
-                  <XCircle className="w-5 h-5" />
-                  Cancel All ({visits.length}) Visits
-                </>
+          </div>
+
+          <div className="p-6 space-y-6">
+            <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <div className="flex items-start gap-3">
+                <AlertCircle className="w-5 h-5 text-yellow-600 mt-0.5" />
+                <div>
+                  <p className="text-yellow-800 font-medium mb-2">Important Information</p>
+                  <ul className="text-yellow-700 text-sm space-y-1">
+                    <li>• This will cancel ALL your upcoming visits</li>
+                    <li>• Store managers will be notified of each cancellation</li>
+                    <li>• Refunds are subject to each store's cancellation policy</li>
+                    <li>• Once cancelled, visits cannot be reinstated automatically</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h4 className="font-medium text-gray-900 mb-3">
+                Visits to be cancelled ({visits.length}):
+              </h4>
+              <div className="border border-gray-200 rounded-lg divide-y max-h-60 overflow-y-auto">
+                {visits.map((visit: any) => (
+                  <div key={visit.id} className="p-4 hover:bg-gray-50">
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="font-medium text-gray-900">{visit.store.name}</div>
+                      <span className="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                        {visit.numberOfPeople} {visit.numberOfPeople === 1 ? 'person' : 'people'}
+                      </span>
+                    </div>
+                    
+                    <div className="text-sm text-gray-600 space-y-2">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="w-4 h-4" />
+                        {formatDateTime(visit.scheduledDate, visit.scheduledTime)}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <MapPin className="w-4 h-4" />
+                        {visit.store.city}, {visit.store.country}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Reason for cancelling all visits
+              </label>
+              <select
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                disabled={cancelling}
+              >
+                <option value="">Select a reason...</option>
+                <option value="Change of travel plans">Change of travel plans</option>
+                <option value="Unexpected circumstances">Unexpected circumstances</option>
+                <option value="Dissatisfied with service">Dissatisfied with service</option>
+                <option value="Found better alternatives">Found better alternatives</option>
+                <option value="Other">Other</option>
+              </select>
+              
+              {reason === 'Other' && (
+                <input
+                  type="text"
+                  placeholder="Please specify..."
+                  className="mt-2 w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  onChange={(e) => setReason(e.target.value)}
+                  disabled={cancelling}
+                />
               )}
-            </button>
+              
+              {error && (
+                <div className="mt-2 p-2 bg-red-50 text-red-700 text-sm rounded-lg">
+                  {error}
+                </div>
+              )}
+            </div>
+
+            <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="flex items-start gap-2">
+                <Info className="w-4 h-4 text-blue-600 mt-0.5" />
+                <div className="text-sm text-blue-700">
+                  <p className="font-medium">What happens next?</p>
+                  <ul className="mt-1 space-y-1">
+                    <li>• Store managers will receive email notifications</li>
+                    <li>• You'll receive a confirmation email summary</li>
+                    <li>• Refunds will be processed per store policies</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-3 pt-4 border-t border-gray-200">
+              <button
+                onClick={onClose}
+                disabled={cancelling}
+                className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50 font-medium"
+              >
+                Go Back
+              </button>
+              <button
+                onClick={handleBulkCancel}
+                disabled={cancelling || !reason.trim()}
+                className="flex-1 px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium flex items-center justify-center gap-2"
+              >
+                {cancelling ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    Cancelling...
+                  </>
+                ) : (
+                  <>
+                    <XCircle className="w-5 h-5" />
+                    Cancel All ({visits.length}) Visits
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  );
-};
+    );
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -684,61 +687,100 @@ const BulkCancelModal = ({ visits, onClose, onSuccess }: any) => {
                                 {visit.store.city}, {visit.store.country}
                                 {visit.numberOfPeople > 1 && ` • ${visit.numberOfPeople} people`}
                               </p>
+                              
+                              {/* Notes Preview */}
+                              {visit.notes && (
+                                <div className="mt-2 text-sm text-gray-600 bg-gray-50 p-2 rounded">
+                                  <span className="font-medium">Note:</span> {visit.notes.length > 60 
+                                    ? visit.notes.substring(0, 60) + '...' 
+                                    : visit.notes}
+                                </div>
+                              )}
+                              
+                              {/* Images Preview */}
+                              {visit.inspirationImages && visit.inspirationImages.length > 0 && (
+                                <div className="flex gap-1 mt-2">
+                                  {visit.inspirationImages.slice(0, 3).map((url, index) => (
+                                    <div
+                                      key={index}
+                                      className="w-8 h-8 rounded border border-gray-200 overflow-hidden"
+                                    >
+                                      <img
+                                        src={url}
+                                        alt={`Preview ${index + 1}`}
+                                        className="w-full h-full object-cover"
+                                      />
+                                    </div>
+                                  ))}
+                                  {visit.inspirationImages.length > 3 && (
+                                    <div className="w-8 h-8 rounded bg-gray-100 flex items-center justify-center text-xs text-gray-600">
+                                      +{visit.inspirationImages.length - 3}
+                                    </div>
+                                  )}
+                                </div>
+                              )}
                             </div>
                             
                             {/* Action Menu for Individual Visits */}
                             <div className="relative">
                               <button
-                                onClick={() => setActionMenuOpen(actionMenuOpen === visit.id ? null : visit.id)}
-                                className="p-2 hover:bg-gray-100 rounded-lg"
-                              >
-                                <MoreVertical className="w-5 h-5 text-gray-500" />
-                              </button>
+  onClick={(e) => {
+    e.stopPropagation();
+    setActionMenuOpen(actionMenuOpen === visit.id ? null : visit.id);
+  }}
+  className="p-2 hover:bg-gray-100 rounded-lg"
+>
+  <MoreVertical className="w-5 h-5 text-gray-500" />
+</button>
                               
                               {actionMenuOpen === visit.id && (
-                                <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
+  <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
                                   <button
-                                    onClick={() => handleEditVisit(visit.id)}
-                                    className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center gap-2"
-                                  >
-                                    <Edit className="w-4 h-4" />
-                                    Edit Visit
-                                  </button>
+  onClick={(e) => {
+    e.stopPropagation();
+    handleEditVisit(visit.id);
+  }}
+  className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center gap-2"
+>
+  <Edit className="w-4 h-4" />
+  Edit Visit
+</button>
                                   
                                   {visit.status === 'scheduled' && (
                                     <button
-                                      onClick={() => handleCancelVisitClick(visit)}
-                                      disabled={!canCancel}
-                                      className={`w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center gap-2 ${!canCancel ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                    >
-                                      <Trash2 className="w-4 h-4" />
-                                      Cancel Visit
-                                      {!canCancel && (
-                                        <span className="text-xs text-amber-600 ml-auto">
-                                          Within 1 hour
-                                        </span>
-                                      )}
-                                    </button>
+  onClick={(e) => {
+    e.stopPropagation();
+    handleCancelVisitClick(visit);
+  }}
+  disabled={!canCancel}
+  className={`w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center gap-2 ${!canCancel ? 'opacity-50 cursor-not-allowed' : ''}`}
+>
+  <Trash2 className="w-4 h-4" />
+  Cancel Visit
+  {!canCancel && (
+    <span className="text-xs text-amber-600 ml-auto">
+      Within 1 hour
+    </span>
+  )}
+</button>
                                   )}
                                   
                                   <div className="border-t border-gray-100">
-                                    <Link
-                                      href={`/visits/${visit.id}`}
-                                      className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-                                    >
-                                      View Details
-                                    </Link>
-                                  </div>
+  <button
+    onClick={(e) => {
+      e.stopPropagation();
+      handleViewDetails(visit.id);
+    }}
+    className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center gap-2"
+  >
+    <Info className="w-4 h-4" />
+    View Details
+  </button>
+</div>
                                 </div>
                               )}
                             </div>
                           </div>
-                          
-                          {visit.notes && (
-                            <div className="mt-3 pt-3 border-t border-gray-100">
-                              <p className="text-sm text-gray-600 line-clamp-2">{visit.notes}</p>
-                            </div>
-                          )}
                           
                           {/* Quick Cancel Button (for scheduled visits) */}
                           {visit.status === 'scheduled' && canCancel && (
@@ -926,11 +968,11 @@ const BulkCancelModal = ({ visits, onClose, onSuccess }: any) => {
 
       {/* Close action menu when clicking outside */}
       {actionMenuOpen && (
-        <div
-          className="fixed inset-0 z-10"
-          onClick={() => setActionMenuOpen(null)}
-        />
-      )}
+  <div
+    className="fixed inset-0 z-0"
+    onClick={() => setActionMenuOpen(null)}
+  />
+)}
 
       {/* Help Tip */}
       <div className="mt-8 text-center text-gray-500 text-sm">
