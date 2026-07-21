@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="utf-8">
+<style>
+  @page {
+    size: 148mm 210mm;
+    margin: 0;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: Georgia, 'Iowan Old Style', 'Times New Roman', serif;
+    color: #2b2620;
+  }
+  .page {
+    width: 148mm;
+    height: 210mm;
+    position: relative;
+    overflow: hidden;
+    page-break-after: always;
+  }
+  .page:last-child { page-break-after: avoid; }
+
+  /* ---------- FRONT ---------- */
+  .front {
+    background: #faf6ee;
+    padding: 14mm 12mm 10mm 12mm;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+  .brand {
+    font-size: 15pt;
+    letter-spacing: 2px;
+    color: #b3872f;
+    font-weight: bold;
+    text-transform: uppercase;
+  }
+  .rule {
+    width: 28mm;
+    height: 1.4pt;
+    background: #b3872f;
+    margin: 5mm 0 8mm 0;
+  }
+  .headline {
+    font-size: 24pt;
+    line-height: 1.2;
+    color: #2b2620;
+    font-weight: bold;
+    margin-bottom: 6mm;
+  }
+  .headline .accent { color: #b3872f; font-style: italic; }
+  .sub {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 10.5pt;
+    line-height: 1.55;
+    color: #4a4238;
+    max-width: 108mm;
+  }
+  .front .spacer { flex: 1; }
+  .front-footer {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 9pt;
+    color: #8a7f6d;
+    border-top: 0.7pt solid #ddd2ba;
+    padding-top: 4mm;
+  }
+
+  /* ---------- BACK ---------- */
+  .back {
+    background: #2b2620;
+    color: #faf6ee;
+    padding: 13mm 12mm;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+  .back h2 {
+    font-size: 13pt;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #d6a94a;
+    margin-bottom: 7mm;
+  }
+  .steps {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+  }
+  .step {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 6mm;
+  }
+  .step-num {
+    flex: 0 0 auto;
+    width: 8mm;
+    height: 8mm;
+    border-radius: 50%;
+    border: 1pt solid #d6a94a;
+    color: #d6a94a;
+    font-size: 10pt;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 5mm;
+  }
+  .step-text-title {
+    font-size: 10.5pt;
+    font-weight: bold;
+    color: #faf6ee;
+    margin-bottom: 1mm;
+  }
+  .step-text-body {
+    font-size: 9.3pt;
+    line-height: 1.45;
+    color: #cfc6b4;
+  }
+  .back .spacer { flex: 1; }
+  .cta {
+    background: #3a352c;
+    border-radius: 3mm;
+    padding: 6mm;
+    display: flex;
+    align-items: center;
+    gap: 6mm;
+  }
+  .cta img { width: 26mm; height: 26mm; display: block; border-radius: 1.5mm; }
+  .cta-text {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+  }
+  .cta-text .cta-title {
+    font-size: 11pt;
+    font-weight: bold;
+    color: #faf6ee;
+    margin-bottom: 2mm;
+  }
+  .cta-text .cta-body {
+    font-size: 9pt;
+    color: #cfc6b4;
+    line-height: 1.4;
+    margin-bottom: 2mm;
+  }
+  .cta-text .cta-contact {
+    font-size: 9pt;
+    color: #d6a94a;
+  }
+
+  .logins {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    display: flex;
+    gap: 4mm;
+    margin-bottom: 5mm;
+  }
+  .login-box {
+    flex: 1;
+    background: #3a352c;
+    border-radius: 3mm;
+    padding: 4mm 4.5mm;
+  }
+  .login-box .login-label {
+    font-size: 8pt;
+    text-transform: uppercase;
+    letter-spacing: 0.5pt;
+    color: #d6a94a;
+    margin-bottom: 2.5mm;
+  }
+  .login-box .login-line {
+    font-size: 8.8pt;
+    color: #faf6ee;
+    line-height: 1.5;
+  }
+  .login-box .login-line span {
+    color: #a89a7f;
+  }
+</style>
+</head>
+<body>
+
+  <!-- FRONT -->
+  <div class="page front">
+    <div class="brand">Bondoutfit</div>
+    <div class="rule"></div>
+    <div class="headline">Gør vindueskiggere<br>til <span class="accent">bookede besøg</span>.</div>
+    <div class="sub">
+      Med Bondoutfit kan dine kunder booke en tid i din butik online —
+      og få rabat, når de dukker op og køber noget. Du får færre spildte
+      besøg, mere trafik på stille dage og et enkelt dashboard til at styre det hele.
+    </div>
+    <div class="spacer"></div>
+    <div class="sub" style="max-width:100%;">
+      Jeg vil rigtig gerne vise dig, hvordan det fungerer på din telefon —
+      det tager cirka 10 minutter, helt uforpligtende.
+    </div>
+    <div class="spacer"></div>
+    <div class="front-footer">bondoutfit.com &nbsp;·&nbsp; tidsbestilling til uafhængig detailhandel</div>
+  </div>
+
+  <!-- BACK -->
+  <div class="page back">
+    <h2>Sådan fungerer det</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div>
+          <div class="step-text-title">Kunden finder din butik</div>
+          <div class="step-text-body">De browser dine kollektioner og ledige tider på Bondoutfit.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div>
+          <div class="step-text-title">De booker en tid</div>
+          <div class="step-text-body">Besøget bliver sat direkte i din butiks kalender — ingen frem-og-tilbage.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div>
+          <div class="step-text-title">Du er klar til dem</div>
+          <div class="step-text-body">Du ved, hvem der kommer og hvornår, så du kan forberede dig og tage godt imod dem.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div>
+          <div class="step-text-title">De besøger og bliver belønnet</div>
+          <div class="step-text-body">Ved ankomst låser de op for en rabat, de kan bruge på deres køb — det giver dem grund til rent faktisk at købe.</div>
+        </div>
+      </div>
+    </div>
+    <div class="spacer"></div>
+    <div class="logins">
+      <div class="login-box">
+        <div class="login-label">Prøv det som butiksejer</div>
+        <div class="login-line"><span>bruger:</span> horistics@outlook.com</div>
+        <div class="login-line"><span>kode:</span> goforit456.</div>
+      </div>
+      <div class="login-box">
+        <div class="login-label">Prøv det som kunde</div>
+        <div class="login-line"><span>bruger:</span> horistics@gmail.com</div>
+        <div class="login-line"><span>kode:</span> goforit123.</div>
+      </div>
+    </div>
+    <div class="cta">
+      <img src="qr.png" alt="QR-kode">
+      <div class="cta-text">
+        <div class="cta-title">Scan for at se det live</div>
+        <div class="cta-body">Eller spørg mig bare — jeg viser dig<br>det gerne personligt.</div>
+        <div class="cta-contact">Isidoros Parlamas</div>
+        <div class="cta-contact" style="color:#cfc6b4; font-size:8.3pt; margin-top:1mm;">mind@horistics.com &nbsp;·&nbsp; +45 27 13 44 83</div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

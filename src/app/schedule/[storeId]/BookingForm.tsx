@@ -5,6 +5,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import VisitImageUpload from '@/app/components/VisitImageUpload';
+import { translations, Lang } from './translations';
 
 interface BookingFormProps {
   storeId: string;
@@ -20,8 +21,10 @@ export default function BookingForm({ storeId, storeName }: BookingFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [inspirationImages, setInspirationImages] = useState<UploadedImage[]>([]);
-  
+ const [inspirationImages, setInspirationImages] = useState<UploadedImage[]>([]);
+  const [lang, setLang] = useState<Lang>('en');
+  const t = translations[lang];
+
   const [formData, setFormData] = useState({
     date: '',
     time: '',
@@ -85,14 +88,21 @@ export default function BookingForm({ storeId, storeName }: BookingFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 bg-white rounded-lg shadow p-6">
-      <div>
-        <h2 className="text-xl font-semibold mb-4">Book Your Visit at {storeName}</h2>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-xl font-semibold">{t.bookVisitAt(storeName)}</h2>
+        <button
+          type="button"
+          onClick={() => setLang(lang === 'en' ? 'da' : 'en')}
+          className="text-sm text-gray-500 underline"
+        >
+          {lang === 'en' ? 'Dansk' : 'English'}
+        </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-1">
-            Date *
+            {t.date}
           </label>
           <input
             type="date"
@@ -108,7 +118,7 @@ export default function BookingForm({ storeId, storeName }: BookingFormProps) {
 
         <div>
           <label htmlFor="time" className="block text-sm font-medium text-gray-700 mb-1">
-            Time *
+            {t.time}
           </label>
           <select
             id="time"
@@ -118,7 +128,7 @@ export default function BookingForm({ storeId, storeName }: BookingFormProps) {
             onChange={handleChange}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <option value="">Select time</option>
+            <option value="">{t.selectTime}</option>
             {timeSlots.map(time => (
               <option key={time} value={time}>{time}</option>
             ))}
@@ -128,7 +138,7 @@ export default function BookingForm({ storeId, storeName }: BookingFormProps) {
 
       <div>
         <label htmlFor="numberOfPeople" className="block text-sm font-medium text-gray-700 mb-1">
-          Number of People *
+          {t.numberOfPeople}
         </label>
         <select
           id="numberOfPeople"
@@ -139,7 +149,7 @@ export default function BookingForm({ storeId, storeName }: BookingFormProps) {
           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           {[1, 2, 3, 4, 5, 6].map(num => (
-            <option key={num} value={num}>{num} {num === 1 ? 'person' : 'people'}</option>
+            <option key={num} value={num}>{num} {num === 1 ? t.person : t.people}</option>
           ))}
         </select>
       </div>
@@ -152,7 +162,7 @@ export default function BookingForm({ storeId, storeName }: BookingFormProps) {
 
       <div>
         <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-1">
-          Additional Notes (Optional)
+          {t.notesLabel}
         </label>
         <textarea
           id="notes"
@@ -160,7 +170,7 @@ export default function BookingForm({ storeId, storeName }: BookingFormProps) {
           rows={3}
           value={formData.notes}
           onChange={handleChange}
-          placeholder="Any specific items you're looking for? Special requests?"
+          placeholder={t.notesPlaceholder}
           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       </div>
@@ -176,7 +186,7 @@ export default function BookingForm({ storeId, storeName }: BookingFormProps) {
         disabled={loading}
         className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        {loading ? 'Booking...' : 'Book Visit'}
+        {loading ? t.bookingButton : t.bookButton}
       </button>
     </form>
   );
