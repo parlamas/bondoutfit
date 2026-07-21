@@ -6,6 +6,7 @@ import "./globals.css";
 import { AuthProvider } from "./components/AuthProvider";
 import NavBar from "./components/NavBar";
 import MobileMenu from "./components/MobileMenu";
+import { Analytics } from "@vercel/analytics/next";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -28,6 +29,7 @@ export default function RootLayout({
           <MobileMenu />
           {children}
         </AuthProvider>
+        <Analytics />
       </body>
     </html>
   );
