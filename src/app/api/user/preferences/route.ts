@@ -4,6 +4,7 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { prisma } from '@/lib/prisma';
 import { authOptions } from '@/lib/auth';
+import { isDemoUser } from '@/lib/demo';
 
 export async function GET() {
   try {
@@ -85,6 +86,14 @@ export async function PUT(request: Request) {
       const nameParts = name.split(' ');
       firstName = nameParts[0] || '';
       lastName = nameParts.slice(1).join(' ') || '';
+    }
+
+    // Demo accounts: simulate a successful update without writing to the database
+    if (isDemoUser(session)) {
+      return NextResponse.json({
+        success: true,
+        message: 'Preferences updated successfully'
+      });
     }
 
     // Update user data

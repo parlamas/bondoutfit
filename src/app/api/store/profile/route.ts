@@ -5,6 +5,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { StoreImageType } from "@prisma/client";
+import { isDemoUser } from "@/lib/demo";
 
 
 export async function GET() {
@@ -85,6 +86,22 @@ export async function PATCH(request: Request) {
         { error: "Store not found" },
         { status: 404 }
       );
+    }
+
+    // Demo accounts: simulate a successful update without writing to the database
+    if (isDemoUser(session)) {
+      return NextResponse.json({
+        ...store,
+        ...(body.name !== undefined && { name: body.name }),
+        ...(body.description !== undefined && { description: body.description }),
+        ...(body.website !== undefined && { website: body.website }),
+        ...(body.phoneCountry !== undefined && { phoneCountry: body.phoneCountry }),
+        ...(body.phoneArea !== undefined && { phoneArea: body.phoneArea }),
+        ...(body.phoneNumber !== undefined && { phoneNumber: body.phoneNumber }),
+        ...(body.categories !== undefined && { categories: body.categories }),
+        ...(body.acceptedCurrencies !== undefined && { acceptedCurrencies: body.acceptedCurrencies }),
+        ...(body.openingHours !== undefined && { openingHours: body.openingHours }),
+      });
     }
 
     // Update the store

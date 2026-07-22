@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { isDemoUser } from '@/lib/demo';
 
 export async function POST(req: NextRequest) {
   try {
@@ -13,6 +14,11 @@ export async function POST(req: NextRequest) {
     }
 
     const { collectionId, images } = await req.json();
+
+    // Demo accounts: simulate a successful reorder without writing to the database
+    if (isDemoUser(session)) {
+      return NextResponse.json({ success: true });
+    }
 
     // Update order for each image
     await prisma.$transaction(

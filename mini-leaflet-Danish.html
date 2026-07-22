@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<title>Bondoutfit Mini Leaflet — DA</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,600;1,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{ --ivory:#f7f3ec; --charcoal:#2a2620; --gold:#b8863c; --line:#d8cfc0; }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  @page{ size:A4; margin:0; }
+  body{ width:210mm; height:297mm; background:#fff; font-family:'Inter',sans-serif; color:var(--charcoal); }
+  .sheet{ width:210mm; height:297mm; display:grid; grid-template-columns:repeat(2,1fr); grid-template-rows:repeat(4,1fr); padding:10mm; }
+  .tile{ background:var(--ivory); border:1px dashed var(--line); padding:4mm; display:flex; flex-direction:column; justify-content:space-between; align-items:center; text-align:center; }
+  .brand{ font-family:'Fraunces',serif; font-weight:600; font-size:9px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold); }
+  .headline{ font-family:'Fraunces',serif; font-weight:600; font-size:13px; line-height:1.25; margin:2mm 0 1mm; }
+  .headline em{ color:var(--gold); font-style:italic; }
+  .sub{ font-size:8.5px; line-height:1.3; color:#5b5448; max-width:38mm; }
+  .qr img{ width:20mm; height:20mm; margin:2mm 0; }
+  .store{ font-size:8px; font-weight:600; letter-spacing:0.5px; text-transform:uppercase; border-top:1px solid var(--line); padding-top:1.5mm; width:100%; }
+  .footer{ font-size:7px; color:#8a8072; margin-top:0.5mm; }
+</style>
+</head>
+<body>
+  <div class="sheet">
+    <!-- 8 identical tiles; QR is a plain img, no JS needed -->
+    <div class="tile"><div class="brand">Bondoutfit</div><div class="headline">Scan og book<br><em>din næste tid</em></div><div class="sub">Book online, spring køen over — og få en rabat, når du møder op.</div><div class="qr"><img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fbondoutfit.com%2Fstores%2Fdemo-store&color=2a2620&bgcolor=f7f3ec" alt="QR"></div><div class="store">[ Butiksnavn ]</div><div class="footer">bondoutfit.com</div></div>
+    <div class="tile"><div class="brand">Bondoutfit</div><div class="headline">Scan og book<br><em>din næste tid</em></div><div class="sub">Book online, spring køen over — og få en rabat, når du møder op.</div><div class="qr"><img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fbondoutfit.com%2Fstores%2Fdemo-store&color=2a2620&bgcolor=f7f3ec" alt="QR"></div><div class="store">[ Butiksnavn ]</div><div class="footer">bondoutfit.com</div></div>
+    <div class="tile"><div class="brand">Bondoutfit</div><div class="headline">Scan og book<br><em>din næste tid</em></div><div class="sub">Book online, spring køen over — og få en rabat, når du møder op.</div><div class="qr"><img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fbondoutfit.com%2Fstores%2Fdemo-store&color=2a2620&bgcolor=f7f3ec" alt="QR"></div><div class="store">[ Butiksnavn ]</div><div class="footer">bondoutfit.com</div></div>
+    <div class="tile"><div class="brand">Bondoutfit</div><div class="headline">Scan og book<br><em>din næste tid</em></div><div class="sub">Book online, spring køen over — og få en rabat, når du møder op.</div><div class="qr"><img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fbondoutfit.com%2Fstores%2Fdemo-store&color=2a2620&bgcolor=f7f3ec" alt="QR"></div><div class="store">[ Butiksnavn ]</div><div class="footer">bondoutfit.com</div></div>
+    <div class="tile"><div class="brand">Bondoutfit</div><div class="headline">Scan og book<br><em>din næste tid</em></div><div class="sub">Book online, spring køen over — og få en rabat, når du møder op.</div><div class="qr"><img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fbondoutfit.com%2Fstores%2Fdemo-store&color=2a2620&bgcolor=f7f3ec" alt="QR"></div><div class="store">[ Butiksnavn ]</div><div class="footer">bondoutfit.com</div></div>
+    <div class="tile"><div class="brand">Bondoutfit</div><div class="headline">Scan og book<br><em>din næste tid</em></div><div class="sub">Book online, spring køen over — og få en rabat, når du møder op.</div><div class="qr"><img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fbondoutfit.com%2Fstores%2Fdemo-store&color=2a2620&bgcolor=f7f3ec" alt="QR"></div><div class="store">[ Butiksnavn ]</div><div class="footer">bondoutfit.com</div></div>
+    <div class="tile"><div class="brand">Bondoutfit</div><div class="headline">Scan og book<br><em>din næste tid</em></div><div class="sub">Book online, spring køen over — og få en rabat, når du møder op.</div><div class="qr"><img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fbondoutfit.com%2Fstores%2Fdemo-store&color=2a2620&bgcolor=f7f3ec" alt="QR"></div><div class="store">[ Butiksnavn ]</div><div class="footer">bondoutfit.com</div></div>
+    <div class="tile"><div class="brand">Bondoutfit</div><div class="headline">Scan og book<br><em>din næste tid</em></div><div class="sub">Book online, spring køen over — og få en rabat, når du møder op.</div><div class="qr"><img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fbondoutfit.com%2Fstores%2Fdemo-store&color=2a2620&bgcolor=f7f3ec" alt="QR"></div><div class="store">[ Butiksnavn ]</div><div class="footer">bondoutfit.com</div></div>
+  </div>
+</body>
+</html>

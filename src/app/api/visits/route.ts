@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { isDemoUser } from "@/lib/demo";
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -129,6 +130,33 @@ export async function POST(req: NextRequest) {
         { error: "Customer not found" },
         { status: 404 }
       );
+    }
+
+    // Demo accounts: simulate a successful booking without writing to the database
+    if (isDemoUser(session)) {
+      const demoDiscount = discountId
+        ? await prisma.discount.findUnique({
+            where: { id: discountId },
+            select: { title: true, discountPercent: true, discountAmount: true },
+          })
+        : null;
+
+      return NextResponse.json({
+        id: `demo-${Date.now()}`,
+        scheduledDate: new Date(scheduledDate).toISOString(),
+        scheduledTime,
+        numberOfPeople: numberOfPeople || 1,
+        status: "SCHEDULED",
+        store: {
+          storeName: store.storeName,
+          street: store.street,
+          streetNumber: store.streetNumber,
+          city: store.city,
+          country: store.country,
+        },
+        discount: demoDiscount,
+        qrCodeGenerated: true,
+      });
     }
 
     const visit = await prisma.visit.create({

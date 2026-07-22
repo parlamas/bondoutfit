@@ -5,6 +5,7 @@ import { getServerSession } from 'next-auth';
 import { prisma } from '@/lib/prisma';
 import { v2 as cloudinary } from 'cloudinary';
 import { authOptions } from '@/lib/auth'; // CHANGED
+import { isDemoUser } from '@/lib/demo';
 
 // Configure Cloudinary
 if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
@@ -39,6 +40,11 @@ export async function PATCH(
 
     if (!store) {
       return NextResponse.json({ error: 'Store not found' }, { status: 404 });
+    }
+
+    // Demo accounts: simulate a successful update without writing to the database
+    if (isDemoUser(session)) {
+      return NextResponse.json({ success: true });
     }
 
     // Update only if image belongs to user's store
@@ -97,6 +103,11 @@ export async function DELETE(
 
     if (!image) {
       return NextResponse.json({ error: 'Image not found' }, { status: 404 });
+    }
+
+    // Demo accounts: simulate a successful deletion without touching Cloudinary or the database
+    if (isDemoUser(session)) {
+      return NextResponse.json({ success: true });
     }
 
     // Delete from Cloudinary first

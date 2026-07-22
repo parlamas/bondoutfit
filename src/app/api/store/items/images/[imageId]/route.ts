@@ -5,6 +5,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { v2 as cloudinary } from 'cloudinary';
+import { isDemoUser } from '@/lib/demo';
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -38,6 +39,11 @@ export async function DELETE(
 
     if (!store || image.storeItem.storeId !== store.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+    }
+
+    // Demo accounts: simulate a successful deletion without touching Cloudinary or the database
+    if (isDemoUser(session)) {
+      return NextResponse.json({ success: true });
     }
 
     // Extract public_id from Cloudinary URL

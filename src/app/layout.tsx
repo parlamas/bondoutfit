@@ -7,6 +7,7 @@ import { AuthProvider } from "./components/AuthProvider";
 import NavBar from "./components/NavBar";
 import MobileMenu from "./components/MobileMenu";
 import { Analytics } from "@vercel/analytics/next";
+import WhatsAppButton from '@/components/WhatsAppButton';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -30,6 +31,7 @@ export default function RootLayout({
           {children}
         </AuthProvider>
         <Analytics />
+        <WhatsAppButton />
       </body>
     </html>
   );

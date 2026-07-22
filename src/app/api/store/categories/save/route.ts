@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { isDemoUser } from "@/lib/demo";
 
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
@@ -13,6 +14,11 @@ export async function POST(req: Request) {
   }
 
   const { categories } = await req.json();
+
+  // Demo accounts: simulate a successful save without writing to the database
+  if (isDemoUser(session)) {
+    return NextResponse.json({ ok: true });
+  }
 
   for (const category of categories) {
     for (let i = 0; i < category.images.length; i++) {

@@ -4,6 +4,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { isDemoUser } from '@/lib/demo';
+
 
 // Development mode check
 const isDevelopment = process.env.NODE_ENV === 'development';
@@ -76,6 +78,59 @@ export async function POST(
       // Verify the store manager has access to this visit's store
       if (visit.storeId !== managerStore.id) {
         return NextResponse.json({ error: 'Not authorized for this store' }, { status: 403 });
+      }
+    }
+
+    // Demo accounts: simulate a scan result without writing to the database,
+    // creating a discount, or logging an audit entry
+    if (isDemoUser(session)) {
+      const demoNow = new Date();
+      const customerName = visit.user.firstName + (visit.user.lastName ? ' ' + visit.user.lastName : '');
+
+      if (!visit.checkedIn) {
+        return NextResponse.json({
+          success: true,
+          message: `✅ Checked in ${customerName} successfully! Discount unlocked.`,
+          visit: {
+            id: visit.id,
+            status: 'SCHEDULED',
+            checkedIn: true,
+            checkedInAt: demoNow,
+            completedAt: null,
+            discountUnlocked: true,
+            discountUsed: visit.discountUsed,
+            numberOfPeople: visit.numberOfPeople,
+            scheduledDate: visit.scheduledDate,
+            scheduledTime: visit.scheduledTime,
+            user: { name: customerName, email: visit.user.email },
+          },
+          developmentMode: isDevelopment,
+        });
+      } else if (visit.checkedIn && visit.status === 'SCHEDULED') {
+        return NextResponse.json({
+          success: true,
+          message: `✅ Marked ${customerName}'s visit as COMPLETED.`,
+          visit: {
+            id: visit.id,
+            status: 'COMPLETED',
+            checkedIn: true,
+            checkedInAt: visit.checkedInAt,
+            completedAt: demoNow,
+            discountUnlocked: visit.discountUnlocked,
+            discountUsed: visit.discountUsed,
+            numberOfPeople: visit.numberOfPeople,
+            scheduledDate: visit.scheduledDate,
+            scheduledTime: visit.scheduledTime,
+            user: { name: customerName, email: visit.user.email },
+          },
+          developmentMode: isDevelopment,
+        });
+      } else {
+        return NextResponse.json({
+          error: `Visit already ${visit.status.toLowerCase()}`,
+          status: visit.status,
+          checkedInAt: visit.checkedInAt,
+        }, { status: 400 });
       }
     }
 

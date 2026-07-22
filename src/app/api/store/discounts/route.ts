@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { isDemoUser } from "@/lib/demo";
 
 /* =========================
    CREATE DISCOUNT
@@ -69,6 +70,26 @@ export async function POST(req: NextRequest) {
         { error: "No store found for this manager" },
         { status: 404 }
       );
+    }
+
+    // Demo accounts: simulate a successful creation without writing to the database
+    if (isDemoUser(session)) {
+      return NextResponse.json({
+        success: true,
+        message: "Discount created successfully",
+        discount: {
+          id: `demo-${Date.now()}`,
+          storeId: store.id,
+          title: title.trim(),
+          description: description.trim(),
+          discountPercent: discountPercent || null,
+          discountAmount: discountAmount || null,
+          validFrom: new Date(validFrom).toISOString(),
+          validTo: new Date(validTo).toISOString(),
+          maxUses: maxUses || null,
+          type: discountPercent ? "PERCENTAGE" : "AMOUNT",
+        },
+      }, { status: 201 });
     }
 
     const discount = await prisma.discount.create({

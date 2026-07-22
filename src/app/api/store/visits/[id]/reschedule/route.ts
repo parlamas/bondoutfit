@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { isDemoUser } from '@/lib/demo';
 
 export async function POST(
   request: NextRequest,
@@ -51,6 +52,23 @@ export async function POST(
         { error: 'Visit not found or not authorized' },
         { status: 404 }
       );
+    }
+
+    // Demo accounts: simulate a successful reschedule without writing to the database
+    if (isDemoUser(session)) {
+      return NextResponse.json({
+        success: true,
+        message: 'Visit rescheduled successfully',
+        visit: {
+          ...visit,
+          scheduledDate: new Date(newDate).toISOString(),
+          scheduledTime: newTime,
+          rescheduledAt: new Date().toISOString(),
+          rescheduledBy,
+          rescheduleNotes: notes,
+          status: 'SCHEDULED',
+        },
+      });
     }
 
     const updatedVisit = await prisma.visit.update({

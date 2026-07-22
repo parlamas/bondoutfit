@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { isDemoUser } from '@/lib/demo';
 
 export async function POST(
   request: NextRequest,
@@ -86,13 +87,34 @@ export async function POST(
     const timeDiff = scheduledDateTime.getTime() - now.getTime();
     const hoursUntilVisit = timeDiff / (1000 * 60 * 60);
 
-    if (hoursUntilVisit < 1) {
+   if (hoursUntilVisit < 1) {
       return NextResponse.json({ 
         error: 'Cannot cancel within 1 hour of scheduled visit time',
         hoursUntilVisit: hoursUntilVisit.toFixed(1),
         scheduledTime: visit.scheduledTime,
         currentTime: now.toLocaleTimeString(),
       }, { status: 400 });
+    }
+
+    // Demo accounts: simulate a successful cancellation without writing to the database,
+    // creating an audit log, or sending any emails
+    if (isDemoUser(session)) {
+      return NextResponse.json({
+        success: true,
+        message: 'Visit cancelled successfully',
+        cancelledBy: isCustomerOwner ? 'customer' : 'manager',
+        visit: {
+          id: visit.id,
+          status: 'CANCELLED',
+          cancelledAt: now,
+          cancellationReason: reason || (isCustomerOwner ? 'Cancelled by customer' : 'Cancelled by store manager'),
+          scheduledDate: visit.scheduledDate,
+          scheduledTime: visit.scheduledTime,
+          user: visit.user,
+          store: { storeName: visit.store.storeName },
+        },
+        refundPolicy: 'Cancellations made more than 1 hour before the visit may be eligible for a full refund.',
+      });
     }
 
     // Update the visit status - using your schema fields

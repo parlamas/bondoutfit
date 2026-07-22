@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { isDemoUser } from "@/lib/demo";
 
 // GET - Get a single discount for editing
 export async function GET(
@@ -139,6 +140,34 @@ export async function PUT(
       );
     }
 
+    // Demo accounts: simulate a successful update without writing to the database
+    if (isDemoUser(session)) {
+      return NextResponse.json({
+        success: true,
+        message: "Discount updated successfully",
+        discount: {
+          ...existingDiscount,
+          title,
+          description,
+          discountPercent: type === "PERCENTAGE" ? discountPercent : null,
+          discountAmount: type === "AMOUNT" ? discountAmount : null,
+          validFrom: new Date(validFrom).toISOString(),
+          validTo: new Date(validTo).toISOString(),
+          code: code || null,
+          type,
+          minPurchase,
+          maxDiscount,
+          svdOnly,
+          applicableCategories: applicableCategories || [],
+          excludedItems: excludedItems || [],
+          maxUses,
+          maxUsesPerUser,
+          isSingleUse,
+          isStackable,
+        },
+      });
+    }
+
     // Check if code is unique (if provided)
     if (code && code !== existingDiscount.code) {
       const codeExists = await prisma.discount.findFirst({
@@ -223,6 +252,15 @@ export async function DELETE(
         { error: "Discount not found or unauthorized" },
         { status: 404 }
       );
+    }
+
+    // Demo accounts: simulate a successful deletion without writing to the database
+    if (isDemoUser(session)) {
+      return NextResponse.json({
+        success: true,
+        message: "Discount deleted successfully",
+        discount: { ...discount, status: "DELETED", isActive: false },
+      });
     }
 
     // Soft delete by setting status to DELETED

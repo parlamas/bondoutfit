@@ -5,6 +5,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { v2 as cloudinary } from 'cloudinary';
+import { isDemoUser } from '@/lib/demo';
 
 // Configure Cloudinary
 cloudinary.config({
@@ -54,6 +55,21 @@ export async function POST(req: NextRequest) {
     if (!store || collection.storeId !== store.id) {
       console.error('Unauthorized: store mismatch');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+    }
+
+    // Demo accounts: simulate a successful upload without hitting Cloudinary or the database
+    if (isDemoUser(session)) {
+      const simulatedImages = files.map((file, i) => ({
+        id: `demo-${Date.now()}-${i}`,
+        url: "https://placehold.co/400x300?text=Demo+Image",
+        description: '',
+        order: i,
+        collectionId,
+      }));
+      return NextResponse.json({
+        ...collection,
+        images: simulatedImages,
+      });
     }
 
     // Get current max order

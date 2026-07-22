@@ -5,6 +5,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { v2 as cloudinary } from 'cloudinary';
+import { isDemoUser } from '@/lib/demo';
 
 // Configure Cloudinary
 cloudinary.config({
@@ -49,6 +50,20 @@ export async function POST(req: NextRequest) {
 
     if (!store || item.storeId !== store.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+    }
+
+    // Demo accounts: simulate a successful upload without hitting Cloudinary or the database
+    if (isDemoUser(session)) {
+      const simulatedImages = files.map((file, i) => ({
+        id: `demo-${Date.now()}-${i}`,
+        imageUrl: "https://placehold.co/400x300?text=Demo+Image",
+        order: i,
+        storeItemId: itemId,
+      }));
+      return NextResponse.json({
+        ...item,
+        images: simulatedImages,
+      });
     }
 
     // Get current max order

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<style>
+  @page { size: 148mm 210mm; margin: 0; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: Georgia, 'Iowan Old Style', 'Times New Roman', serif;
+    color: #2b2620;
+  }
+  .page {
+    width: 148mm;
+    height: 210mm;
+    background: #faf6ee;
+    padding: 10mm 11mm 8mm 11mm;
+    display: flex;
+    flex-direction: column;
+  }
+  .brand {
+    font-size: 13pt;
+    letter-spacing: 2px;
+    color: #b3872f;
+    font-weight: bold;
+    text-transform: uppercase;
+  }
+  .rule { width: 24mm; height: 1.2pt; background: #b3872f; margin: 3.5mm 0 5mm 0; }
+  .headline {
+    font-size: 17pt;
+    line-height: 1.2;
+    color: #2b2620;
+    font-weight: bold;
+    margin-bottom: 4mm;
+  }
+  .headline .accent { color: #b3872f; font-style: italic; }
+  .sub {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 9pt;
+    line-height: 1.45;
+    color: #4a4238;
+    margin-bottom: 3mm;
+  }
+  h2.section {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 9.5pt;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #b3872f;
+    margin: 4mm 0 3mm 0;
+    border-top: 0.7pt solid #ddd2ba;
+    padding-top: 3.5mm;
+  }
+  .steps { font-family: 'Helvetica Neue', Arial, sans-serif; }
+  .step { display: flex; align-items: flex-start; margin-bottom: 2.8mm; }
+  .step-num {
+    flex: 0 0 auto; width: 6mm; height: 6mm; border-radius: 50%;
+    border: 1pt solid #b3872f; color: #b3872f; font-size: 8pt;
+    display: flex; align-items: center; justify-content: center; margin-right: 3.5mm;
+  }
+  .step-text-title { font-size: 9pt; font-weight: bold; color: #2b2620; margin-bottom: 0.5mm; }
+  .step-text-body { font-size: 8.2pt; line-height: 1.35; color: #6a5f4f; }
+  .logins { font-family: 'Helvetica Neue', Arial, sans-serif; display: flex; gap: 3.5mm; margin-top: 1mm; }
+  .login-box { flex: 1; background: #ffffff; border: 0.7pt solid #e4dac0; border-radius: 2.5mm; padding: 3.5mm 4mm; }
+  .login-box .login-label { font-size: 7.3pt; text-transform: uppercase; letter-spacing: 0.5pt; color: #b3872f; margin-bottom: 2mm; }
+  .login-box .login-line { font-size: 8pt; color: #2b2620; line-height: 1.5; }
+  .login-box .login-line span { color: #8a7f6d; }
+  .spacer { flex: 1; }
+  .cta { background: #ffffff; border: 0.7pt solid #e4dac0; border-radius: 2.5mm; padding: 4.5mm 5mm; display: flex; align-items: center; gap: 4.5mm; }
+  .cta img { width: 20mm; height: 20mm; display: block; border-radius: 1.2mm; }
+  .cta-text { font-family: 'Helvetica Neue', Arial, sans-serif; }
+  .cta-text .cta-title { font-size: 9.5pt; font-weight: bold; color: #2b2620; margin-bottom: 1.5mm; }
+  .cta-text .cta-body { font-size: 8pt; color: #6a5f4f; line-height: 1.35; margin-bottom: 1.5mm; }
+  .cta-text .cta-contact { font-size: 8pt; color: #b3872f; }
+  .cta-text .cta-contact2 { font-size: 7.6pt; color: #6a5f4f; margin-top: 0.5mm; }
+</style>
+</head>
+<body>
+  <div class="page">
+    <div class="brand">Bondoutfit</div>
+    <div class="rule"></div>
+    <div class="headline">Convierte a los curiosos del escaparate en <span class="accent">visitas reservadas</span>.</div>
+    <div class="sub">
+      Con Bondoutfit, tus clientes pueden reservar una cita en tu tienda online —
+      y obtener un descuento cuando lleguen y compren algo. Tendrás menos visitas
+      perdidas, más tráfico en los días tranquilos y un panel sencillo para gestionarlo todo.
+    </div>
+    <div class="sub">
+      Me encantaría mostrarte cómo funciona en tu teléfono —
+      tarda unos 10 minutos, sin compromiso.
+    </div>
+
+    <h2 class="section">Así funciona</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div>
+          <div class="step-text-title">El cliente encuentra tu tienda</div>
+          <div class="step-text-body">Explora tus colecciones y horarios disponibles en Bondoutfit.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div>
+          <div class="step-text-title">Reserva una cita</div>
+          <div class="step-text-body">La visita se añade directamente al calendario de tu tienda.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div>
+          <div class="step-text-title">Estás preparado para recibirlo</div>
+          <div class="step-text-body">Sabes quién viene y cuándo, así puedes prepararte.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div>
+          <div class="step-text-title">Visita la tienda y es recompensado</div>
+          <div class="step-text-body">Al llegar, desbloquea un descuento que puede usar en su compra.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="logins">
+      <div class="login-box">
+        <div class="login-label">Pruébalo como dueño de la tienda</div>
+        <div class="login-line"><span>usuario:</span> horistics@outlook.com</div>
+        <div class="login-line"><span>código:</span> goforit456.</div>
+      </div>
+      <div class="login-box">
+        <div class="login-label">Pruébalo como cliente</div>
+        <div class="login-line"><span>usuario:</span> horistics@gmail.com</div>
+        <div class="login-line"><span>código:</span> goforit123.</div>
+      </div>
+    </div>
+
+    <div class="spacer"></div>
+
+    <div class="cta">
+      <img src="qr.png" alt="Código QR">
+      <div class="cta-text">
+        <div class="cta-title">Escanea para verlo en vivo</div>
+        <div class="cta-body">O simplemente pregúntame — con gusto te lo muestro en persona.</div>
+        <div class="cta-contact">Isidoros Parlamas</div>
+        <div class="cta-contact2">mind@horistics.com &nbsp;·&nbsp; +45 27 13 44 83</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

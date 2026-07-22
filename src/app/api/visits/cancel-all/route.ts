@@ -4,6 +4,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { isDemoUser } from '@/lib/demo';
+
 
 // Helper function to send emails (you'll need to implement based on your email provider)
 async function sendEmail(to: string, subject: string, html: string) {
@@ -341,6 +343,43 @@ export async function POST(request: NextRequest) {
         },
         suggestion: visits.length > 0 ? 'Some visits may be too close to scheduled time or already checked in. Try cancelling individually.' : 'No scheduled visits found.'
       }, { status: 400 });
+    }
+
+    // Demo accounts: simulate a successful bulk cancellation without writing to the
+    // database, creating audit logs, or sending any emails
+    if (isDemoUser(session)) {
+      const demoCancelledVisits = cancellableVisits.map(v => ({
+        id: v.id,
+        storeId: v.store.id,
+        scheduledDate: v.scheduledDate,
+        scheduledTime: v.scheduledTime,
+        status: 'CANCELLED',
+        cancelledAt: now,
+      }));
+      const demoStoreIds = new Set(cancellableVisits.map(v => v.store.id));
+
+      return NextResponse.json({
+        success: true,
+        message: `Successfully cancelled ${demoCancelledVisits.length} visit(s)`,
+        summary: {
+          cancelledCount: demoCancelledVisits.length,
+          skippedCount: visits.length - cancellableVisits.length,
+          failedCount: 0,
+          totalVisitsFound: visits.length,
+        },
+        cancelledVisits: demoCancelledVisits,
+        errors: undefined,
+        notifications: {
+          managersNotified: demoStoreIds.size,
+          customerConfirmationSent: demoCancelledVisits.length > 0,
+        },
+        policy: {
+          minCancellationNotice: '1 hour',
+          refundEligibility: 'Cancellations made more than 1 hour before each visit may be eligible for refunds.',
+          contactStores: 'For specific refund policies, please contact the stores directly.',
+        },
+        timestamp: now.toISOString(),
+      });
     }
 
     // Group visits by store to send consolidated notifications to each manager

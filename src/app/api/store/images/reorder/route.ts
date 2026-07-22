@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { prisma } from '@/lib/prisma';
 import { authOptions } from '@/lib/auth'; // ADD THIS LINE
+import { isDemoUser } from '@/lib/demo';
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -14,7 +15,12 @@ export async function POST(req: NextRequest) {
 
   try {
     const { images } = await req.json();
-    
+
+    // Demo accounts: simulate a successful reorder without writing to the database
+    if (isDemoUser(session)) {
+      return NextResponse.json({ success: true });
+    }
+
     const updates = images.map((img: any) =>
       prisma.storeImage.update({
         where: { id: img.id },

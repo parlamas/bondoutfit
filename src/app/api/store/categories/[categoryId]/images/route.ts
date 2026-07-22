@@ -5,6 +5,8 @@ import { getServerSession } from "next-auth";
 import { prisma } from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
 import { v2 as cloudinary } from "cloudinary";
+import { isDemoUser } from "@/lib/demo";
+
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME!,
@@ -43,6 +45,17 @@ export async function POST(
 
   if (!file) {
     return NextResponse.json({ error: "No file provided" }, { status: 400 });
+  }
+
+  // Demo accounts: simulate a successful upload without hitting Cloudinary or the database
+  if (isDemoUser(session)) {
+    return NextResponse.json({
+      id: `demo-${Date.now()}`,
+      categoryId: category.id,
+      imageUrl: "https://placehold.co/400x300?text=Demo+Image",
+      description: description || null,
+      order: 0,
+    });
   }
 
   const buffer = Buffer.from(await file.arrayBuffer());

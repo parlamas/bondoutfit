@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @page { size: 148mm 210mm; margin: 0; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: Georgia, 'Iowan Old Style', 'Times New Roman', serif;
+    color: #2b2620;
+  }
+  .page {
+    width: 148mm;
+    height: 210mm;
+    background: #faf6ee;
+    padding: 8mm 10mm 6mm 10mm;
+    display: flex;
+    flex-direction: column;
+  }
+  .brand {
+    font-size: 12.5pt;
+    letter-spacing: 2px;
+    color: #b3872f;
+    font-weight: bold;
+    text-transform: uppercase;
+  }
+  .rule { width: 22mm; height: 1.2pt; background: #b3872f; margin: 3mm 0 4mm 0; }
+  .headline {
+    font-size: 17pt;
+    line-height: 1.16;
+    color: #2b2620;
+    font-weight: bold;
+    margin-bottom: 3mm;
+  }
+  .headline .accent { color: #b3872f; font-style: italic; }
+  .sub {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 8.6pt;
+    line-height: 1.4;
+    color: #4a4238;
+    margin-bottom: 2.2mm;
+  }
+
+  h2.section {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 9pt;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #b3872f;
+    margin: 3mm 0 2.2mm 0;
+    border-top: 0.7pt solid #ddd2ba;
+    padding-top: 2.8mm;
+  }
+  .steps {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+  }
+  .step {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 2mm;
+  }
+  .step-num {
+    flex: 0 0 auto;
+    width: 5.5mm;
+    height: 5.5mm;
+    border-radius: 50%;
+    border: 1pt solid #b3872f;
+    color: #b3872f;
+    font-size: 7.6pt;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 3mm;
+  }
+  .step-text-title {
+    font-size: 8.6pt;
+    font-weight: bold;
+    color: #2b2620;
+    margin-bottom: 0.4mm;
+  }
+  .step-text-body {
+    font-size: 7.8pt;
+    line-height: 1.3;
+    color: #6a5f4f;
+  }
+
+  .logins {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    display: flex;
+    gap: 3mm;
+    margin-top: 0.5mm;
+  }
+  .login-box {
+    flex: 1;
+    background: #ffffff;
+    border: 0.7pt solid #e4dac0;
+    border-radius: 2.5mm;
+    padding: 3mm 3.5mm;
+  }
+  .login-box .login-label {
+    font-size: 6.9pt;
+    text-transform: uppercase;
+    letter-spacing: 0.5pt;
+    color: #b3872f;
+    margin-bottom: 1.5mm;
+  }
+  .login-box .login-line {
+    font-size: 7.6pt;
+    color: #2b2620;
+    line-height: 1.45;
+  }
+  .login-box .login-line span { color: #8a7f6d; }
+
+  .spacer { flex: 1; min-height: 2mm; }
+
+  .cta {
+    background: #ffffff;
+    border: 0.7pt solid #e4dac0;
+    border-radius: 2.5mm;
+    padding: 3.2mm 4mm;
+    display: flex;
+    align-items: center;
+    gap: 3.5mm;
+  }
+  .cta + .cta { margin-top: 2mm; }
+  .cta img { width: 16mm; height: 16mm; display: block; border-radius: 1.2mm; }
+  .cta-text { font-family: 'Helvetica Neue', Arial, sans-serif; }
+  .cta-text .cta-title {
+    font-size: 8.8pt;
+    font-weight: bold;
+    color: #2b2620;
+    margin-bottom: 1mm;
+  }
+  .cta-text .cta-body {
+    font-size: 7.4pt;
+    color: #6a5f4f;
+    line-height: 1.3;
+    margin-bottom: 1mm;
+  }
+  .cta-text .cta-contact { font-size: 7.4pt; color: #b3872f; }
+  .cta-text .cta-contact2 { font-size: 7pt; color: #6a5f4f; margin-top: 0.4mm; }
+</style>
+</head>
+<body>
+  <div class="page">
+    <div class="brand">Bondoutfit</div>
+    <div class="rule"></div>
+    <div class="headline">Turn window-shoppers into <span class="accent">booked visits</span>.</div>
+    <div class="sub">
+      With Bondoutfit, your customers can book a time at your store online — and get
+      a discount when they show up and make a purchase. You get fewer wasted visits,
+      more traffic on slow days, and one simple dashboard to manage it all.
+    </div>
+    <div class="sub">
+      I'd really like to show you how it works on your phone —
+      it takes about 10 minutes, no obligation.
+    </div>
+
+    <h2 class="section">How it works</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div>
+          <div class="step-text-title">The customer finds your store</div>
+          <div class="step-text-body">They browse your collections and available times on Bondoutfit.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div>
+          <div class="step-text-title">They book a time</div>
+          <div class="step-text-body">The visit goes straight into your store's calendar.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div>
+          <div class="step-text-title">You're ready for them</div>
+          <div class="step-text-body">You know who's coming and when, so you can prepare.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div>
+          <div class="step-text-title">They visit and get rewarded</div>
+          <div class="step-text-body">On arrival, they unlock a discount they can use on their purchase.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="logins">
+      <div class="login-box">
+        <div class="login-label">Try it as a store owner</div>
+        <div class="login-line"><span>user:</span> horistics@outlook.com</div>
+        <div class="login-line"><span>code:</span> <span style="color:red; font-weight:bold;">goforit456.</span></div>
+      </div>
+      <div class="login-box">
+        <div class="login-label">Try it as a customer</div>
+        <div class="login-line"><span>user:</span> horistics@gmail.com</div>
+        <div class="login-line"><span>code:</span> <span style="color:red; font-weight:bold;">goforit123.</span></div>
+      </div>
+    </div>
+
+    <div class="spacer"></div>
+
+    <div class="cta">
+      <img src="qr.png" alt="QR code">
+      <div class="cta-text">
+        <div class="cta-title">Scan to see it live</div>
+        <div class="cta-body">Or just ask me — I'd be happy to show you in person.</div>
+        <div class="cta-contact">Isidoros Parlamas</div>
+        <div class="cta-contact2">mind@horistics.com &nbsp;·&nbsp; +45 27 13 44 83</div>
+      </div>
+    </div>
+
+    <div class="cta">
+      <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fwa.me%2F4527134483&color=2a2620&bgcolor=faf6ee" alt="WhatsApp QR">
+      <div class="cta-text">
+        <div class="cta-title">Write me on WhatsApp</div>
+        <div class="cta-body">Scan to start a conversation immediately.</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

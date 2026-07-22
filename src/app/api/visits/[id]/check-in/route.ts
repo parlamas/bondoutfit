@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { isDemoUser } from '@/lib/demo';
 
 export async function POST(
   request: NextRequest,
@@ -64,6 +65,31 @@ export async function POST(
         scheduledTime: visit.scheduledTime,
         currentTime: currentTime.toISOString(),
       }, { status: 400 });
+    }
+
+    // Demo accounts: simulate a successful check-in without writing to the database
+    if (isDemoUser(session)) {
+      const demoDiscountUnlocked = !!visit.discountId && !visit.discountUnlocked;
+      const demoDiscountCode = demoDiscountUnlocked
+        ? `DISC-${visitId.slice(0, 8).toUpperCase()}`
+        : null;
+
+      return NextResponse.json({
+        success: true,
+        message: 'Customer checked in successfully',
+        visit: {
+          id: visit.id,
+          customerName: '',
+          customerEmail: '',
+          storeName: visit.store.storeName,
+          scheduledDate: visit.scheduledDate,
+          scheduledTime: visit.scheduledTime,
+          numberOfPeople: visit.numberOfPeople,
+          checkedInAt: currentTime,
+          discountUnlocked: demoDiscountUnlocked,
+          discountCode: demoDiscountCode,
+        },
+      });
     }
 
     // Update the visit

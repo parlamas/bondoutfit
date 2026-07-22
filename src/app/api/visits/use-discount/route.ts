@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { isDemoUser } from "@/lib/demo";
 
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
@@ -31,6 +32,11 @@ export async function POST(req: Request) {
 
   if (visit.discountUsed) {
     return NextResponse.json({ error: "Discount already used" }, { status: 400 });
+  }
+
+  // Demo accounts: simulate a successful discount use without writing to the database
+  if (isDemoUser(session)) {
+    return NextResponse.json({ success: true });
   }
 
   await prisma.visit.update({

@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { v2 as cloudinary } from 'cloudinary';
+import { isDemoUser } from '@/lib/demo';
 
 // Configure Cloudinary
 cloudinary.config({
@@ -35,6 +36,14 @@ export async function POST(request: NextRequest) {
     // Check file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
       return NextResponse.json({ error: 'File too large (max 5MB)' }, { status: 400 });
+    }
+
+    // Demo accounts: simulate a successful upload without hitting Cloudinary
+    if (isDemoUser(session)) {
+      return NextResponse.json({
+        url: "https://placehold.co/1200x1200?text=Demo+Image",
+        publicId: `demo_${session.user.id}_${Date.now()}`,
+      });
     }
 
     // Convert file to buffer

@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { isDemoUser } from '@/lib/demo';
 
 export async function PATCH(
   req: NextRequest,
@@ -38,6 +39,15 @@ export async function PATCH(
         { error: 'Visit not found or unauthorized' },
         { status: 404 }
       );
+    }
+
+    // Demo accounts: simulate a successful status update without writing to the database
+    if (isDemoUser(session)) {
+      return NextResponse.json({
+        success: true,
+        message: `Visit status updated to ${status}`,
+        visit: { ...visit, status },
+      });
     }
 
     const updatedVisit = await prisma.visit.update({

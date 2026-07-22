@@ -4,6 +4,7 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { prisma } from '@/lib/prisma';
 import { authOptions } from '@/lib/auth';
+import { isDemoUser } from '@/lib/demo';
 
 export async function PUT(request: Request) {
   try {
@@ -20,6 +21,19 @@ export async function PUT(request: Request) {
     const nameParts = name.split(' ');
     const firstName = nameParts[0] || '';
     const lastName = nameParts.slice(1).join(' ') || '';
+
+    // Demo accounts: simulate a successful update without writing to the database
+    if (isDemoUser(session)) {
+      return NextResponse.json({
+        success: true,
+        user: {
+          id: session.user.id,
+          name: `${firstName} ${lastName}`.trim(),
+          email,
+          phone,
+        },
+      });
+    }
 
     // Update user in database
     const updatedUser = await prisma.user.update({

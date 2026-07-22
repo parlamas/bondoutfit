@@ -4,6 +4,7 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { prisma } from '@/lib/prisma';
 import { authOptions } from '@/lib/auth';
+import { isDemoUser } from '@/lib/demo';
 
 // GET /api/store/items - Get all items for the store
 export async function GET() {
@@ -104,6 +105,41 @@ export async function POST(request: Request) {
       isOnSale,
       images,
     } = body;
+
+    // Demo accounts: simulate a successful creation without writing to the database
+    if (isDemoUser(session)) {
+      return NextResponse.json({
+        item: {
+          id: `demo-${Date.now()}`,
+          storeId: store.id,
+          name,
+          sku,
+          category,
+          subcategory,
+          description,
+          brand,
+          color,
+          size,
+          price: price ? Math.round(price * 100) : null,
+          comparePrice: comparePrice ? Math.round(comparePrice * 100) : null,
+          costPrice: costPrice ? Math.round(costPrice * 100) : null,
+          currency: currency || 'EUR',
+          isTaxIncluded: isTaxIncluded ?? true,
+          taxRate: taxRate || 0,
+          stockQuantity: stockQuantity || 0,
+          lowStockThreshold: lowStockThreshold || 10,
+          isInStock: isInStock ?? true,
+          allowBackorder: allowBackorder ?? false,
+          weight,
+          dimensions: dimensions ?? null,
+          visible: visible ?? true,
+          featured: featured ?? false,
+          isNew: isNew ?? false,
+          isOnSale: isOnSale ?? false,
+          images: images ?? [],
+        },
+      }, { status: 201 });
+    }
 
     const item = await prisma.storeItem.create({
       data: {

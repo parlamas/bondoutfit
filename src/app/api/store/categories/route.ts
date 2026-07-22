@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { prisma } from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
+import { isDemoUser } from "@/lib/demo";
 
 /* GET all categories for current store */
 export async function GET() {
@@ -61,6 +62,16 @@ export async function POST(req: Request) {
 
   if (!store) {
     return NextResponse.json({ error: "Store not found" }, { status: 404 });
+  }
+
+  // Demo accounts: simulate a successful creation without writing to the database
+  if (isDemoUser(session)) {
+    return NextResponse.json({
+      id: `demo-${Date.now()}`,
+      storeId: store.id,
+      title: title.trim(),
+      order: 0,
+    });
   }
 
   const last = await prisma.storeCategory.findFirst({

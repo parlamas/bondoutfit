@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { isDemoUser } from "@/lib/demo";
 
 /**
  * GET → list store images
@@ -65,6 +66,16 @@ export async function POST(req: Request) {
       { error: "Store not found" },
       { status: 404 }
     );
+  }
+
+  // Demo accounts: simulate a successful creation without writing to the database
+  if (isDemoUser(session)) {
+    return NextResponse.json({
+      id: `demo-${Date.now()}`,
+      storeId: store.id,
+      imageUrl,
+      type,
+    });
   }
 
   const image = await prisma.storeImage.create({

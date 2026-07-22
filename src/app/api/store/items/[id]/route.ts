@@ -4,6 +4,7 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { prisma } from '@/lib/prisma';
 import { authOptions } from '@/lib/auth';
+import { isDemoUser } from '@/lib/demo';
 
 // GET /api/store/items/[id] - Get a specific item
 export async function GET(
@@ -129,6 +130,40 @@ export async function PUT(
       isOnSale,
     } = body;
 
+    // Demo accounts: simulate a successful update without writing to the database
+    if (isDemoUser(session)) {
+      return NextResponse.json({
+        item: {
+          ...existingItem,
+          name,
+          sku,
+          category,
+          subcategory,
+          description,
+          brand,
+          color,
+          size,
+          price: price ? Math.round(price * 100) : null,
+          comparePrice: comparePrice ? Math.round(comparePrice * 100) : null,
+          costPrice: costPrice ? Math.round(costPrice * 100) : null,
+          currency,
+          isTaxIncluded,
+          taxRate,
+          stockQuantity,
+          lowStockThreshold,
+          isInStock,
+          allowBackorder,
+          weight,
+          dimensions: dimensions ?? null,
+          visible,
+          featured,
+          isNew,
+          isOnSale,
+          images: [],
+        },
+      });
+    }
+
     const item = await prisma.storeItem.update({
       where: { id: params.id },
       data: {
@@ -206,6 +241,11 @@ export async function DELETE(
 
     if (!existingItem) {
       return NextResponse.json({ error: 'Item not found' }, { status: 404 });
+    }
+
+    // Demo accounts: simulate a successful deletion without writing to the database
+    if (isDemoUser(session)) {
+      return NextResponse.json({ success: true });
     }
 
     // Delete the item (images will cascade delete)

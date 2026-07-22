@@ -6,6 +6,7 @@ import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { unlink } from 'fs/promises';
 import path from 'path';
+import { isDemoUser } from '@/lib/demo';
 
 export async function DELETE(
   req: NextRequest,
@@ -23,6 +24,11 @@ export async function DELETE(
 
     if (!image) {
       return NextResponse.json({ error: 'Image not found' }, { status: 404 });
+    }
+
+    // Demo accounts: simulate a successful deletion without touching disk or the database
+    if (isDemoUser(session)) {
+      return NextResponse.json({ success: true });
     }
 
     // Delete file from disk

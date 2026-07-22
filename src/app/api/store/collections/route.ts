@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { isDemoUser } from "@/lib/demo";
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -59,6 +60,17 @@ export async function POST(request: Request) {
       { error: "Store not found" },
       { status: 404 }
     );
+  }
+
+  // Demo accounts: simulate a successful creation without writing to the database
+  if (isDemoUser(session)) {
+    return NextResponse.json({
+      id: `demo-${Date.now()}`,
+      storeId: store.id,
+      title: body.title.trim(),
+      createdAt: new Date().toISOString(),
+      images: [],
+    });
   }
 
   const collection = await prisma.storeCollection.create({

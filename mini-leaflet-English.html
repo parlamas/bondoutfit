@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Bondoutfit Mini Leaflet — EN</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,600;1,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  :root{
+    --ivory:#f7f3ec;
+    --charcoal:#2a2620;
+    --gold:#b8863c;
+    --line:#d8cfc0;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  @page{ size:A4; margin:0; }
+  body{
+    width:210mm; height:297mm;
+    background:#fff;
+    font-family:'Inter',sans-serif;
+    color:var(--charcoal);
+  }
+  .sheet{
+    width:210mm; height:297mm;
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    grid-template-rows:repeat(4,1fr);
+    padding:10mm;
+  }
+  .tile{
+    background:var(--ivory);
+    border:1px dashed var(--line);
+    padding:4mm;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    align-items:center;
+    text-align:center;
+  }
+  .brand{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:9px;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+    color:var(--gold);
+  }
+  .headline{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:13px;
+    line-height:1.25;
+    margin:2mm 0 1mm;
+  }
+  .headline em{ color:var(--gold); font-style:italic; }
+  .sub{
+    font-size:8.5px;
+    line-height:1.3;
+    color:#5b5448;
+    max-width:38mm;
+  }
+  .qr{ margin:2mm 0; }
+  .qr canvas, .qr img{ width:20mm !important; height:20mm !important; }
+  .store{
+    font-size:8px;
+    font-weight:600;
+    letter-spacing:0.5px;
+    text-transform:uppercase;
+    border-top:1px solid var(--line);
+    padding-top:1.5mm;
+    width:100%;
+  }
+  .footer{ font-size:7px; color:#8a8072; margin-top:0.5mm; }
+</style>
+</head>
+<body>
+  <div class="sheet" id="sheet"></div>
+
+<script>
+  const qrText = "https://bondoutfit.com/stores/demo-store"; // replace with real storeId link per store
+
+  const tileHTML = (i) => `
+    <div class="tile">
+      <div class="brand">Bondoutfit</div>
+      <div class="headline">Scan &amp; book<br><em>your next visit</em></div>
+      <div class="sub">Skip the line — book online, get rewarded when you arrive.</div>
+      <div class="qr" id="qr${i}"></div>
+      <div class="store">[ Store Name ]</div>
+      <div class="footer">bondoutfit.com</div>
+    </div>`;
+
+  const sheet = document.getElementById('sheet');
+  for(let i=0;i<8;i++){ sheet.insertAdjacentHTML('beforeend', tileHTML(i)); }
+
+  window.onload = () => {
+    for(let i=0;i<8;i++){
+      new QRCode(document.getElementById(`qr${i}`), {
+        text: qrText, width: 90, height: 90,
+        colorDark: "#2a2620", colorLight: "#f7f3ec"
+      });
+    }
+  };
+</script>
+</body>
+</html>

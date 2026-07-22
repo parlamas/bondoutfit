@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { isDemoUser } from "@/lib/demo";
 
 export async function PATCH(
   req: NextRequest,
@@ -49,6 +50,15 @@ export async function PATCH(
       updateData.isActive = true;
     } else if (status === "DISMOUNTED" || status === "DELETED") {
       updateData.isActive = false;
+    }
+
+    // Demo accounts: simulate a successful status update without writing to the database
+    if (isDemoUser(session)) {
+      return NextResponse.json({
+        success: true,
+        message: `Discount status updated to ${status}`,
+        discount: { ...discount, ...updateData },
+      });
     }
 
     const updatedDiscount = await prisma.discount.update({

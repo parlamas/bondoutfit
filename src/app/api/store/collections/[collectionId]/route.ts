@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { isDemoUser } from '@/lib/demo';
 
 export async function GET(
   req: NextRequest,
@@ -81,6 +82,15 @@ export async function PATCH(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 
+    // Demo accounts: simulate a successful update without writing to the database
+    if (isDemoUser(session)) {
+      return NextResponse.json({
+        ...collection,
+        title: title !== undefined ? title : collection.title,
+        images: [],
+      });
+    }
+
     const updated = await prisma.storeCollection.update({
       where: { id: params.collectionId },
       data: {
@@ -128,6 +138,11 @@ export async function DELETE(
 
     if (collection.storeId !== store.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+    }
+
+    // Demo accounts: simulate a successful deletion without writing to the database
+    if (isDemoUser(session)) {
+      return NextResponse.json({ success: true });
     }
 
     await prisma.storeCollection.delete({

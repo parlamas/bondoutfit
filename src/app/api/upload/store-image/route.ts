@@ -5,6 +5,7 @@ import { getServerSession } from 'next-auth';
 import { v2 as cloudinary, UploadApiResponse, UploadApiErrorResponse } from 'cloudinary';
 import { prisma } from '@/lib/prisma';
 import { authOptions } from '@/lib/auth';
+import { isDemoUser } from '@/lib/demo';
 
 // Configure Cloudinary
 if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
@@ -49,6 +50,42 @@ export async function POST(req: NextRequest) {
     // Validate file type
     if (!file.type.startsWith('image/')) {
       return NextResponse.json({ error: 'File must be an image' }, { status: 400 });
+    }
+
+    // Demo accounts: simulate a successful upload without hitting Cloudinary or the database
+    if (isDemoUser(session)) {
+      const demoUrl = "https://placehold.co/400x300?text=Demo+Image";
+      const demoImageType =
+        type === "logo" ? "LOGO" :
+        type === "storefront" ? "STOREFRONT" :
+        "GALLERY";
+
+      if (demoImageType === "LOGO" || demoImageType === "STOREFRONT") {
+        return NextResponse.json({
+          id: `demo-${Date.now()}`,
+          url: demoUrl,
+        });
+      }
+
+      if (categoryId) {
+        return NextResponse.json({
+          id: `demo-${Date.now()}`,
+          url: demoUrl,
+          description: description || null,
+          order: 0,
+        });
+      }
+
+      if (demoImageType === "GALLERY" && !categoryId) {
+        return NextResponse.json({
+          id: `demo-${Date.now()}`,
+          url: demoUrl,
+          description: description || null,
+          order: 0,
+        });
+      }
+
+      return NextResponse.json({ error: 'Invalid image type' }, { status: 400 });
     }
 
     // Convert file to buffer
