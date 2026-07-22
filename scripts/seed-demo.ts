@@ -26,7 +26,7 @@ async function seedDemo() {
       storeId: store.id,
       sku: "DEMO-SHIRT-001",
       name: "Linen Shirt",
-      category: "Shirts",
+      category: "CLOTHING",
       price: 4900,
       currency: "EUR",
       stockQuantity: 12,
