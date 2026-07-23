@@ -7,6 +7,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Users, Shield } from 'lucide-react';
 import MobileMenu from "./components/MobileMenu";
+import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
 function StoreSelector() {
@@ -122,11 +123,14 @@ function IntroSection() {
           <Users className="h-7 w-7 text-brand-gold" />
           <h3 className="font-serif text-xl font-semibold text-brand-ink">{t('forCustomers')}</h3>
         </div>
-        <p className="text-brand-inksoft font-sans leading-relaxed">
+        <p className="text-brand-inksoft font-sans leading-relaxed mb-4">
           {t.rich('customersText', {
             strong: (chunks) => <strong className="text-brand-ink">{chunks}</strong>
           })}
         </p>
+        <Link href="/for-customers" className="text-brand-gold font-sans font-semibold text-sm hover:underline">
+          For Customers &rarr;
+        </Link>
       </div>
 
       {/* Store Managers */}
@@ -135,9 +139,12 @@ function IntroSection() {
           <Shield className="h-7 w-7 text-brand-ink" />
           <h3 className="font-serif text-xl font-semibold text-brand-ink">{t('forStoreManagers')}</h3>
         </div>
-        <p className="text-brand-inksoft font-sans leading-relaxed">
+        <p className="text-brand-inksoft font-sans leading-relaxed mb-4">
           {t('managersText')}
         </p>
+        <Link href="/for-managers" className="text-brand-gold font-sans font-semibold text-sm hover:underline">
+          For Managers &rarr;
+        </Link>
       </div>
     </section>
   );
