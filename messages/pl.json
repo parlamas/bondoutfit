@@ -1,0 +1,16 @@
+{
+  "HomePage": {
+    "scheduleHeading": "Zarezerwuj wizytę i zdobądź rabat",
+    "country": "Kraj",
+    "selectCountry": "Wybierz kraj",
+    "city": "Miasto",
+    "selectCity": "Wybierz miasto",
+    "store": "Sklep",
+    "selectStore": "Wybierz sklep",
+    "viewStoreCta": "Zobacz sklep i zarezerwuj wizytę",
+    "forCustomers": "Dla klientów",
+    "customersText": "Dzięki <strong>Scheduled Visit Discount (SVD)</strong> rezerwujesz wizytę w sklepie z wyprzedzeniem. Jeśli przyjdziesz na czas i dokonasz zakupu, otrzymujesz wcześniej uzgodniony rabat. Bez czekania, bez niepewności, lepsze ceny.",
+    "forStoreManagers": "Dla właścicieli sklepów",
+    "managersText": "SVD zamienia zaplanowane wizyty w przewidywalny popyt. Wiesz, kto przyjdzie, kiedy i dlaczego. Rabaty są rekompensowane wyższą konwersją, płynniejszą pracą i lepszym wykorzystaniem personelu oraz przestrzeni."
+  }
+}

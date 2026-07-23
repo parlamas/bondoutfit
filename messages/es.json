@@ -1,0 +1,16 @@
+{
+  "HomePage": {
+    "scheduleHeading": "Reserva una visita y obtén un descuento",
+    "country": "País",
+    "selectCountry": "Selecciona un país",
+    "city": "Ciudad",
+    "selectCity": "Selecciona una ciudad",
+    "store": "Tienda",
+    "selectStore": "Selecciona una tienda",
+    "viewStoreCta": "Ver tienda y reservar visita",
+    "forCustomers": "Para clientes",
+    "customersText": "Con <strong>Scheduled Visit Discount (SVD)</strong>, reservas una visita a la tienda con antelación. Si llegas a tiempo y realizas una compra, recibes un descuento previamente acordado. Sin esperas, sin incertidumbre, mejores precios.",
+    "forStoreManagers": "Para dueños de tiendas",
+    "managersText": "SVD convierte las visitas planificadas en demanda predecible. Sabes quién viene, cuándo y por qué. Los descuentos se compensan con mayor conversión, operaciones más fluidas y mejor uso del personal y del espacio."
+  }
+}

@@ -7,8 +7,10 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Users, Shield } from 'lucide-react';
 import MobileMenu from "./components/MobileMenu";
+import { useTranslations } from 'next-intl';
 
 function StoreSelector() {
+  const t = useTranslations('HomePage');
   const [stores, setStores] = useState<
     { id: string; storeName: string; country: string; city: string }[] // FIXED: Changed 'name' to 'storeName'
   >([]);
@@ -37,12 +39,12 @@ function StoreSelector() {
     <section className="max-w-4xl mx-auto px-4 py-8 sm:px-6 sm:py-10">
       <div className="bg-brand-paper border border-brand-stoneborder rounded-xl shadow-sm p-5 sm:p-7 space-y-5 sm:space-y-6">
         <h2 className="font-serif text-2xl font-semibold text-brand-ink">
-          Schedule a Visit &amp; Get a Discount
+          {t('scheduleHeading')}
         </h2>
 
         {/* Country */}
         <div>
-          <label className="block text-sm font-sans font-medium text-brand-ink mb-1.5">Country</label>
+          <label className="block text-sm font-sans font-medium text-brand-ink mb-1.5">{t('country')}</label>
           <select
             value={country}
             onChange={e => {
@@ -52,7 +54,7 @@ function StoreSelector() {
             }}
             className="w-full border border-brand-stoneborder bg-white rounded-lg p-2.5 font-sans text-brand-ink focus:ring-2 focus:ring-brand-gold focus:border-brand-gold"
           >
-            <option value="">Select country</option>
+            <option value="">{t('selectCountry')}</option>
             {countries.map(c => (
               <option key={c} value={c}>{c}</option>
             ))}
@@ -62,7 +64,7 @@ function StoreSelector() {
         {/* City */}
         {country && (
           <div>
-            <label className="block text-sm font-sans font-medium text-brand-ink mb-1.5">City</label>
+            <label className="block text-sm font-sans font-medium text-brand-ink mb-1.5">{t('city')}</label>
             <select
               value={city}
               onChange={e => {
@@ -71,7 +73,7 @@ function StoreSelector() {
               }}
               className="w-full border border-brand-stoneborder bg-white rounded-lg p-2.5 font-sans text-brand-ink focus:ring-2 focus:ring-brand-gold focus:border-brand-gold"
             >
-              <option value="">Select city</option>
+              <option value="">{t('selectCity')}</option>
               {cities.map(c => (
                 <option key={c} value={c}>{c}</option>
               ))}
@@ -82,13 +84,13 @@ function StoreSelector() {
         {/* Store */}
         {city && (
           <div>
-            <label className="block text-sm font-sans font-medium text-brand-ink mb-1.5">Store</label>
+            <label className="block text-sm font-sans font-medium text-brand-ink mb-1.5">{t('store')}</label>
             <select
               value={storeId}
               onChange={e => setStoreId(e.target.value)}
               className="w-full border border-brand-stoneborder bg-white rounded-lg p-2.5 font-sans text-brand-ink focus:ring-2 focus:ring-brand-gold focus:border-brand-gold"
             >
-              <option value="">Select store</option>
+              <option value="">{t('selectStore')}</option>
               {filteredStores.map(s => (
                 <option key={s.id} value={s.id}>{s.storeName}</option> // FIXED: Changed s.name to s.storeName
               ))}
@@ -102,7 +104,7 @@ function StoreSelector() {
             onClick={() => router.push(`/stores/${storeId}`)}
             className="w-full bg-brand-ink hover:bg-brand-golddeep text-white py-3 rounded-lg text-base font-serif font-semibold transition-colors"
           >
-            View Store &amp; Schedule Visit
+            {t('viewStoreCta')}
           </button>
         )}
       </div>
@@ -111,19 +113,19 @@ function StoreSelector() {
 }
 
 function IntroSection() {
+  const t = useTranslations('HomePage');
   return (
     <section className="max-w-5xl mx-auto px-4 py-10 grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
       {/* Customers */}
       <div className="bg-brand-paper border border-brand-stoneborder rounded-xl shadow-sm p-6">
         <div className="flex items-center gap-3 mb-4">
           <Users className="h-7 w-7 text-brand-gold" />
-          <h3 className="font-serif text-xl font-semibold text-brand-ink">For Customers</h3>
+          <h3 className="font-serif text-xl font-semibold text-brand-ink">{t('forCustomers')}</h3>
         </div>
         <p className="text-brand-inksoft font-sans leading-relaxed">
-          With <strong className="text-brand-ink">Scheduled Visit Discount (SVD)</strong>, you book a store
-          visit in advance. If you arrive on time and make a purchase, you
-          receive a pre-agreed discount. No waiting, no uncertainty, better
-          prices.
+          {t.rich('customersText', {
+            strong: (chunks) => <strong className="text-brand-ink">{chunks}</strong>
+          })}
         </p>
       </div>
 
@@ -131,12 +133,10 @@ function IntroSection() {
       <div className="bg-brand-paper border border-brand-stoneborder rounded-xl shadow-sm p-6">
         <div className="flex items-center gap-3 mb-4">
           <Shield className="h-7 w-7 text-brand-ink" />
-          <h3 className="font-serif text-xl font-semibold text-brand-ink">For Store Managers</h3>
+          <h3 className="font-serif text-xl font-semibold text-brand-ink">{t('forStoreManagers')}</h3>
         </div>
         <p className="text-brand-inksoft font-sans leading-relaxed">
-          SVD turns planned visits into predictable demand. You know who is
-          coming, when, and why. Discounts are offset by higher conversion,
-          smoother operations, and better use of staff and space.
+          {t('managersText')}
         </p>
       </div>
     </section>
@@ -168,6 +168,7 @@ export default function HomePage() {
     </div>
   );
 }
+
 
 
 

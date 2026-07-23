@@ -8,6 +8,9 @@ import NavBar from "./components/NavBar";
 import MobileMenu from "./components/MobileMenu";
 import { Analytics } from "@vercel/analytics/next";
 import WhatsAppButton from '@/components/WhatsAppButton';
+import { NextIntlClientProvider } from 'next-intl';
+import { getLocale, getMessages } from 'next-intl/server';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -17,22 +20,32 @@ export const metadata: Metadata = {
     "Schedule store visits and get exclusive discounts with our SVD platform",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const locale = await getLocale();
+  const messages = await getMessages();
+
   return (
-    <html lang="en">
+    <html lang={locale}>
       <body className={inter.className}>
-        <AuthProvider>
-          <NavBar />
-          <MobileMenu />
-          {children}
-        </AuthProvider>
-        <Analytics />
-        <WhatsAppButton />
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          <AuthProvider>
+            <div className="flex justify-end px-4 py-2">
+              <LanguageSwitcher />
+            </div>
+            <NavBar />
+            <MobileMenu />
+            {children}
+          </AuthProvider>
+          <Analytics />
+          <WhatsAppButton />
+        </NextIntlClientProvider>
       </body>
     </html>
   );
 }
+
+

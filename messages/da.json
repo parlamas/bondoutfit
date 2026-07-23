@@ -1,0 +1,16 @@
+{
+  "HomePage": {
+    "scheduleHeading": "Book en tid og få rabat",
+    "country": "Land",
+    "selectCountry": "Vælg land",
+    "city": "By",
+    "selectCity": "Vælg by",
+    "store": "Butik",
+    "selectStore": "Vælg butik",
+    "viewStoreCta": "Se butik og book besøg",
+    "forCustomers": "Til kunder",
+    "customersText": "Med <strong>Scheduled Visit Discount (SVD)</strong> booker du et butiksbesøg på forhånd. Hvis du kommer til tiden og køber noget, får du en aftalt rabat. Ingen ventetid, ingen usikkerhed, bedre priser.",
+    "forStoreManagers": "Til butiksejere",
+    "managersText": "SVD gør planlagte besøg til forudsigelig efterspørgsel. Du ved, hvem der kommer, hvornår og hvorfor. Rabatterne opvejes af højere konvertering, mere jævn drift og bedre brug af personale og plads."
+  }
+}
