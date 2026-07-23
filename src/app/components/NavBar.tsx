@@ -15,7 +15,7 @@ export default function RoleBasedNavbar() {
 
 
   return (
-    <header className="w-full border-b bg-white">
+    <header className="w-full border-b bg-white sticky top-0 z-50">
   <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
   {/* LEFT */}
   <div className="hidden md:flex items-center gap-3">
