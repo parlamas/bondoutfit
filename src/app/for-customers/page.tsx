@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import { Calendar, Percent, Clock, Sparkles, ShoppingBag, ThumbsUp } from 'lucide-react';
 
+export const dynamic = 'force-dynamic';
+
 export default async function ForCustomersPage() {
   const t = await getTranslations('ForCustomers');
 

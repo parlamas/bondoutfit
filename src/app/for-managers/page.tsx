@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import { Calendar, TrendingUp, Users, Clock, ShieldCheck, BarChart3 } from 'lucide-react';
 
+export const dynamic = 'force-dynamic';
+
 export default async function ForManagersPage() {
   const t = await getTranslations('ForManagers');
 
