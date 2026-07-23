@@ -33,10 +33,12 @@ export default async function RootLayout({
       <body className={inter.className}>
         <NextIntlClientProvider locale={locale} messages={messages}>
           <AuthProvider>
-            <div className="flex justify-end px-4 py-2">
-              <LanguageSwitcher />
+            <div className="sticky top-0 z-50 bg-white">
+              <div className="flex justify-end px-4 py-2 border-b">
+                <LanguageSwitcher />
+              </div>
+              <NavBar />
             </div>
-            <NavBar />
             <MobileMenu />
             {children}
           </AuthProvider>
