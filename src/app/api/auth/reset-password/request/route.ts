@@ -4,10 +4,20 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { transporter } from "@/lib/email";
 import { randomBytes } from "crypto";
+import { isDemoEmail } from "@/lib/demo";
 
 export async function POST(request: NextRequest) {
   try {
     const { email, type = 'customer' } = await request.json();
+
+    if (isDemoEmail(email)) {
+      // Demo account: never actually send a reset email, but respond
+      // identically so the endpoint doesn't reveal which accounts are demo.
+      return NextResponse.json(
+        { message: "If an account exists, you will receive a reset email." },
+        { status: 200 }
+      );
+    }
 
     const user = await prisma.user.findUnique({
       where: { email },
