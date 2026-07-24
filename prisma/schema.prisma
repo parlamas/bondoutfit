@@ -196,6 +196,9 @@ model Store {
   rating             Float?   @default(0)
   totalReviews       Int      @default(0)
 
+  // Payment gating (manual bank transfer, no Stripe)
+  paymentStatus String @default("pending") // "pending" | "active"
+
   // Hours
   openingHours Json?
   holidays     DateTime[]

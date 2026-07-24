@@ -52,7 +52,19 @@ export default function StoreDashboard() {
   
   // Only load data if user is a store manager
   if (status === 'authenticated' && session?.user?.role === 'STORE_MANAGER') {
-    loadRecentCheckIns();
+    fetch('/api/store/payment-status')
+      .then(res => res.json())
+      .then(data => {
+        if (data.paymentStatus !== 'active') {
+          router.push('/dashboard/store/payment-pending');
+          return;
+        }
+        loadRecentCheckIns();
+      })
+      .catch(() => {
+        // Fail safe: if the check itself fails, don't let them through
+        router.push('/dashboard/store/payment-pending');
+      });
   }
 }, [status, session, router]);
 
