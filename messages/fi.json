@@ -73,5 +73,16 @@
     "finalCtaTitle": "Valmis ensimmäiseen käyntiisi?",
     "finalCtaBody": "Etsi lähellä oleva liike ja varaa sinulle sopiva aika.",
     "findStoreCta": "Etsi liike"
-  }
+  },
+  "HowItWorks": {
+  "title": "Näin SVD toimii",
+  "step1Title": "1. Liike ilmoittaa SVD:stä",
+  "step1Body": "Liikkeenomistajat luovat aikasidonnaisia alennustarjouksia varatuille käynneille.",
+  "step2Title": "2. Asiakas varaa käynnin",
+  "step2Body": "Asiakkaat selaavat vapaita aikoja ja varaavat käyntinsä BondOutfitin kautta.",
+  "step3Title": "3. Asiakas käy liikkeessä",
+  "step3Body": "Asiakas saapuu varattuun aikaan ja ilmoittautuu liikkeessä.",
+  "step4Title": "4. Alennus otetaan käyttöön",
+  "step4Body": "Liike soveltaa etukäteen ilmoitetun alennuksen asiakkaan ostokseen."
+}
 }

@@ -73,5 +73,16 @@
     "finalCtaTitle": "Klar for ditt første besøk?",
     "finalCtaBody": "Finn en butikk i nærheten og book et tidspunkt som passer deg.",
     "findStoreCta": "Finn en butikk"
-  }
+  },
+  "HowItWorks": {
+  "title": "Slik fungerer SVD",
+  "step1Title": "1. Butikken annonserer SVD",
+  "step1Body": "Butikkeiere oppretter tidsbestemte rabattilbud for planlagte besøk.",
+  "step2Title": "2. Kunden booker besøk",
+  "step2Body": "Kunder ser ledige tider og booker besøket sitt via BondOutfit.",
+  "step3Title": "3. Kunden besøker butikken",
+  "step3Body": "Kunden møter opp til avtalt tid og sjekker inn i butikken.",
+  "step4Title": "4. Rabatt anvendes",
+  "step4Body": "Butikken gir den annonserte rabatten på kundens kjøp."
+}
 }

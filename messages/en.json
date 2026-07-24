@@ -73,5 +73,16 @@
     "finalCtaTitle": "Ready to book your first visit?",
     "finalCtaBody": "Find a store near you and reserve a time that works for you.",
     "findStoreCta": "Find a Store"
-  }
+  },
+  "HowItWorks": {
+  "title": "How SVD Works",
+  "step1Title": "1. Store Announces SVD",
+  "step1Body": "Store managers create time-specific discount offers for scheduled visits.",
+  "step2Title": "2. Customer Schedules Visit",
+  "step2Body": "Customers browse available time slots and book their visit through BondOutfit.",
+  "step3Title": "3. Customer Visits Store",
+  "step3Body": "Customer shows up at the scheduled time and checks in at the store.",
+  "step4Title": "4. Discount Applied",
+  "step4Body": "Store applies the pre-announced discount to the customer's purchase."
+}
 }

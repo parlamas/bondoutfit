@@ -73,5 +73,16 @@
     "finalCtaTitle": "Redo för ditt första besök?",
     "finalCtaBody": "Hitta en butik nära dig och boka en tid som passar dig.",
     "findStoreCta": "Hitta en butik"
-  }
+  },
+  "HowItWorks": {
+  "title": "Så fungerar SVD",
+  "step1Title": "1. Butiken annonserar SVD",
+  "step1Body": "Butiksägare skapar tidsbestämda rabatterbjudanden för planerade besök.",
+  "step2Title": "2. Kunden bokar besök",
+  "step2Body": "Kunder ser lediga tider och bokar sitt besök via BondOutfit.",
+  "step3Title": "3. Kunden besöker butiken",
+  "step3Body": "Kunden dyker upp vid den bokade tiden och checkar in i butiken.",
+  "step4Title": "4. Rabatt tillämpas",
+  "step4Body": "Butiken ger den utlovade rabatten på kundens köp."
+}
 }

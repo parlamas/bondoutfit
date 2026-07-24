@@ -73,5 +73,16 @@
   "finalCtaTitle": "Pronto para sua primeira visita?",
   "finalCtaBody": "Encontre uma loja perto de você e agende um horário que funcione para você.",
   "findStoreCta": "Encontrar loja"
+},
+"HowItWorks": {
+  "title": "Como funciona o SVD",
+  "step1Title": "1. A loja anuncia o SVD",
+  "step1Body": "Os lojistas criam ofertas de desconto para horários específicos de visitas agendadas.",
+  "step2Title": "2. O cliente agenda uma visita",
+  "step2Body": "Os clientes veem os horários disponíveis e agendam sua visita através do BondOutfit.",
+  "step3Title": "3. O cliente visita a loja",
+  "step3Body": "O cliente chega no horário agendado e faz check-in na loja.",
+  "step4Title": "4. Desconto aplicado",
+  "step4Body": "A loja aplica o desconto anunciado na compra do cliente."
 }
 }

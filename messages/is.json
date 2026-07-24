@@ -73,5 +73,16 @@
     "finalCtaTitle": "Tilbúin/n í fyrstu heimsóknina þína?",
     "finalCtaBody": "Finndu verslun nálægt þér og bókaðu tíma sem hentar þér.",
     "findStoreCta": "Finna verslun"
-  }
+  },
+  "HowItWorks": {
+  "title": "Svona virkar SVD",
+  "step1Title": "1. Verslunin auglýsir SVD",
+  "step1Body": "Verslunareigendur búa til tímabundin afsláttartilboð fyrir bókaðar heimsóknir.",
+  "step2Title": "2. Viðskiptavinur bókar heimsókn",
+  "step2Body": "Viðskiptavinir skoða lausa tíma og bóka heimsókn sína í gegnum BondOutfit.",
+  "step3Title": "3. Viðskiptavinur heimsækir verslun",
+  "step3Body": "Viðskiptavinur mætir á bókuðum tíma og skráir sig inn í versluninni.",
+  "step4Title": "4. Afsláttur er veittur",
+  "step4Body": "Verslunin veitir hinn auglýsta afslátt á kaup viðskiptavinarins."
+}
 }
