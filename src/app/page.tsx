@@ -155,6 +155,21 @@ function IntroSection() {
    HOME PAGE
 ========================= */
 
+function HeroSection() {
+  const t = useTranslations('HomePage');
+  return (
+    <section className="max-w-4xl mx-auto px-4 pt-10 pb-2 text-center">
+      <h1 className="font-serif text-3xl sm:text-4xl font-bold text-brand-ink leading-tight">
+        {t('heroHeadline')}<br />
+        <span className="text-brand-gold italic">{t('heroAccent')}</span>
+      </h1>
+      <p className="mt-3 text-brand-inksoft font-sans italic">
+        {t('heroSubline')}
+      </p>
+    </section>
+  );
+}
+
 export default function HomePage() {
   const { data: session } = useSession();
   const role = (session?.user as any)?.role;
@@ -170,12 +185,12 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-brand-stone pt-14 md:pt-0">
       <MobileMenu />
+      {role !== "STORE_MANAGER" && <HeroSection />}
       {role !== "STORE_MANAGER" && <StoreSelector />}
       <IntroSection />
     </div>
   );
 }
-
 
 
 
