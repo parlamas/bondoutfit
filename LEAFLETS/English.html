@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @page { size: A4; margin: 0; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: Georgia, 'Iowan Old Style', 'Times New Roman', serif;
+    color: #2b2620;
+  }
+  .page {
+    width: 210mm;
+    height: 297mm;
+    background: #faf6ee;
+    padding: 18mm;
+    display: flex;
+    flex-direction: column;
+    page-break-after: always;
+  }
+  .page:last-child { page-break-after: avoid; }
+
+  .brand {
+    font-size: 15pt;
+    letter-spacing: 2.5px;
+    color: #b3872f;
+    font-weight: bold;
+    text-transform: uppercase;
+  }
+  .rule { width: 30mm; height: 1.4pt; background: #b3872f; margin: 5mm 0 8mm 0; }
+
+  .headline {
+    font-size: 26pt;
+    line-height: 1.2;
+    color: #2b2620;
+    font-weight: bold;
+    margin-bottom: 8mm;
+  }
+  .headline .accent { color: #b3872f; font-style: italic; }
+
+  .story {
+    font-family: Georgia, 'Iowan Old Style', 'Times New Roman', serif;
+    font-size: 10.3pt;
+    line-height: 1.55;
+    color: #3a332a;
+  }
+  .story p { margin-bottom: 5mm; }
+  .story .lede {
+    font-size: 12.5pt;
+    color: #2b2620;
+  }
+  .story strong { color: #2b2620; }
+  .story em { color: #b3872f; font-style: italic; }
+
+  .shift {
+    margin: 6mm 0;
+  }
+  .shift-label {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 7.5pt;
+    font-weight: bold;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    margin-bottom: 2mm;
+  }
+
+  .shift-one {
+    border-left: 2.5pt solid #b3872f;
+    padding-left: 5mm;
+  }
+  .shift-one .shift-label { color: #b3872f; }
+
+  .shift-two {
+    background: #efe6d3;
+    border-radius: 2.5mm;
+    padding: 5mm 6mm;
+    margin-left: 8mm;
+  }
+  .shift-two .shift-label { color: #2b2620; }
+  .shift-two p { margin-bottom: 3.5mm; }
+  .shift-two p:last-child { margin-bottom: 0; }
+
+  .page-footer {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 9pt;
+    color: #8a7f6d;
+    border-top: 0.7pt solid #ddd2ba;
+    padding-top: 4mm;
+    margin-top: auto;
+  }
+
+  /* ---- Page 2 specifics ---- */
+  h2.section {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 12pt;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: #b3872f;
+    margin: 0 0 6mm 0;
+  }
+  .steps {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    margin-bottom: 8mm;
+  }
+  .step {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 5mm;
+  }
+  .step-num {
+    flex: 0 0 auto;
+    width: 8mm;
+    height: 8mm;
+    border-radius: 50%;
+    border: 1.2pt solid #b3872f;
+    color: #b3872f;
+    font-size: 10pt;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 5mm;
+  }
+  .step-text-title {
+    font-size: 11pt;
+    font-weight: bold;
+    color: #2b2620;
+    margin-bottom: 1mm;
+  }
+  .step-text-body {
+    font-size: 9.6pt;
+    line-height: 1.4;
+    color: #6a5f4f;
+  }
+
+  .logins {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    display: flex;
+    gap: 6mm;
+    margin-bottom: 8mm;
+  }
+  .login-box {
+    flex: 1;
+    background: #ffffff;
+    border: 0.8pt solid #e4dac0;
+    border-radius: 3mm;
+    padding: 5mm 6mm;
+  }
+  .login-box .login-label {
+    font-size: 8.3pt;
+    text-transform: uppercase;
+    letter-spacing: 0.6pt;
+    color: #b3872f;
+    margin-bottom: 2.5mm;
+  }
+  .login-box .login-line {
+    font-size: 9.3pt;
+    color: #2b2620;
+    line-height: 1.6;
+  }
+  .login-box .login-line span { color: #8a7f6d; }
+  .login-box .login-line .val { color: #0e7490; font-weight: bold; }
+
+  .cta {
+    background: #ffffff;
+    border: 0.8pt solid #e4dac0;
+    border-radius: 3mm;
+    padding: 5mm 6mm;
+    display: flex;
+    align-items: center;
+    gap: 6mm;
+    margin-bottom: 5mm;
+  }
+  .cta img { width: 24mm; height: 24mm; display: block; border-radius: 1.5mm; }
+  .cta-text { font-family: 'Helvetica Neue', Arial, sans-serif; }
+  .cta-text .cta-title {
+    font-size: 10.5pt;
+    font-weight: bold;
+    color: #2b2620;
+    margin-bottom: 1.5mm;
+  }
+  .cta-text .cta-body {
+    font-size: 9pt;
+    color: #6a5f4f;
+    line-height: 1.4;
+    margin-bottom: 1.5mm;
+  }
+  .cta-text .cta-contact { font-size: 9pt; color: #b3872f; }
+  .cta-text .cta-contact2 { font-size: 8.4pt; color: #6a5f4f; margin-top: 0.5mm; }
+</style>
+</head>
+<body>
+
+  <!-- PAGE 1: THE STORY -->
+  <div class="page">
+    <div class="brand">Bondoutfit</div>
+    <div class="rule"></div>
+    <div class="headline">Discounts don't sell.<br><span class="accent">Commitment does.</span></div>
+
+    <div class="story">
+      <p class="lede">I walked down another street today, past window after window promising twenty
+      percent off, thirty percent off, buy-one-get-one. The signs were confident. The stores behind
+      them were quiet.</p>
+
+      <p>It's a strange contradiction every retailer knows intimately: the discount is right there,
+      printed in bold, impossible to miss — and still, most people walk straight past it. Why?</p>
+
+      <p>Because a discount sign asks nothing of the person looking at it. It's free to ignore. It
+      costs nothing to walk by. And when something costs nothing, it rarely earns much attention
+      either.</p>
+
+      <div class="shift shift-one">
+        <div class="shift-label">Shift one — commitment</div>
+        <p>But something changes the moment a customer books an appointment. Suddenly there's a small
+        promise on both sides — the customer has agreed to show up, and quietly, the discount stops
+        being a free giveaway and turns into something they're actually going to <em>earn</em>.</p>
+
+        <p>That's not a coincidence. It's how people work. Ask anyone who has ever put down a deposit,
+        confirmed their attendance at a dinner, or booked a haircut two weeks in advance — the simple act of committing
+        changes how seriously we take what comes after. Why we crave a small commitment before a
+        reward doesn't really matter for our purposes here. What matters is that we do.</p>
+      </div>
+
+      <div class="shift shift-two">
+        <div class="shift-label">Shift two — the bond</div>
+        <p>There's a second, quieter shift that happens the moment someone books a visit to your store.
+        They stop being anonymous foot traffic and become, however briefly, <strong>expected</strong>.
+        Someone on your team now knows they're coming. And knowing changes everything — the greeting
+        is warmer, the attention sharper, the whole interaction less like a transaction and more like
+        it was arranged in advance, because it was. It's also, quietly, an opportunity: for your
+        staff, whose own charisma has more room to show when they're not just reacting to a stranger
+        — and for the customer, who tends to let more of their own personality come through when
+        they feel expected rather than anonymous.</p>
+
+        <p>This is the idea behind Bondoutfit's name. Not a coupon. Not a gimmick. A <strong>bond</strong>
+        — between your business, your staff, and the person walking through your door with an
+        appointment already in hand.</p>
+      </div>
+
+      <p>Your discount signs aren't wrong. They're just doing half the job. Bondoutfit is the other
+      half — the part that turns a passing glance into a kept promise.</p>
+    </div>
+
+    <div class="page-footer">bondoutfit.com &nbsp;·&nbsp; appointment booking for independent retail</div>
+  </div>
+
+  <!-- PAGE 2: HOW IT WORKS + TRY IT -->
+  <div class="page">
+    <h2 class="section">So here's how it actually works</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div>
+          <div class="step-text-title">The customer finds your store</div>
+          <div class="step-text-body">They find you through bondoutfit.com's directory, or go straight to your own address — for example, yourstore.bondoutfit.com — if you'd rather send them there directly.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div>
+          <div class="step-text-title">They book a time</div>
+          <div class="step-text-body">The visit goes straight into your store's calendar — no calls, no back-and-forth.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div>
+          <div class="step-text-title">You're ready for them</div>
+          <div class="step-text-body">You know who's coming and when, so your team can prepare — and greet them properly, not react to a stranger.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div>
+          <div class="step-text-title">They visit, and they earn it</div>
+          <div class="step-text-body">On arrival, they unlock the discount they committed to — and this time, it actually gets used.</div>
+        </div>
+      </div>
+    </div>
+
+    <h2 class="section">See it for yourself</h2>
+    <div class="sub" style="margin-bottom: 3mm;">The demo below is a clothing boutique, but the same idea works for any retail business — furniture, electronics, books, anything where a visit and a purchase go together.</div>
+    <div class="logins">
+      <div class="login-box">
+        <div class="login-label">Try it as a store owner</div>
+        <div class="login-line"><span>user:</span> <span class="val">horistics@outlook.com</span></div>
+        <div class="login-line"><span>code:</span> <span class="val">goforit456.</span></div>
+      </div>
+      <div class="login-box">
+        <div class="login-label">Try it as a customer</div>
+        <div class="login-line"><span>user:</span> <span class="val">horistics@gmail.com</span></div>
+        <div class="login-line"><span>code:</span> <span class="val">goforit123.</span></div>
+      </div>
+    </div>
+
+    <div class="cta">
+      <img src="qr.png" alt="QR code">
+      <div class="cta-text">
+        <div class="cta-title">Scan to see it live</div>
+        <div class="cta-body">Or just ask me — I'd be happy to show you in person, right now, on your own phone.</div>
+        <div class="cta-contact">Isidoros Parlamas</div>
+        <div class="cta-contact2">mind@horistics.com &nbsp;·&nbsp; +45 27 13 44 83 &nbsp;·&nbsp; bondoutfit.com</div>
+      </div>
+    </div>
+
+    <div class="cta">
+      <img src="qr-whatsapp.png" alt="WhatsApp QR">
+      <div class="cta-text">
+        <div class="cta-title">Write me on WhatsApp</div>
+        <div class="cta-body">Scan to start a conversation immediately — no call needed.</div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

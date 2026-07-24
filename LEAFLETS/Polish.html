@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<style>
+  @page { size: A4; margin: 0; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: Georgia, 'Iowan Old Style', 'Times New Roman', serif;
+    color: #2b2620;
+  }
+  .page {
+    width: 210mm;
+    height: 297mm;
+    background: #faf6ee;
+    padding: 18mm;
+    display: flex;
+    flex-direction: column;
+    page-break-after: always;
+  }
+  .page:last-child { page-break-after: avoid; }
+
+  .brand {
+    font-size: 15pt;
+    letter-spacing: 2.5px;
+    color: #b3872f;
+    font-weight: bold;
+    text-transform: uppercase;
+  }
+  .rule { width: 30mm; height: 1.4pt; background: #b3872f; margin: 5mm 0 8mm 0; }
+
+  .headline {
+    font-size: 26pt;
+    line-height: 1.2;
+    color: #2b2620;
+    font-weight: bold;
+    margin-bottom: 8mm;
+  }
+  .headline .accent { color: #b3872f; font-style: italic; }
+
+  .story {
+    font-family: Georgia, 'Iowan Old Style', 'Times New Roman', serif;
+    font-size: 10.3pt;
+    line-height: 1.55;
+    color: #3a332a;
+  }
+  .story p { margin-bottom: 5mm; }
+  .story .lede {
+    font-size: 12.5pt;
+    color: #2b2620;
+  }
+  .story strong { color: #2b2620; }
+  .story em { color: #b3872f; font-style: italic; }
+
+  .shift {
+    margin: 6mm 0;
+  }
+  .shift-label {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 7.5pt;
+    font-weight: bold;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    margin-bottom: 2mm;
+  }
+
+  .shift-one {
+    border-left: 2.5pt solid #b3872f;
+    padding-left: 5mm;
+  }
+  .shift-one .shift-label { color: #b3872f; }
+
+  .shift-two {
+    background: #efe6d3;
+    border-radius: 2.5mm;
+    padding: 5mm 6mm;
+    margin-left: 8mm;
+  }
+  .shift-two .shift-label { color: #2b2620; }
+  .shift-two p { margin-bottom: 3.5mm; }
+  .shift-two p:last-child { margin-bottom: 0; }
+
+  .page-footer {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 9pt;
+    color: #8a7f6d;
+    border-top: 0.7pt solid #ddd2ba;
+    padding-top: 4mm;
+    margin-top: auto;
+  }
+
+  h2.section {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 12pt;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: #b3872f;
+    margin: 0 0 6mm 0;
+  }
+  .steps {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    margin-bottom: 8mm;
+  }
+  .step {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 5mm;
+  }
+  .step-num {
+    flex: 0 0 auto;
+    width: 8mm;
+    height: 8mm;
+    border-radius: 50%;
+    border: 1.2pt solid #b3872f;
+    color: #b3872f;
+    font-size: 10pt;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 5mm;
+  }
+  .step-text-title {
+    font-size: 11pt;
+    font-weight: bold;
+    color: #2b2620;
+    margin-bottom: 1mm;
+  }
+  .step-text-body {
+    font-size: 9.6pt;
+    line-height: 1.4;
+    color: #6a5f4f;
+  }
+  .sub {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 9pt;
+    color: #6a5f4f;
+    line-height: 1.4;
+  }
+
+  .logins {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    display: flex;
+    gap: 6mm;
+    margin-bottom: 8mm;
+  }
+  .login-box {
+    flex: 1;
+    background: #ffffff;
+    border: 0.8pt solid #e4dac0;
+    border-radius: 3mm;
+    padding: 5mm 6mm;
+  }
+  .login-box .login-label {
+    font-size: 8.3pt;
+    text-transform: uppercase;
+    letter-spacing: 0.6pt;
+    color: #b3872f;
+    margin-bottom: 2.5mm;
+  }
+  .login-box .login-line {
+    font-size: 9.3pt;
+    color: #2b2620;
+    line-height: 1.6;
+  }
+  .login-box .login-line span { color: #8a7f6d; }
+  .login-box .login-line .val { color: #0e7490; font-weight: bold; }
+
+  .cta {
+    background: #ffffff;
+    border: 0.8pt solid #e4dac0;
+    border-radius: 3mm;
+    padding: 5mm 6mm;
+    display: flex;
+    align-items: center;
+    gap: 6mm;
+    margin-bottom: 5mm;
+  }
+  .cta img { width: 24mm; height: 24mm; display: block; border-radius: 1.5mm; }
+  .cta-text { font-family: 'Helvetica Neue', Arial, sans-serif; }
+  .cta-text .cta-title {
+    font-size: 10.5pt;
+    font-weight: bold;
+    color: #2b2620;
+    margin-bottom: 1.5mm;
+  }
+  .cta-text .cta-body {
+    font-size: 9pt;
+    color: #6a5f4f;
+    line-height: 1.4;
+    margin-bottom: 1.5mm;
+  }
+  .cta-text .cta-contact { font-size: 9pt; color: #b3872f; }
+  .cta-text .cta-contact2 { font-size: 8.4pt; color: #6a5f4f; margin-top: 0.5mm; }
+</style>
+</head>
+<body>
+
+  <!-- PAGE 1: HISTORIA -->
+  <div class="page">
+    <div class="brand">Bondoutfit</div>
+    <div class="rule"></div>
+    <div class="headline">Rabaty się nie sprzedają.<br><span class="accent">Zaangażowanie tak.</span></div>
+
+    <div class="story">
+      <p class="lede">Dziś znów szedłem ulicą, mijając wystawę za wystawą obiecującą dwadzieścia
+      procent zniżki, trzydzieści procent zniżki, kup jeden, dostań drugi. Szyldy były pewne siebie.
+      Sklepy za nimi były ciche.</p>
+
+      <p>To dziwna sprzeczność, którą zna każdy sprzedawca detaliczny: rabat jest tuż obok,
+      wydrukowany pogrubioną czcionką, nie do przeoczenia — a mimo to większość ludzi po prostu
+      przechodzi obojętnie. Dlaczego?</p>
+
+      <p>Ponieważ szyld z rabatem niczego nie wymaga od osoby, która na niego patrzy. Można go
+      zignorować za darmo. Przejście obok nic nie kosztuje. A gdy coś nic nie kosztuje, rzadko
+      przyciąga też wiele uwagi.</p>
+
+      <div class="shift shift-one">
+        <div class="shift-label">Zmiana pierwsza — zaangażowanie</div>
+        <p>Ale coś się zmienia w chwili, gdy klient rezerwuje wizytę. Nagle pojawia się mała
+        obietnica po obu stronach — klient zgodził się przyjść, a rabat po cichu przestaje być
+        darmowym prezentem i staje się czymś, co naprawdę trzeba <em>zdobyć</em>.</p>
+
+        <p>To nie przypadek. Tak działają ludzie. Zapytaj każdego, kto kiedykolwiek wpłacił zadatek,
+        potwierdził swoją obecność na kolacji, albo zarezerwował wizytę u fryzjera dwa tygodnie
+        wcześniej — sam akt zobowiązania zmienia to, jak poważnie traktujemy to, co następuje
+        później. To, dlaczego pragniemy małego zobowiązania przed nagrodą, nie ma tu znaczenia.
+        Ważne jest to, że tak właśnie robimy.</p>
+      </div>
+
+      <div class="shift shift-two">
+        <div class="shift-label">Zmiana druga — więź</div>
+        <p>Jest jeszcze druga, cichsza zmiana, która zachodzi w chwili, gdy ktoś rezerwuje wizytę w
+        twoim sklepie. Przestaje być anonimowym ruchem klientów i staje się, choćby na chwilę,
+        <strong>oczekiwany</strong>. Ktoś z twojego zespołu wie już, że przyjdzie. A ta wiedza
+        zmienia wszystko — powitanie jest cieplejsze, uwaga bardziej skupiona, cała interakcja
+        mniej przypomina transakcję, a bardziej coś ustalonego wcześniej, bo właśnie tak było. To
+        także, po cichu, okazja: dla twojego zespołu, którego własna charyzma ma więcej przestrzeni,
+        by się pokazać, gdy nie reagują po prostu na nieznajomego — i dla klienta, który zwykle
+        pokazuje więcej własnej osobowości, gdy czuje się oczekiwany, a nie anonimowy.</p>
+
+        <p>To jest właśnie idea stojąca za nazwą Bondoutfit. Nie kupon. Nie chwyt marketingowy.
+        <strong>Więź</strong> — między twoją firmą, twoim zespołem, a osobą wchodzącą przez drzwi z
+        już umówioną wizytą.</p>
+      </div>
+
+      <p>Twoje szyldy z rabatami nie są błędem. Wykonują tylko połowę pracy. Bondoutfit to druga
+      połowa — ta część, która zamienia przelotne spojrzenie w dotrzymaną obietnicę.</p>
+    </div>
+
+    <div class="page-footer">bondoutfit.com &nbsp;·&nbsp; rezerwacja wizyt dla niezależnego handlu detalicznego</div>
+  </div>
+
+  <!-- PAGE 2: JAK TO DZIAŁA -->
+  <div class="page">
+    <h2 class="section">Oto jak to działa w praktyce</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div>
+          <div class="step-text-title">Klient znajduje twój sklep</div>
+          <div class="step-text-body">Znajdują cię dzięki katalogowi bondoutfit.com, albo trafiając bezpośrednio pod twój własny adres — na przykład twojsklep.bondoutfit.com — jeśli wolisz kierować ich tam bezpośrednio.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div>
+          <div class="step-text-title">Rezerwują termin</div>
+          <div class="step-text-body">Wizyta trafia bezpośrednio do kalendarza twojego sklepu — bez telefonów, bez zbędnej wymiany wiadomości.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div>
+          <div class="step-text-title">Jesteś gotowy ich przyjąć</div>
+          <div class="step-text-body">Wiesz, kto przyjdzie i kiedy, więc twój zespół może się przygotować — i przywitać ich jak należy, zamiast reagować na nieznajomego.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div>
+          <div class="step-text-title">Odwiedzają sklep i na to zasługują</div>
+          <div class="step-text-body">Po przybyciu odblokowują rabat, do którego się zobowiązali — i tym razem faktycznie z niego korzystają.</div>
+        </div>
+      </div>
+    </div>
+
+    <h2 class="section">Zobacz sam</h2>
+    <div class="sub" style="margin-bottom: 3mm;">Poniższe demo to sklep odzieżowy, ale ten sam pomysł sprawdza się w każdej branży detalicznej — meble, elektronika, książki, wszędzie tam, gdzie wizyta i zakup idą w parze.</div>
+    <div class="logins">
+      <div class="login-box">
+        <div class="login-label">Wypróbuj jako właściciel sklepu</div>
+        <div class="login-line"><span>użytkownik:</span> <span class="val">horistics@outlook.com</span></div>
+        <div class="login-line"><span>kod:</span> <span class="val">goforit456.</span></div>
+      </div>
+      <div class="login-box">
+        <div class="login-label">Wypróbuj jako klient</div>
+        <div class="login-line"><span>użytkownik:</span> <span class="val">horistics@gmail.com</span></div>
+        <div class="login-line"><span>kod:</span> <span class="val">goforit123.</span></div>
+      </div>
+    </div>
+
+    <div class="cta">
+      <img src="qr.png" alt="Kod QR">
+      <div class="cta-text">
+        <div class="cta-title">Zeskanuj, aby zobaczyć na żywo</div>
+        <div class="cta-body">Albo po prostu zapytaj mnie — chętnie pokażę ci to osobiście, od razu, na twoim telefonie.</div>
+        <div class="cta-contact">Isidoros Parlamas</div>
+        <div class="cta-contact2">Horistics CVR 43109324 &bull; mind@horistics.com &nbsp;·&nbsp; +45 27 13 44 83 &nbsp;·&nbsp; bondoutfit.com</div>
+      </div>
+    </div>
+
+    <div class="cta">
+      <img src="qr-whatsapp.png" alt="WhatsApp QR">
+      <div class="cta-text">
+        <div class="cta-title">Napisz do mnie na WhatsApp</div>
+        <div class="cta-body">Zeskanuj, aby natychmiast rozpocząć rozmowę — bez konieczności dzwonienia.</div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

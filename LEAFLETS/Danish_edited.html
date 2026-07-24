@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="utf-8">
+<style>
+  @page { size: A4; margin: 0; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: Georgia, 'Iowan Old Style', 'Times New Roman', serif;
+    color: #2b2620;
+  }
+  .page {
+    width: 210mm;
+    height: 297mm;
+    background: #faf6ee;
+    padding: 18mm;
+    display: flex;
+    flex-direction: column;
+    page-break-after: always;
+  }
+  .page:last-child { page-break-after: avoid; }
+
+  .brand {
+    font-size: 15pt;
+    letter-spacing: 2.5px;
+    color: #b3872f;
+    font-weight: bold;
+    text-transform: uppercase;
+  }
+  .rule { width: 30mm; height: 1.4pt; background: #b3872f; margin: 5mm 0 8mm 0; }
+
+  .headline {
+    font-size: 26pt;
+    line-height: 1.2;
+    color: #2b2620;
+    font-weight: bold;
+    margin-bottom: 8mm;
+  }
+  .headline .accent { color: #b3872f; font-style: italic; }
+
+  .story {
+    font-family: Georgia, 'Iowan Old Style', 'Times New Roman', serif;
+    font-size: 10.3pt;
+    line-height: 1.55;
+    color: #3a332a;
+  }
+  .story p { margin-bottom: 5mm; }
+  .story .lede {
+    font-size: 12.5pt;
+    color: #2b2620;
+  }
+  .story strong { color: #2b2620; }
+  .story em { color: #b3872f; font-style: italic; }
+
+  .shift {
+    margin: 6mm 0;
+  }
+  .shift-label {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 7.5pt;
+    font-weight: bold;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    margin-bottom: 2mm;
+  }
+
+  .shift-one {
+    border-left: 2.5pt solid #b3872f;
+    padding-left: 5mm;
+  }
+  .shift-one .shift-label { color: #b3872f; }
+
+  .shift-two {
+    background: #efe6d3;
+    border-radius: 2.5mm;
+    padding: 5mm 6mm;
+    margin-left: 8mm;
+  }
+  .shift-two .shift-label { color: #2b2620; }
+  .shift-two p { margin-bottom: 3.5mm; }
+  .shift-two p:last-child { margin-bottom: 0; }
+
+  .page-footer {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 9pt;
+    color: #8a7f6d;
+    border-top: 0.7pt solid #ddd2ba;
+    padding-top: 4mm;
+    margin-top: auto;
+  }
+
+  h2.section {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 12pt;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: #b3872f;
+    margin: 0 0 6mm 0;
+  }
+  .steps {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    margin-bottom: 8mm;
+  }
+  .step {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 5mm;
+  }
+  .step-num {
+    flex: 0 0 auto;
+    width: 8mm;
+    height: 8mm;
+    border-radius: 50%;
+    border: 1.2pt solid #b3872f;
+    color: #b3872f;
+    font-size: 10pt;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 5mm;
+  }
+  .step-text-title {
+    font-size: 11pt;
+    font-weight: bold;
+    color: #2b2620;
+    margin-bottom: 1mm;
+  }
+  .step-text-body {
+    font-size: 9.6pt;
+    line-height: 1.4;
+    color: #6a5f4f;
+  }
+  .sub {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 9pt;
+    color: #6a5f4f;
+    line-height: 1.4;
+  }
+
+  .logins {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    display: flex;
+    gap: 6mm;
+    margin-bottom: 8mm;
+  }
+  .login-box {
+    flex: 1;
+    background: #ffffff;
+    border: 0.8pt solid #e4dac0;
+    border-radius: 3mm;
+    padding: 5mm 6mm;
+  }
+  .login-box .login-label {
+    font-size: 8.3pt;
+    text-transform: uppercase;
+    letter-spacing: 0.6pt;
+    color: #b3872f;
+    margin-bottom: 2.5mm;
+  }
+  .login-box .login-line {
+    font-size: 9.3pt;
+    color: #2b2620;
+    line-height: 1.6;
+  }
+  .login-box .login-line span { color: #8a7f6d; }
+  .login-box .login-line .val { color: #0e7490; font-weight: bold; }
+
+  .cta {
+    background: #ffffff;
+    border: 0.8pt solid #e4dac0;
+    border-radius: 3mm;
+    padding: 5mm 6mm;
+    display: flex;
+    align-items: center;
+    gap: 6mm;
+    margin-bottom: 5mm;
+  }
+  .cta img { width: 24mm; height: 24mm; display: block; border-radius: 1.5mm; }
+  .cta-text { font-family: 'Helvetica Neue', Arial, sans-serif; }
+  .cta-text .cta-title {
+    font-size: 10.5pt;
+    font-weight: bold;
+    color: #2b2620;
+    margin-bottom: 1.5mm;
+  }
+  .cta-text .cta-body {
+    font-size: 9pt;
+    color: #6a5f4f;
+    line-height: 1.4;
+    margin-bottom: 1.5mm;
+  }
+  .cta-text .cta-contact { font-size: 9pt; color: #b3872f; }
+  .cta-text .cta-contact2 { font-size: 8.4pt; color: #6a5f4f; margin-top: 0.5mm; }
+</style>
+</head>
+<body>
+
+  <!-- PAGE 1: HISTORIEN -->
+  <div class="page">
+    <div class="brand">Bondoutfit</div>
+    <div class="rule"></div>
+    <div class="headline">Rabatter sælger ikke.<br><span class="accent">Forpligtelse gør.</span></div>
+
+    <div class="story">
+      <p class="lede">Jeg gik ned ad endnu en gade i dag, forbi vindue efter vindue, der lovede tyve
+      procent rabat, tredive procent rabat, køb-en-få-en. Skiltene var selvsikre. Butikkerne bag dem
+      var stille.</p>
+
+      <p>Det er en mærkelig modsigelse, som enhver butiksejer kender alt for godt: rabatten er lige
+      der, trykt med fed skrift, umulig at overse — og alligevel går de fleste bare forbi. Hvorfor?</p>
+
+      <p>Fordi et rabatskilt ikke kræver noget af den, der ser det. Det er gratis at ignorere. Det
+      koster ikke noget at gå forbi. Og når noget ikke koster noget, får det sjældent meget
+      opmærksomhed heller.</p>
+
+      <div class="shift shift-one">
+        <div class="shift-label">Skift ét — forpligtelse</div>
+        <p>Men noget ændrer sig i det øjeblik en kunde booker en tid. Pludselig er der et lille løfte
+        på begge sider — kunden har indvilget i at møde op, og stille og roligt holder rabatten op
+        med at være en gratis gave og bliver til noget, de faktisk skal <em>gøre sig fortjent til</em>.</p>
+
+        <p>Det er ikke en tilfældighed. Sådan fungerer mennesker. Spørg enhver, der nogensinde har
+        betalt et depositum, bekræftet sin deltagelse i en middag, eller booket en tid hos frisøren
+        to uger i forvejen — den simple handling at forpligte sig ændrer, hvor alvorligt vi tager
+        det, der kommer bagefter. Hvorfor vi længes efter en lille forpligtelse før en belønning, er
+        ikke vigtigt her. Det, der betyder noget, er, at vi gør det.</p>
+      </div>
+
+      <div class="shift shift-two">
+        <div class="shift-label">Skift to — båndet</div>
+        <p>Der er et andet, stille skift, der sker i det øjeblik nogen booker et besøg i din butik.
+        De holder op med at være anonym trafik og bliver, om end kortvarigt, <strong>forventet</strong>.
+        Nogen i dit team ved nu, at de kommer. Og at vide det ændrer alt — velkomsten bliver varmere,
+        opmærksomheden skarpere, hele interaktionen mindre som en transaktion og mere som noget, der
+        var aftalt på forhånd, fordi det var det. Det giver også en mulighed: både for dit personale, hvis personlighed får mere plads til at komme frem, når de ikke bare reagerer på en fremmed — og for kunden, som ofte viser mere af sig selv, når vedkommende føler sig ventet frem for anonym.</p>
+
+        <p>Det er ideen bag navnet Bondoutfit. Ikke en kupon. Ikke et gimmick. Et <strong>bånd</strong>
+        — mellem din virksomhed, dit personale og personen, der træder ind ad døren med en aftale i
+        hånden.</p>
+      </div>
+
+      <p>Dine rabatskilte tager ikke fejl. De klarer bare halvdelen af jobbet. Bondoutfit er den
+      anden halvdel — den del, der gør et flygtigt blik til et holdt løfte.</p>
+    </div>
+
+    <div class="page-footer">bondoutfit.com &nbsp;·&nbsp; Tidsbestilling til detailbutikker</div>
+  </div>
+
+  <!-- PAGE 2: SÅDAN FUNGERER DET -->
+  <div class="page">
+    <h2 class="section">Sådan fungerer det i praksis</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div>
+          <div class="step-text-title">Kunden finder din butik</div>
+          <div class="step-text-body">De finder dig via bondoutfit.coms oversigt, eller går direkte til din egen adresse — for eksempel dinbutik.bondoutfit.com — hvis du hellere vil sende dem direkte derhen.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div>
+          <div class="step-text-title">De booker en tid</div>
+          <div class="step-text-body">Besøget lægges direkte ind i din butiks kalender — ingen opkald, ingen frem og tilbage.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div>
+          <div class="step-text-title">Du er klar til dem</div>
+          <div class="step-text-body">Du ved, hvem der kommer og hvornår, så dit team kan forberede sig — og byde dem ordentligt velkommen, i stedet for at reagere på en fremmed.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div>
+          <div class="step-text-title">De besøger, og de fortjener det</div>
+          <div class="step-text-body">Ved ankomst låser de op for den rabat, de forpligtede sig til — og denne gang bliver den faktisk brugt.</div>
+        </div>
+      </div>
+    </div>
+
+    <h2 class="section">Se det selv</h2>
+    <div class="sub" style="margin-bottom: 3mm;">Demoen nedenfor er en tøjbutik, men samme idé virker for enhver detailvirksomhed — møbler, elektronik, bøger, alt hvor et besøg og et køb hører sammen.</div>
+    <div class="logins">
+      <div class="login-box">
+        <div class="login-label">Prøv det som butiksejer</div>
+        <div class="login-line"><span>bruger:</span> <span class="val">horistics@outlook.com</span></div>
+        <div class="login-line"><span>kode:</span> <span class="val">goforit456.</span></div>
+      </div>
+      <div class="login-box">
+        <div class="login-label">Prøv det som kunde</div>
+        <div class="login-line"><span>bruger:</span> <span class="val">horistics@gmail.com</span></div>
+        <div class="login-line"><span>kode:</span> <span class="val">goforit123.</span></div>
+      </div>
+    </div>
+
+    <div class="cta">
+      <img src="qr.png" alt="QR-kode">
+      <div class="cta-text">
+        <div class="cta-title">Scan for at se det live</div>
+        <div class="cta-body">Eller spørg mig bare — jeg viser det gerne for dig personligt, lige nu, på din egen telefon.</div>
+        <div class="cta-contact">Isidoros Parlamas</div>
+        <div class="cta-contact2">Horistics CVR 43109324 &bull; mind@horistics.com &nbsp;·&nbsp; +45 27 13 44 83 &nbsp;·&nbsp; bondoutfit.com</div>
+      </div>
+    </div>
+
+    <div class="cta">
+      <img src="qr-whatsapp.png" alt="WhatsApp QR">
+      <div class="cta-text">
+        <div class="cta-title">Skriv til mig på WhatsApp</div>
+        <div class="cta-body">Scan for at starte en samtale med det samme — intet opkald nødvendigt.</div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
