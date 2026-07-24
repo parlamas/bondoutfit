@@ -75,7 +75,7 @@
     "findStoreCta": "Etsi liike"
   },
   "HowItWorks": {
-  "title": "Näin SVD toimii",
+  "title": "Näin varatun käynnin alennus (SVD) toimii",
   "step1Title": "1. Liike ilmoittaa SVD:stä",
   "step1Body": "Liikkeenomistajat luovat aikasidonnaisia alennustarjouksia varatuille käynneille.",
   "step2Title": "2. Asiakas varaa käynnin",
