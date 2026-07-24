@@ -12,6 +12,9 @@ const LANGUAGES = [
   { code: 'pt', label: 'Português' },
   { code: 'pl', label: 'Polski' },
   { code: 'sv', label: 'Svenska' },
+  { code: 'fi', label: 'Suomi' },
+  { code: 'no', label: 'Norsk' },
+  { code: 'is', label: 'Íslenska' },
 ];
 
 export default function LanguageSwitcher() {
