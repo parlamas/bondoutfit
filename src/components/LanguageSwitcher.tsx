@@ -30,7 +30,7 @@ export default function LanguageSwitcher() {
     <select
       value={locale}
       onChange={handleChange}
-      className="text-sm border border-brand-stoneborder rounded-md px-2 py-1 bg-white text-brand-ink"
+      className="text-sm font-semibold border-2 border-brand-gold rounded-md px-3 py-1.5 bg-brand-gold/10 text-brand-ink hover:bg-brand-gold/20 transition-colors cursor-pointer"
     >
       {LANGUAGES.map(l => (
         <option key={l.code} value={l.code}>{l.label}</option>
