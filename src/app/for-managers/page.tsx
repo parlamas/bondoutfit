@@ -88,14 +88,14 @@ export default async function ForManagersPage() {
                 {t('tryOwnerLabel')}
               </div>
               <div className="text-sm text-white font-sans">user: horistics@outlook.com</div>
-              <div className="text-sm text-white font-sans">pass: goforit456.</div>
+              <div className="text-sm text-cyan-400 font-sans">pass: goforit456.</div>
             </div>
             <div className="bg-white/10 rounded-lg p-4">
               <div className="text-xs font-sans font-semibold text-brand-gold uppercase tracking-wide mb-2">
                 {t('tryCustomerLabel')}
               </div>
               <div className="text-sm text-white font-sans">user: horistics@gmail.com</div>
-              <div className="text-sm text-white font-sans">pass: goforit123.</div>
+              <div className="text-sm text-cyan-400 font-sans">pass: goforit123.</div>
             </div>
           </div>
         </div>
