@@ -11,7 +11,10 @@
     "forCustomers": "Fyrir viðskiptavini",
     "customersText": "Með <strong>Scheduled Visit Discount (SVD)</strong> bókar þú heimsókn í verslun fyrirfram. Ef þú mætir á réttum tíma og gerir kaup færðu umsaminn afslátt. Engin bið, engin óvissa, betra verð.",
     "forStoreManagers": "Fyrir verslunareigendur",
-    "managersText": "SVD breytir áætluðum heimsóknum í fyrirsjáanlega eftirspurn. Þú veist hver kemur, hvenær og af hverju. Afslættirnir vega upp á móti hærri viðskiptum, mýkri rekstri og betri nýtingu starfsfólks og rýmis."
+    "managersText": "SVD breytir áætluðum heimsóknum í fyrirsjáanlega eftirspurn. Þú veist hver kemur, hvenær og af hverju. Afslættirnir vega upp á móti hærri viðskiptum, mýkri rekstri og betri nýtingu starfsfólks og rýmis.",
+    "heroHeadline": "Afsláttur selur ekki.",
+"heroAccent": "Skuldbinding gerir það.",
+"heroSubline": "Breyttu gluggagláparum í skuldbundna viðskiptavini."
   },
   "ForManagers": {
     "heroTitleStart": "Breyttu gluggagláparum í",

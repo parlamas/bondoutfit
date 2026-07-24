@@ -11,7 +11,10 @@
     "forCustomers": "Asiakkaille",
     "customersText": "<strong>Scheduled Visit Discount (SVD)</strong> -palvelun avulla varaat käynnin liikkeeseen etukäteen. Jos saavut ajallaan ja teet ostoksen, saat sovitun alennuksen. Ei odottelua, ei epävarmuutta, parempia hintoja.",
     "forStoreManagers": "Liikkeenomistajille",
-    "managersText": "SVD muuttaa suunnitellut käynnit ennustettavaksi kysynnäksi. Tiedät kuka on tulossa, milloin ja miksi. Alennukset kuittautuvat paremmalla konversiolla, sujuvammalla toiminnalla ja henkilöstön sekä tilan paremmalla käytöllä."
+    "managersText": "SVD muuttaa suunnitellut käynnit ennustettavaksi kysynnäksi. Tiedät kuka on tulossa, milloin ja miksi. Alennukset kuittautuvat paremmalla konversiolla, sujuvammalla toiminnalla ja henkilöstön sekä tilan paremmalla käytöllä.",
+    "heroHeadline": "Alennukset eivät myy.",
+"heroAccent": "Sitoutuminen myy.",
+"heroSubline": "Muuta ikkunashoppailijat sitoutuneiksi asiakkaiksi."
   },
   "ForManagers": {
     "heroTitleStart": "Muuta ikkunashoppailijat",

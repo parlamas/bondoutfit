@@ -11,7 +11,10 @@
     "forCustomers": "Para clientes",
     "customersText": "Com o <strong>Scheduled Visit Discount (SVD)</strong>, você marca uma visita à loja com antecedência. Se chegar na hora e fizer uma compra, recebe um desconto pré-acordado. Sem espera, sem incerteza, melhores preços.",
     "forStoreManagers": "Para gerentes de loja",
-    "managersText": "O SVD transforma visitas planejadas em demanda previsível. Você sabe quem vai chegar, quando e por quê. Os descontos são compensados por maior conversão, operações mais tranquilas e melhor uso da equipe e do espaço."
+    "managersText": "O SVD transforma visitas planejadas em demanda previsível. Você sabe quem vai chegar, quando e por quê. Os descontos são compensados por maior conversão, operações mais tranquilas e melhor uso da equipe e do espaço.",
+    "heroHeadline": "Descontos não vendem.",
+"heroAccent": "Compromisso vende.",
+"heroSubline": "Transforme curiosos em clientes comprometidos."
   },
   "ForManagers": {
   "heroTitleStart": "Transforme curiosos em",

@@ -11,7 +11,10 @@
     "forCustomers": "Til kunder",
     "customersText": "Med <strong>Scheduled Visit Discount (SVD)</strong> booker du et butiksbesøg på forhånd. Hvis du kommer til tiden og køber noget, får du en aftalt rabat. Ingen ventetid, ingen usikkerhed, bedre priser.",
     "forStoreManagers": "Til butiksejere",
-    "managersText": "SVD gør planlagte besøg til forudsigelig efterspørgsel. Du ved, hvem der kommer, hvornår og hvorfor. Rabatterne opvejes af højere konvertering, mere jævn drift og bedre brug af personale og plads."
+    "managersText": "SVD gør planlagte besøg til forudsigelig efterspørgsel. Du ved, hvem der kommer, hvornår og hvorfor. Rabatterne opvejes af højere konvertering, mere jævn drift og bedre brug af personale og plads.",
+    "heroHeadline": "Rabatter sælger ikke.",
+"heroAccent": "Forpligtelse gør.",
+"heroSubline": "Gør vindueskiggere til forpligtede kunder."
   },
   "ForManagers": {
   "heroTitleStart": "Gør vindueskiggere til",
