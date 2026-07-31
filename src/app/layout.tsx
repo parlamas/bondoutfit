@@ -36,11 +36,9 @@ export default async function RootLayout({
             <div className="sticky top-0 z-50 bg-white">
               <div className="flex items-center justify-end gap-4 px-4 py-2 border-b flex-wrap">
                 <span className="text-xs text-brand-inksoft">Horistics CVR 43109324</span>
+                <a href="/" className="text-xs text-brand-gold hover:underline mr-2">The Concept</a>
                 <a href="/the-psychology" className="text-xs text-brand-gold hover:underline mr-2">The Psychology →</a>
-                <div className="flex items-center gap-1">
-                  <span className="text-xs text-brand-inksoft">The Concept:</span>
-                  <LanguageSwitcher />
-                </div>
+                <LanguageSwitcher />
               </div>
               <NavBar />
             </div>
