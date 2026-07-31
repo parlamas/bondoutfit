@@ -10,7 +10,7 @@ import { Analytics } from "@vercel/analytics/next";
 import WhatsAppButton from '@/components/WhatsAppButton';
 import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getMessages } from 'next-intl/server';
-import LanguageSwitcher from '@/components/LanguageSwitcher';
+import HeaderControls from '@/components/HeaderControls';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -34,12 +34,7 @@ export default async function RootLayout({
         <NextIntlClientProvider locale={locale} messages={messages}>
           <AuthProvider>
             <div className="sticky top-0 z-50 bg-white">
-              <div className="flex items-center justify-end gap-4 px-4 py-2 border-b flex-wrap">
-                <span className="text-xs text-brand-inksoft">Horistics CVR 43109324</span>
-                <a href="/" className="text-xs text-brand-gold hover:underline mr-2">The Concept</a>
-                <a href="/the-psychology" className="text-xs text-brand-gold hover:underline mr-2">The Psychology →</a>
-                <LanguageSwitcher />
-              </div>
+              <HeaderControls />
               <NavBar />
             </div>
             <MobileMenu />
