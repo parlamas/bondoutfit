@@ -113,6 +113,39 @@ function StoreSelector() {
   );
 }
 
+function DemoSection() {
+  const t = useTranslations('Psychology');
+  return (
+    <section className="max-w-3xl mx-auto px-4 py-10">
+      <div className="bg-brand-ink rounded-2xl p-8 text-center">
+        <h2 className="font-serif text-2xl font-semibold text-white mb-3">{t('seeForYourself')}</h2>
+        <p className="text-brand-stone font-sans mb-6 max-w-xl mx-auto leading-relaxed">
+          {t('demoNote')}
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left mb-6">
+          <div className="bg-white/10 rounded-lg p-4">
+            <div className="text-xs font-sans font-semibold text-brand-gold uppercase tracking-wide mb-2">
+              {t('tryOwnerLabel')}
+            </div>
+            <div className="text-sm text-white font-sans">user: <span className="text-cyan-400">horistics@outlook.com</span></div>
+            <div className="text-sm text-white font-sans">pass: <span className="text-cyan-400">goforit456.</span></div>
+          </div>
+          <div className="bg-white/10 rounded-lg p-4">
+            <div className="text-xs font-sans font-semibold text-brand-gold uppercase tracking-wide mb-2">
+              {t('tryCustomerLabel')}
+            </div>
+            <div className="text-sm text-white font-sans">user: <span className="text-cyan-400">horistics@gmail.com</span></div>
+            <div className="text-sm text-white font-sans">pass: <span className="text-cyan-400">goforit123.</span></div>
+          </div>
+        </div>
+        <p className="text-sm text-brand-stone font-sans mb-1">{t('scanBody')}</p>
+        <p className="text-sm text-brand-gold font-sans">Isidoros Parlamas · mind@horistics.com · +45 27 13 44 83</p>
+        <p className="text-xs text-brand-stone font-sans mt-4 opacity-70">{t('footer')}</p>
+      </div>
+    </section>
+  );
+}
+
 function IntroSection() {
   const t = useTranslations('HomePage');
   return (
@@ -188,6 +221,7 @@ export default function HomePage() {
       {role !== "STORE_MANAGER" && <HeroSection />}
       {role !== "STORE_MANAGER" && <StoreSelector />}
       <IntroSection />
+      <DemoSection />
     </div>
   );
 }
