@@ -33,7 +33,8 @@ export default function ThePsychologyPage() {
   return (
     <div className="min-h-screen bg-brand-stone py-10 px-4">
       <div className="max-w-2xl mx-auto">
-        <div className="flex justify-end mb-6">
+        <div className="flex flex-col items-end mb-6">
+          <span className="text-xs text-brand-inksoft mb-1">40 languages</span>
           <PsychologyLanguageSwitcher value={locale} onChange={setLocale} />
         </div>
 

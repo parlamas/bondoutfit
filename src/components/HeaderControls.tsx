@@ -32,7 +32,12 @@ export default function HeaderControls() {
       >
         The Concept
       </a>
-      {!onPsychologyPage && <LanguageSwitcher />}
+      {!onPsychologyPage && (
+        <div className="flex flex-col items-end">
+          <span className="text-[10px] text-brand-inksoft leading-tight">40 languages</span>
+          <LanguageSwitcher />
+        </div>
+      )}
     </div>
   );
 }
