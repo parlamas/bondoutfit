@@ -18,6 +18,9 @@ export const metadata: Metadata = {
   title: "BondOutfit - Scheduled Visit Discount (SVD)",
   description:
     "Schedule store visits and get exclusive discounts with our SVD platform",
+  verification: {
+    google: "5XGVzIKx0Ef-SY9F9E2IBBn83QQHd6fJqO7s9BhqKUk",
+  },
 };
 
 export default async function RootLayout({
